@@ -1,5 +1,5 @@
+use crate::Timestamp;
 use std::cmp::Ordering;
-use std::time::SystemTime;
 use uuid::Uuid;
 
 pub trait GetName {
@@ -11,11 +11,11 @@ pub trait GetId {
 }
 
 pub trait GetDeleted {
-    fn get_deleted(&self) -> Option<SystemTime>;
+    fn get_deleted(&self) -> Option<Timestamp>;
 }
 
 pub trait SetDeleted {
-    fn set_deleted(&mut self, time: SystemTime);
+    fn set_deleted(&mut self, time: Timestamp);
 }
 
 pub fn create_name_sort<N: GetName>(partial_name: &str) -> impl Fn(&N, &N) -> Ordering {

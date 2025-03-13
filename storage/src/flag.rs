@@ -1,23 +1,22 @@
 mod stub_flag_store;
 
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::{StorageError, Store};
-use std::time::SystemTime;
+use crate::{StorageError, Store, Timestamp};
 use uuid::Uuid;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum FlagColor {
+pub enum FlagColor {
     Green,
     Red,
 }
 
 #[derive(Debug, Clone)]
-struct Flag {
+pub struct Flag {
     id: Uuid,
     company_id: Uuid,
     flag_color: FlagColor,
     name: String,
-    date_deleted: Option<SystemTime>,
+    date_deleted: Option<Timestamp>,
 }
 
 impl PartialEq for Flag {
@@ -42,19 +41,19 @@ impl GetId for Flag {
 }
 
 impl GetDeleted for Flag {
-    fn get_deleted(&self) -> Option<SystemTime> {
+    fn get_deleted(&self) -> Option<Timestamp> {
         self.date_deleted
     }
 }
 
 impl SetDeleted for Flag {
-    fn set_deleted(&mut self, time: SystemTime) {
+    fn set_deleted(&mut self, time: Timestamp) {
         self.date_deleted = Some(time);
     }
 }
 
 impl Flag {
-    fn new_green(company_id: Uuid, name: String) -> Self {
+    pub fn new_green(company_id: Uuid, name: String) -> Self {
         Flag {
             id: Uuid::new_v4(),
             company_id,
@@ -64,7 +63,7 @@ impl Flag {
         }
     }
 
-    fn new_red(company_id: Uuid, name: String) -> Self {
+    pub fn new_red(company_id: Uuid, name: String) -> Self {
         Flag {
             id: Uuid::new_v4(),
             company_id,
@@ -144,7 +143,10 @@ mod tests {
         let company = Flag::new_red(Uuid::new_v4(), "Test".to_string());
         assert!(store.create(company.clone()).await.is_ok());
         assert_eq!(Ok(company.clone()), store.get_by_id(company.id).await);
-        assert!(store.delete_by_id(company.id).await.is_ok());
+        assert!(store
+            .delete_by_id(company.id, Timestamp::now())
+            .await
+            .is_ok());
         assert_eq!(
             Err(StorageError::NotFound),
             store.get_by_id(company.id).await
@@ -229,7 +231,7 @@ mod tests {
         fn test_get_and_set_deleted() {
             let mut flag = Flag::new_green(Uuid::new_v4(), "Test Flag".to_string());
             assert_eq!(flag.get_deleted(), None);
-            let time = SystemTime::now();
+            let time = Timestamp::now();
             flag.set_deleted(time);
             assert_eq!(flag.get_deleted(), Some(time));
         }

@@ -1,7 +1,6 @@
 mod stub_company_store;
 
-use super::StorageError;
-use std::time::SystemTime;
+use super::Timestamp;
 use uuid::Uuid;
 
 use crate::role::Role;
@@ -12,7 +11,7 @@ pub use stub_company_store::StubCompanyStore;
 pub struct Company {
     pub id: Uuid,
     pub name: String,
-    pub date_deleted: Option<SystemTime>,
+    pub date_deleted: Option<Timestamp>,
 }
 
 impl PartialEq for Company {
@@ -34,13 +33,13 @@ impl GetId for Company {
 }
 
 impl GetDeleted for Company {
-    fn get_deleted(&self) -> Option<SystemTime> {
+    fn get_deleted(&self) -> Option<Timestamp> {
         self.date_deleted
     }
 }
 
 impl SetDeleted for Company {
-    fn set_deleted(&mut self, time: SystemTime) {
+    fn set_deleted(&mut self, time: Timestamp) {
         self.date_deleted = Some(time);
     }
 }
@@ -54,15 +53,15 @@ impl Company {
         }
     }
 
-    pub fn create_role(&self, name: String) -> Role {
-        Role::new(self.id, name)
+    pub fn create_role(&self, name: String, date_created: Timestamp) -> Role {
+        Role::new(self.id, name, date_created)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Store;
+    use crate::{StorageError, Store};
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Company>>(store: &mut C) {
@@ -124,7 +123,10 @@ mod tests {
         let company = Company::new("Test".to_string());
         assert!(store.create(company.clone()).await.is_ok());
         assert_eq!(Ok(company.clone()), store.get_by_id(company.id).await);
-        assert!(store.delete_by_id(company.id).await.is_ok());
+        assert!(store
+            .delete_by_id(company.id, Timestamp::now())
+            .await
+            .is_ok());
         assert_eq!(
             Err(StorageError::NotFound),
             store.get_by_id(company.id).await
@@ -184,7 +186,7 @@ mod tests {
         fn test_get_and_set_deleted() {
             let mut company = Company::new("Test".to_string());
             assert_eq!(company.get_deleted(), None);
-            let time = SystemTime::now();
+            let time = Timestamp::now();
             company.set_deleted(time);
             assert_eq!(company.get_deleted(), Some(time));
         }
@@ -192,7 +194,7 @@ mod tests {
         #[test]
         fn test_create_role() {
             let company = Company::new("Test".to_string());
-            let role = company.create_role("Test Role".to_string());
+            let role = company.create_role("Test Role".to_string(), Timestamp::now());
             assert_eq!(role.company_id, company.id);
         }
     }

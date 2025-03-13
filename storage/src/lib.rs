@@ -1,13 +1,22 @@
+#![cfg_attr(not(feature = "use_std"), no_std)]
+
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use std::time::SystemTime;
 use uuid::Uuid;
 
 mod company;
 mod flag;
 mod role;
+mod time;
 mod utils;
 
-trait Store<T> {
+pub use company::*;
+pub use flag::*;
+pub use role::*;
+pub use time::*;
+
+// type SafeFuture<T> = impl std::future::Future<Output = T> + Send;
+
+pub trait Store<T> {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError>;
 
     async fn get_by_name(&self, name: &str) -> Result<T, StorageError>;
@@ -16,10 +25,11 @@ trait Store<T> {
 
     async fn create(&mut self, company: T) -> Result<(), StorageError>;
 
-    async fn delete_by_id(&mut self, id: Uuid) -> Result<(), StorageError>;
+    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
+        -> Result<(), StorageError>;
 }
 
-struct StubStore<T> {
+pub struct StubStore<T> {
     store: Vec<T>,
 }
 
@@ -73,12 +83,16 @@ where
         Ok(())
     }
 
-    async fn delete_by_id(&mut self, id: Uuid) -> Result<(), StorageError> {
+    async fn delete_by_id(
+        &mut self,
+        id: Uuid,
+        date_deleted: Timestamp,
+    ) -> Result<(), StorageError> {
         self.store
             .iter_mut()
             .filter(|c| c.get_id() == id)
             .map(|t| {
-                t.set_deleted(SystemTime::now());
+                t.set_deleted(date_deleted);
                 () // Return Unit Type
             })
             .next()
@@ -100,7 +114,7 @@ mod tests {
     struct TestStorable {
         id: Uuid,
         name: String,
-        date_deleted: Option<SystemTime>,
+        date_deleted: Option<Timestamp>,
     }
 
     impl TestStorable {
@@ -126,13 +140,13 @@ mod tests {
     }
 
     impl GetDeleted for TestStorable {
-        fn get_deleted(&self) -> Option<SystemTime> {
+        fn get_deleted(&self) -> Option<Timestamp> {
             self.date_deleted
         }
     }
 
     impl SetDeleted for TestStorable {
-        fn set_deleted(&mut self, time: SystemTime) {
+        fn set_deleted(&mut self, time: Timestamp) {
             self.date_deleted = Some(time);
         }
     }
@@ -209,7 +223,10 @@ mod tests {
         let storable = TestStorable::new("Test".to_string());
         assert!(store.create(storable.clone()).await.is_ok());
         assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
-        assert!(store.delete_by_id(storable.id).await.is_ok());
+        assert!(store
+            .delete_by_id(storable.id, Timestamp::now())
+            .await
+            .is_ok());
         assert_eq!(
             Err(StorageError::NotFound),
             store.get_by_id(storable.id).await

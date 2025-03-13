@@ -3,8 +3,12 @@ name = "storage"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+use_std = []
+
 [dependencies]
 uuid = { version = "1.15.1", features = ["v4"] }
 
 [dev-dependencies]
+storage = { path = ".", features = ["use_std"] }
 tokio = { version = "1.44.0", features = ["rt", "macros"] }
