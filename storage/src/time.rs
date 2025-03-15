@@ -1,6 +1,4 @@
 use core::ops::Deref;
-#[cfg(feature = "use_std")]
-use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Timestamp(i64);
@@ -10,11 +8,11 @@ impl Timestamp {
         Timestamp(time)
     }
 
-    #[cfg(feature = "use_std")]
+    #[cfg(test)]
     pub fn now() -> Self {
         Timestamp::new(
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
                 .expect("Time went backwards!")
                 .as_secs() as i64,
         )

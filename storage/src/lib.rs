@@ -1,5 +1,3 @@
-#![cfg_attr(not(feature = "use_std"), no_std)]
-
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use uuid::Uuid;
 
