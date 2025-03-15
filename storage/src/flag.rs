@@ -2,6 +2,7 @@ mod stub_flag_store;
 
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{StorageError, Store, Timestamp};
+use async_trait::async_trait;
 use uuid::Uuid;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -74,6 +75,7 @@ impl Flag {
     }
 }
 
+#[async_trait]
 pub trait FlagStore<T: Store<Flag> = Self>: Store<Flag> {
     async fn get_for_company(&self, id: Uuid) -> Result<Vec<Flag>, StorageError>;
 }
@@ -81,7 +83,6 @@ pub trait FlagStore<T: Store<Flag> = Self>: Store<Flag> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::role::RoleStore;
     use crate::Store;
 
     // Reusable test functions

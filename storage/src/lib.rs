@@ -1,4 +1,5 @@
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
+use async_trait::async_trait;
 use uuid::Uuid;
 
 mod company;
@@ -14,6 +15,7 @@ pub use time::*;
 
 // type SafeFuture<T> = impl std::future::Future<Output = T> + Send;
 
+#[async_trait]
 pub trait Store<T> {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError>;
 
@@ -37,9 +39,10 @@ impl<T> StubStore<T> {
     }
 }
 
+#[async_trait]
 impl<T> Store<T> for StubStore<T>
 where
-    T: GetName + GetId + GetDeleted + SetDeleted + Clone,
+    T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
 {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError> {
         self.store

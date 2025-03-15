@@ -1,9 +1,11 @@
 use crate::role::{Role, RoleStore};
 use crate::{StorageError, StubStore};
+use async_trait::async_trait;
 use uuid::Uuid;
 
 pub type StubRoleStore = StubStore<Role>;
 
+#[async_trait]
 impl RoleStore for StubRoleStore {
     async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>, StorageError> {
         Ok(self

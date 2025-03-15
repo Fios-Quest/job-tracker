@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 uuid = { version = "1.15.1", features = ["v4"] }
+async-trait = "0.1.87"
 
 [dev-dependencies]
 tokio = { version = "1.44.0", features = ["rt", "macros"] }

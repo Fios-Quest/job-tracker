@@ -2,6 +2,7 @@ mod stub_role_store;
 
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{StorageError, Store, Timestamp};
+use async_trait::async_trait;
 use uuid::Uuid;
 
 #[derive(Clone, Debug)]
@@ -55,6 +56,7 @@ impl SetDeleted for Role {
     }
 }
 
+#[async_trait]
 pub trait RoleStore<T: Store<Role> = Self>: Store<Role> {
     async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>, StorageError>;
 }
