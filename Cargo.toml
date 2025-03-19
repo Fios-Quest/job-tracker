@@ -15,6 +15,7 @@ dioxus = { version = "0.6.0" }
 # workspace
 ui = { path = "ui" }
 server = { path = "server" }
+storage = { path = "storage" }
 
 [profile]
 

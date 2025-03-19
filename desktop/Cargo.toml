@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 dioxus = { workspace = true, features = ["router"] }
 ui = { workspace = true }
+storage = { workspace = true }
 
 [features]
 default = []

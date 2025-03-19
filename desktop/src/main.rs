@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
-
+use std::sync::{Arc, Mutex};
+use storage::StubCompanyStore;
 use ui::Navbar;
 use views::{Blog, Home};
 
@@ -24,6 +25,8 @@ fn main() {
 #[component]
 fn App() -> Element {
     // Build cool things ✌️
+    let companies_store = Arc::new(Mutex::new(StubCompanyStore::new()));
+    use_context_provider(move || companies_store);
 
     rsx! {
         // Global app resources

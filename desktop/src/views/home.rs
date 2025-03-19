@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
-use ui::{Echo, Hero};
+use storage::{Company, Store, StubCompanyStore};
+use ui::{CompanyList, Echo, Hero};
 
 #[component]
 pub fn Home() -> Element {
     rsx! {
-        Hero {}
-        Echo {}
+        CompanyList {}
     }
 }
