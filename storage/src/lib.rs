@@ -23,12 +23,13 @@ pub trait Store<T> {
 
     async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError>;
 
-    async fn create(&mut self, company: T) -> Result<(), StorageError>;
+    async fn create(&mut self, item: T) -> Result<(), StorageError>;
 
     async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
         -> Result<(), StorageError>;
 }
 
+#[derive(Clone)]
 pub struct StubStore<T> {
     store: Vec<T>,
 }
@@ -73,14 +74,14 @@ where
         Ok(results)
     }
 
-    async fn create(&mut self, company: T) -> Result<(), StorageError> {
+    async fn create(&mut self, item: T) -> Result<(), StorageError> {
         // Todo: join these futures
-        if self.get_by_name(&company.get_name()).await.is_ok()
-            || self.get_by_id(company.get_id()).await.is_ok()
+        if self.get_by_name(&item.get_name()).await.is_ok()
+            || self.get_by_id(item.get_id()).await.is_ok()
         {
             return Err(StorageError::AlreadyExists);
         }
-        self.store.push(company);
+        self.store.push(item);
         Ok(())
     }
 
@@ -191,22 +192,22 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_company() {
+    async fn test_create() {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
 
-        // Should be able to create the company once
+        // Should be able to create the item once
         assert!(store.create(storable.clone()).await.is_ok());
         assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
 
-        // Should not be able to store a company with the same name
+        // Should not be able to store an item with the same name
         let storable_same_name = TestStorable::new("Test".to_string());
         assert_eq!(
             Err(StorageError::AlreadyExists),
             store.create(storable_same_name).await
         );
 
-        // Should not be able to store a company with the same id
+        // Should not be able to store an item with the same id
         let storable_same_id = TestStorable {
             id: storable.id,
             name: "Test".to_string(),
