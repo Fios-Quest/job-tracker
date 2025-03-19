@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
-use storage::{Company, Store, StubCompanyStore};
-use ui::{CompanyList, Echo, Hero};
+use ui::CompanyList;
 
 #[component]
 pub fn Home() -> Element {
