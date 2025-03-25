@@ -7,7 +7,6 @@ pub fn Home() -> Element {
     let application_context = use_context::<Signal<ApplicationContext>>();
     let company_id = application_context().get_company_id();
     let role_id = application_context().get_role_id();
-    dbg!(company_id);
 
     rsx! {
         CompanyList { }
