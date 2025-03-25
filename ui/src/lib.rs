@@ -15,3 +15,7 @@ pub use company_list::CompanyList;
 mod roles_list;
 pub use roles_list::EmptyRolesList;
 pub use roles_list::RolesList;
+use storage::{Stores, StubCompanyStore, StubFlagStore, StubRoleStore};
+
+#[cfg(feature = "desktop")]
+type StoreContext = Stores<StubCompanyStore, StubRoleStore, StubFlagStore>;
