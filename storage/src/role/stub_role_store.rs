@@ -1,4 +1,4 @@
-use crate::role::{Role, RoleStore};
+use super::{Role, RoleStore};
 use crate::{StorageError, StubStore};
 use async_trait::async_trait;
 use uuid::Uuid;

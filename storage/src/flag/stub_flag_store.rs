@@ -1,4 +1,4 @@
-use crate::flag::{Flag, FlagStore};
+use super::{Flag, FlagStore};
 use crate::{StorageError, StubStore};
 use async_trait::async_trait;
 use uuid::Uuid;

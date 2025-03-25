@@ -3,7 +3,7 @@ mod stub_company_store;
 use super::Timestamp;
 use uuid::Uuid;
 
-use crate::role::Role;
+use super::Role;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 pub use stub_company_store::StubCompanyStore;
 
@@ -135,7 +135,8 @@ mod tests {
 
     // Module for each implementation
     mod stub_company_store {
-        use crate::company::stub_company_store::StubCompanyStore;
+        use crate::StubCompanyStore;
+
         #[tokio::test]
         async fn test_get_by_id() {
             let mut store = StubCompanyStore::new();

@@ -178,6 +178,7 @@ mod tests {
     // Module for each implementation
     mod stub_company_store {
         use crate::flag::stub_flag_store::StubFlagStore;
+
         #[tokio::test]
         async fn test_get_by_id() {
             let mut store = StubFlagStore::new();

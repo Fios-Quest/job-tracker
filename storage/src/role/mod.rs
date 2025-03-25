@@ -155,6 +155,7 @@ mod tests {
     // Module for each implementation
     mod stub_role_store {
         use crate::role::stub_role_store::StubRoleStore;
+
         #[tokio::test]
         async fn test_get_by_id() {
             let mut store = StubRoleStore::new();
