@@ -1,10 +1,10 @@
 mod company_list_item;
 
-use crate::company_list::company_list_item::CompanyListItem;
 use crate::StoreContext;
+use company_list_item::CompanyListItem;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
-use storage::{Company, Store, StubCompanyStore};
+use storage::{Company, Store};
 
 #[component]
 pub fn CompanyList() -> Element {

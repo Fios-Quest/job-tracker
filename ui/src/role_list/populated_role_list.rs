@@ -1,25 +1,12 @@
-mod role_list_item;
-
-use crate::roles_list::role_list_item::RoleListItem;
+use super::role_list_item::RoleListItem;
 use crate::StoreContext;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
-use storage::{Role, RoleStore, Store, StubRoleStore, Timestamp};
+use storage::{Role, RoleStore, Store, Timestamp};
 use uuid::Uuid;
 
 #[component]
-pub fn EmptyRolesList() -> Element {
-    rsx! {
-        div { id: "roles" }
-
-        h3 { "Roles" }
-
-        p { "Select a company to see Roles" }
-    }
-}
-
-#[component]
-pub fn RolesList(company_id: Uuid) -> Element {
+pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     let stores = use_context::<Arc<Mutex<StoreContext>>>();
     let mut role_name_value = use_signal(|| "");
 
