@@ -6,6 +6,7 @@ mod application_context;
 mod company;
 mod flag;
 mod role;
+mod stores;
 mod time;
 mod utils;
 
@@ -13,6 +14,7 @@ pub use application_context::*;
 pub use company::*;
 pub use flag::*;
 pub use role::*;
+pub use stores::*;
 pub use time::*;
 
 // type SafeFuture<T> = impl std::future::Future<Output = T> + Send;
