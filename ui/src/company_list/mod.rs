@@ -4,7 +4,7 @@ use crate::StoreContext;
 use company_list_item::CompanyListItem;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
-use storage::{Company, Store};
+use storage::{Company, Store, Stores};
 
 #[component]
 pub fn CompanyList() -> Element {

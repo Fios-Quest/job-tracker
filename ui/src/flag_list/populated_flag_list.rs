@@ -3,7 +3,7 @@ use crate::StoreContext;
 use dioxus::prelude::*;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use storage::{Flag, FlagColor, FlagStore, Store};
+use storage::{Flag, FlagColor, FlagStore, Store, Stores};
 use uuid::Uuid;
 
 #[component]

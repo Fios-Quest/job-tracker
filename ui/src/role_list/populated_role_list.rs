@@ -2,7 +2,7 @@ use super::role_list_item::RoleListItem;
 use crate::StoreContext;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
-use storage::{Role, RoleStore, Store, Timestamp};
+use storage::{Role, RoleStore, Store, Stores, Timestamp};
 use uuid::Uuid;
 
 #[component]

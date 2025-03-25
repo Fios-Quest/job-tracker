@@ -18,7 +18,5 @@ pub use role_list::*;
 mod flag_list;
 pub use flag_list::*;
 
-use storage::{Stores, StubCompanyStore, StubFlagStore, StubRoleStore};
-
 #[cfg(feature = "desktop")]
-type StoreContext = Stores<StubCompanyStore, StubRoleStore, StubFlagStore>;
+type StoreContext = storage::StubStores;
