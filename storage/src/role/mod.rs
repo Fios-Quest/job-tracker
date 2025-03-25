@@ -5,6 +5,8 @@ use crate::{StorageError, Store, Timestamp};
 use async_trait::async_trait;
 use uuid::Uuid;
 
+pub use stub_role_store::*;
+
 #[derive(Clone, Debug)]
 pub struct Role {
     pub id: Uuid,

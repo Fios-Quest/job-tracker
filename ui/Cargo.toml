@@ -7,3 +7,7 @@ edition = "2021"
 dioxus = { workspace = true }
 server = { workspace = true }
 storage = { workspace = true }
+uuid = { version = "1.15.1", features = ["v4"] }
+
+[features]
+desktop = []

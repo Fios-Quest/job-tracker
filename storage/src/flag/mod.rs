@@ -5,6 +5,8 @@ use crate::{StorageError, Store, Timestamp};
 use async_trait::async_trait;
 use uuid::Uuid;
 
+pub use stub_flag_store::StubFlagStore;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FlagColor {
     Green,
