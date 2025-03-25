@@ -7,7 +7,6 @@ edition = "2021"
 dioxus = { workspace = true, features = ["router"] }
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
-uuid = { version = "1.15.1", features = ["v4"] }
 
 [features]
 default = []
