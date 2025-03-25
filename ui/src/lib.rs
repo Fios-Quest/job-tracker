@@ -12,9 +12,12 @@ pub use echo::Echo;
 mod company_list;
 pub use company_list::CompanyList;
 
-mod roles_list;
-pub use roles_list::EmptyRolesList;
-pub use roles_list::RolesList;
+mod role_list;
+pub use role_list::*;
+
+mod flag_list;
+pub use flag_list::*;
+
 use storage::{Stores, StubCompanyStore, StubFlagStore, StubRoleStore};
 
 #[cfg(feature = "desktop")]

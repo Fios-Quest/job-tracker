@@ -3,6 +3,7 @@ mod stub_flag_store;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{StorageError, Store, Timestamp};
 use async_trait::async_trait;
+use std::str::FromStr;
 use uuid::Uuid;
 
 pub use stub_flag_store::StubFlagStore;
@@ -13,13 +14,25 @@ pub enum FlagColor {
     Red,
 }
 
+impl FromStr for FlagColor {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "green" => Ok(Self::Green),
+            "red" => Ok(Self::Red),
+            _ => Err(format!("Invalid flag_color '{}'", s)),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Flag {
-    id: Uuid,
-    company_id: Uuid,
-    flag_color: FlagColor,
-    name: String,
-    date_deleted: Option<Timestamp>,
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub flag_color: FlagColor,
+    pub name: String,
+    pub date_deleted: Option<Timestamp>,
 }
 
 impl PartialEq for Flag {
