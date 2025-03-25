@@ -1,6 +1,7 @@
 mod role_list_item;
 
 use crate::roles_list::role_list_item::RoleListItem;
+use crate::StoreContext;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
 use storage::{Role, RoleStore, Store, StubRoleStore, Timestamp};
@@ -19,14 +20,15 @@ pub fn EmptyRolesList() -> Element {
 
 #[component]
 pub fn RolesList(company_id: Uuid) -> Element {
-    let role_store = use_context::<Arc<Mutex<StubRoleStore>>>();
+    let stores = use_context::<Arc<Mutex<StoreContext>>>();
     let mut role_name_value = use_signal(|| "");
 
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<Arc<Mutex<StubRoleStore>>>()
+        use_context::<Arc<Mutex<StoreContext>>>()
             .lock()
             .expect("Could not lock role store")
+            .role_store()
             .get_for_company(company_id)
             .await
             .expect("Did not get roles")
@@ -39,16 +41,16 @@ pub fn RolesList(company_id: Uuid) -> Element {
     });
 
     let create_role = move |event: Event<FormData>| {
-        let role_store = role_store.clone();
+        let stores = stores.clone();
         async move {
             let role_name = event.values().get("role_name").map(|v| v.as_value());
 
             if let Some(role_name) = role_name {
                 if !role_name.is_empty() {
                     // Store the name
-                    role_store
-                        .lock()
-                        .expect("Could not lock role store")
+                    let mut stores_lock = stores.lock().expect("Could not lock role store");
+                    stores_lock
+                        .role_store()
                         .create(Role::new(company_id, role_name, Timestamp::now()))
                         .await
                         .expect("Could not store new role");

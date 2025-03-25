@@ -1,21 +1,23 @@
 mod company_list_item;
 
 use crate::company_list::company_list_item::CompanyListItem;
+use crate::StoreContext;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
 use storage::{Company, Store, StubCompanyStore};
 
 #[component]
 pub fn CompanyList() -> Element {
-    let company_store = use_context::<Arc<Mutex<StubCompanyStore>>>();
+    let stores = use_context::<Arc<Mutex<StoreContext>>>();
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
 
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
-        use_context::<Arc<Mutex<StubCompanyStore>>>()
+        use_context::<Arc<Mutex<StoreContext>>>()
             .lock()
             .expect("Could not lock company store")
+            .company_store()
             .find_by_name(&search)
             .await
             .expect("Did not get companies")
@@ -28,16 +30,16 @@ pub fn CompanyList() -> Element {
     });
 
     let create_company = move |event: Event<FormData>| {
-        let company_store = company_store.clone();
+        let stores = stores.clone();
         async move {
             let company_name = event.values().get("company_name").map(|v| v.as_value());
 
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
-                    company_store
-                        .lock()
-                        .expect("Could not lock company store")
+                    let mut stores_lock = stores.lock().expect("Could not lock company store");
+                    stores_lock
+                        .company_store()
                         .create(Company::new(company_name))
                         .await
                         .expect("Could not store new company");

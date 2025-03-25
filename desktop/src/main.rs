@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
-use storage::{ApplicationContext, StubCompanyStore, StubFlagStore, StubRoleStore};
+use storage::{ApplicationContext, Stores, StubCompanyStore, StubFlagStore, StubRoleStore};
 use ui::Navbar;
 use views::{Blog, Home};
 
@@ -24,14 +24,17 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    // Build cool things ✌️
-    let company_store = Arc::new(Mutex::new(StubCompanyStore::new()));
-    let role_store = Arc::new(Mutex::new(StubRoleStore::new()));
-    let flag_store = Arc::new(Mutex::new(StubFlagStore::new()));
+    let company_store = StubCompanyStore::new();
+    let role_store = StubRoleStore::new();
+    let flag_store = StubFlagStore::new();
+    let stores = Arc::new(Mutex::new(Stores::new(
+        company_store,
+        role_store,
+        flag_store,
+    )));
+    use_context_provider(move || stores);
+
     let application_context = Signal::new(ApplicationContext::new());
-    use_context_provider(move || company_store);
-    use_context_provider(move || role_store);
-    use_context_provider(move || flag_store);
     use_context_provider(move || application_context);
 
     rsx! {
