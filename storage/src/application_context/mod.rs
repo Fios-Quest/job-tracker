@@ -119,6 +119,7 @@ mod tests {
     fn test_set_get_unset_company_id() {
         let context = ApplicationContext::new();
         let company_id = Uuid::new_v4();
+        let role_id = Uuid::new_v4();
 
         let context_with_company_id = context.set_company_id(company_id);
         assert_eq!(
@@ -127,11 +128,23 @@ mod tests {
             "Company value must be set"
         );
 
+        let context_with_role_id = context_with_company_id.set_role_id(role_id).unwrap();
+        assert_eq!(
+            context_with_role_id.get_role_id(),
+            Some(role_id),
+            "Role value must be set"
+        );
+
         let context_unset_company_id = context_with_company_id.unset_company_id();
         assert_eq!(
             context_unset_company_id.get_company_id(),
             None,
             "Company value must be unset"
+        );
+        assert_eq!(
+            context_unset_company_id.get_role_id(),
+            None,
+            "Role value must be unset"
         );
     }
 
@@ -146,14 +159,14 @@ mod tests {
         assert_eq!(
             context_with_role_id.get_role_id(),
             Some(role_id),
-            "Company value must be set"
+            "Role value must be set"
         );
 
-        let context_unset_company_id = context_with_role_id.unset_company_id();
+        let context_unset_company_id = context_with_role_id.unset_role_id();
         assert_eq!(
-            context_unset_company_id.get_company_id(),
+            context_unset_company_id.get_role_id(),
             None,
-            "Company value must be unset"
+            "Role value must be unset"
         );
     }
 
@@ -162,9 +175,11 @@ mod tests {
         let context = ApplicationContext::new();
         let role_id = Uuid::new_v4();
 
+        let set_role_result = context.set_role_id(role_id);
+        assert_eq!(set_role_result, Err(ApplicationContextError::CompanyNotSet));
         assert_eq!(
-            context.set_role_id(role_id),
-            Err(ApplicationContextError::CompanyNotSet)
+            set_role_result.unwrap_err().to_string(),
+            "Company is not set".to_string()
         );
     }
 }
