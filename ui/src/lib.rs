@@ -11,3 +11,7 @@ pub use echo::Echo;
 
 mod company_list;
 pub use company_list::CompanyList;
+
+mod roles_list;
+pub use roles_list::EmptyRolesList;
+pub use roles_list::RolesList;

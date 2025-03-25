@@ -8,7 +8,7 @@ impl Timestamp {
         Timestamp(time)
     }
 
-    #[cfg(test)]
+    #[cfg(any(test, feature = "desktop"))]
     pub fn now() -> Self {
         Timestamp::new(
             std::time::SystemTime::now()

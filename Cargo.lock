@@ -5005,6 +5005,7 @@ dependencies = [
  "dioxus",
  "server",
  "storage",
+ "uuid",
 ]
 
 [[package]]

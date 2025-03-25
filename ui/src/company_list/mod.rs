@@ -1,3 +1,6 @@
+mod company_list_item;
+
+use crate::company_list::company_list_item::CompanyListItem;
 use dioxus::prelude::*;
 use std::sync::{Arc, Mutex};
 use storage::{Company, Store, StubCompanyStore};
@@ -8,7 +11,7 @@ pub fn CompanyList() -> Element {
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
 
-    let mut companies_items = use_resource(move || async move {
+    let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
         use_context::<Arc<Mutex<StubCompanyStore>>>()
             .lock()
@@ -17,14 +20,10 @@ pub fn CompanyList() -> Element {
             .await
             .expect("Did not get companies")
     });
-    let list = companies_items().unwrap_or_default();
-    let companies = list.iter().map(|c| {
-        let name = &c.name;
+    let companies = companies_resource().unwrap_or_default();
+    let companies_list = companies.iter().cloned().map(|company| {
         rsx! {
-            li {
-                key: c.id,
-                "{name}"
-            }
+            CompanyListItem { company }
         }
     });
 
@@ -48,7 +47,7 @@ pub fn CompanyList() -> Element {
                     company_name_search.set("".to_string());
 
                     // Rerun the resource
-                    companies_items.restart();
+                    companies_resource.restart();
                 }
             }
         }
@@ -61,12 +60,14 @@ pub fn CompanyList() -> Element {
 
     rsx! {
         div {
+            id: "companies",
+
             h3 { "Companies" }
 
             input { id: "search_companies", value: company_name_search, onchange: company_search, }
 
             ul {
-                { companies }
+                { companies_list }
             }
 
             form {

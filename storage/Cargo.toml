@@ -9,3 +9,6 @@ async-trait = "0.1.87"
 
 [dev-dependencies]
 tokio = { version = "1.44.0", features = ["rt", "macros"] }
+
+[features]
+desktop = []

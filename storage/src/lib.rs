@@ -2,12 +2,14 @@ use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use async_trait::async_trait;
 use uuid::Uuid;
 
+mod application_context;
 mod company;
 mod flag;
 mod role;
 mod time;
 mod utils;
 
+pub use application_context::*;
 pub use company::*;
 pub use flag::*;
 pub use role::*;
