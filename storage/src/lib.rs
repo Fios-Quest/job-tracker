@@ -106,10 +106,17 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum StorageError {
     NotFound,
     AlreadyExists,
+    SurrealError(String), // Not ideal, but Surreal errors are a bit weird
+}
+
+impl From<surrealdb::Error> for StorageError {
+    fn from(e: surrealdb::Error) -> Self {
+        StorageError::SurrealError(e.to_string())
+    }
 }
 
 #[cfg(test)]

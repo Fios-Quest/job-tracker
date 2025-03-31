@@ -3,6 +3,9 @@ use crate::{Company, FlagStore, RoleStore, Store};
 mod stub_stores;
 pub use stub_stores::*;
 
+mod rocks_stores;
+pub use rocks_stores::*;
+
 pub trait Stores<C, R, F>
 where
     C: Store<Company>,

@@ -1,13 +1,17 @@
 mod stub_company_store;
+pub use stub_company_store::StubCompanyStore;
+
+mod rocks_company_store;
+pub use rocks_company_store::RocksCompanyStore;
 
 use super::Timestamp;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::Role;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-pub use stub_company_store::StubCompanyStore;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Company {
     pub id: Uuid,
     pub name: String,
@@ -66,46 +70,50 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
-        assert!(store.create(company.clone()).await.is_ok());
+        assert_eq!(store.create(company.clone()).await, Ok(()));
 
-        assert_eq!(company.id, store.get_by_id(company.id).await.unwrap().id);
+        assert_eq!(store.get_by_id(company.id).await.unwrap().id, company.id);
     }
 
     async fn test_get_by_name<C: Store<Company>>(store: &mut C) {
         let name = "Test";
         let company = Company::new(name.to_string());
-        assert!(store.create(company).await.is_ok());
+        assert_eq!(store.create(company).await, Ok(()));
 
         // Test can be found
-        assert_eq!(name, store.get_by_name(name).await.unwrap().name);
+        let result = store.get_by_name(name).await;
+
+        assert_eq!(result.unwrap().name, name);
         // Test no partial match
         assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_name(&name[..1]).await
+            store.get_by_name(&name[..1]).await,
+            Err(StorageError::NotFound)
         );
     }
+
     async fn test_find_by_name<C: Store<Company>>(store: &mut C) {
         let name = "Test";
         let company = Company::new(name.to_string());
-        assert!(store.create(company).await.is_ok());
+        assert_eq!(store.create(company).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
     }
+
     async fn test_create_company<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
 
         // Should be able to create the company once
-        assert!(store.create(company.clone()).await.is_ok());
-        assert_eq!(Ok(company.clone()), store.get_by_id(company.id).await);
+        assert_eq!(store.create(company.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
 
         // Should not be able to store a company with the same name
         let company_same_name = Company::new("Test".to_string());
         assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(company_same_name).await
+            store.create(company_same_name).await,
+            Err(StorageError::AlreadyExists)
         );
 
         // Should not be able to store a company with the same id
@@ -115,21 +123,22 @@ mod tests {
             date_deleted: None,
         };
         assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(company_same_id).await
+            store.create(company_same_id).await,
+            Err(StorageError::AlreadyExists)
         );
     }
+
     async fn test_delete_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
-        assert!(store.create(company.clone()).await.is_ok());
-        assert_eq!(Ok(company.clone()), store.get_by_id(company.id).await);
-        assert!(store
-            .delete_by_id(company.id, Timestamp::now())
-            .await
-            .is_ok());
+        assert_eq!(store.create(company.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
         assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_id(company.id).await
+            store.delete_by_id(company.id, Timestamp::now()).await,
+            Ok(())
+        );
+        assert_eq!(
+            store.get_by_id(company.id).await,
+            Err(StorageError::NotFound)
         );
     }
 
@@ -164,6 +173,56 @@ mod tests {
         #[tokio::test]
         async fn test_delete_by_id() {
             let mut store = StubCompanyStore::new();
+            super::test_delete_by_id(&mut store).await;
+        }
+    }
+
+    mod rocks_company_store {
+        use crate::RocksCompanyStore;
+        use tempdir::TempDir;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksCompanyStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksCompanyStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksCompanyStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_company() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksCompanyStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_create_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksCompanyStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
             super::test_delete_by_id(&mut store).await;
         }
     }

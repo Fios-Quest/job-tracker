@@ -40,9 +40,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_company_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
         let mut stores = StubStores::new();
 
         let company = Company::new("Test Company".to_string());
@@ -63,9 +60,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_role_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
         let mut stores = StubStores::new();
 
         let role = Role::new(Uuid::new_v4(), "Test Role".to_string(), Timestamp::now());
@@ -78,9 +72,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_flag_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
         let mut stores = StubStores::new();
 
         let flag = Flag::new_green(Uuid::new_v4(), "Test Flag".to_string());
