@@ -8,7 +8,7 @@ dioxus = { workspace = true, features = ["router"] }
 directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
-tokio = { version = "1.44.0", features = ["rt", "macros"] }
+tokio = { version = "1.44.1", features = ["rt", "macros"] }
 
 [features]
 default = []
