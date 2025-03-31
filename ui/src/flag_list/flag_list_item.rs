@@ -14,9 +14,11 @@ pub fn FlagListItem(flag: Flag) -> Element {
         FlagColor::Red => "🚩",
     };
 
+    let id = id.to_string();
+
     rsx! {
         li {
-            key: id.to_string(),
+            id: "flag-{id}",
             "{flag_icon} {name}"
         }
     }

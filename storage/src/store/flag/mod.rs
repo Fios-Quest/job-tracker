@@ -1,14 +1,18 @@
 mod stub_flag_store;
+pub use stub_flag_store::StubFlagStore;
 
+mod rocks_flag_store;
+pub use rocks_flag_store::RocksFlagStore;
+
+use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::{StorageError, Store, Timestamp};
+use crate::Timestamp;
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
-pub use stub_flag_store::StubFlagStore;
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum FlagColor {
     Green,
     Red,
@@ -26,7 +30,7 @@ impl FromStr for FlagColor {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Flag {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -98,7 +102,7 @@ pub trait FlagStore<T: Store<Flag> = Self>: Store<Flag> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Store;
+    use crate::store::Store;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Flag>>(store: &mut C) {
@@ -191,8 +195,8 @@ mod tests {
     }
 
     // Module for each implementation
-    mod stub_company_store {
-        use crate::flag::stub_flag_store::StubFlagStore;
+    mod stub_flag_store {
+        use crate::store::flag::stub_flag_store::StubFlagStore;
 
         #[tokio::test]
         async fn test_get_by_id() {
@@ -227,6 +231,66 @@ mod tests {
         #[tokio::test]
         async fn test_get_for_company() {
             let mut store = StubFlagStore::new();
+            super::test_get_for_company(&mut store).await;
+        }
+    }
+
+    // Module for each implementation
+    mod rocks_flag_store {
+        use crate::RocksFlagStore;
+        use tempdir::TempDir;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_company() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_create_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_delete_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_for_company() {
+            let tmp_dir = TempDir::new("company_test").unwrap();
+            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

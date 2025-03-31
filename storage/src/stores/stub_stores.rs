@@ -1,54 +1,43 @@
-use crate::{Company, FlagStore, RoleStore, Store};
+use crate::stores::Stores;
+use crate::{StubCompanyStore, StubFlagStore, StubRoleStore};
 
-pub struct Stores<C, R, F>
-where
-    C: Store<Company>,
-    R: RoleStore,
-    F: FlagStore,
-{
-    company_store: C,
-    role_store: R,
-    flag_store: F,
+#[derive(Default)]
+pub struct StubStores {
+    company_store: StubCompanyStore,
+    role_store: StubRoleStore,
+    flag_store: StubFlagStore,
 }
 
-impl<C, R, F> Stores<C, R, F>
-where
-    C: Store<Company>,
-    R: RoleStore,
-    F: FlagStore,
-{
-    pub fn new(company_store: C, role_store: R, flag_store: F) -> Self {
-        Self {
-            company_store,
-            role_store,
-            flag_store,
-        }
+impl StubStores {
+    pub fn new() -> Self {
+        Self::default()
     }
+}
 
-    pub fn company_store(&mut self) -> &mut C {
+impl Stores<StubCompanyStore, StubRoleStore, StubFlagStore> for StubStores {
+    fn company_store(&mut self) -> &mut StubCompanyStore {
         &mut self.company_store
     }
 
-    pub fn role_store(&mut self) -> &mut R {
+    fn role_store(&mut self) -> &mut StubRoleStore {
         &mut self.role_store
     }
 
-    pub fn flag_store(&mut self) -> &mut F {
+    fn flag_store(&mut self) -> &mut StubFlagStore {
         &mut self.flag_store
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::stores::stub_stores::StubStores;
+    use crate::stores::*;
     use crate::*;
     use uuid::Uuid;
 
     #[tokio::test]
     async fn test_company_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
-        let mut stores = Stores::new(company_store, role_store, flag_store);
+        let mut stores = StubStores::new();
 
         let company = Company::new("Test Company".to_string());
         stores
@@ -68,10 +57,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_role_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
-        let mut stores = Stores::new(company_store, role_store, flag_store);
+        let mut stores = StubStores::new();
 
         let role = Role::new(Uuid::new_v4(), "Test Role".to_string(), Timestamp::now());
         stores.role_store().create(role.clone()).await.unwrap();
@@ -83,10 +69,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_flag_store() {
-        let company_store = StubCompanyStore::new();
-        let role_store = StubRoleStore::new();
-        let flag_store = StubFlagStore::new();
-        let mut stores = Stores::new(company_store, role_store, flag_store);
+        let mut stores = StubStores::new();
 
         let flag = Flag::new_green(Uuid::new_v4(), "Test Flag".to_string());
         stores.flag_store().create(flag.clone()).await.unwrap();

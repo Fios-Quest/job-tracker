@@ -1,4 +1,6 @@
 //! This crate contains all shared UI for the workspace.
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 mod hero;
 pub use hero::Hero;
@@ -18,7 +20,6 @@ pub use role_list::*;
 mod flag_list;
 pub use flag_list::*;
 
-use storage::{Stores, StubCompanyStore, StubFlagStore, StubRoleStore};
-
 #[cfg(feature = "desktop")]
-type StoreContext = Stores<StubCompanyStore, StubRoleStore, StubFlagStore>;
+type StoreType = storage::RocksStores;
+type StoreContext = Arc<Mutex<StoreType>>;

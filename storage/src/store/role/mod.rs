@@ -1,13 +1,17 @@
 mod stub_role_store;
-
-use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::{StorageError, Store, Timestamp};
-use async_trait::async_trait;
-use uuid::Uuid;
-
 pub use stub_role_store::*;
 
-#[derive(Clone, Debug)]
+mod rocks_role_store;
+pub use rocks_role_store::RocksRoleStore;
+
+use crate::store::{StorageError, Store};
+use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
+use crate::Timestamp;
+use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Role {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -156,7 +160,7 @@ mod tests {
 
     // Module for each implementation
     mod stub_role_store {
-        use crate::role::stub_role_store::StubRoleStore;
+        use crate::store::role::stub_role_store::StubRoleStore;
 
         #[tokio::test]
         async fn test_get_by_id() {
@@ -191,6 +195,65 @@ mod tests {
         #[tokio::test]
         async fn get_for_company() {
             let mut store = StubRoleStore::new();
+            super::test_get_for_company(&mut store).await;
+        }
+    }
+
+    mod rocks_role_store {
+        use crate::RocksRoleStore;
+        use tempdir::TempDir;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_role() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_create(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
+            super::test_delete_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn get_for_company() {
+            let tmp_dir = TempDir::new("role_test").unwrap();
+            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
+                .await
+                .unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

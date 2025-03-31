@@ -1,20 +1,20 @@
 use super::role_list_item::RoleListItem;
 use crate::StoreContext;
 use dioxus::prelude::*;
-use std::sync::{Arc, Mutex};
-use storage::{Role, RoleStore, Store, Timestamp};
+use storage::Store;
+use storage::{Role, RoleStore, Stores, Timestamp};
 use uuid::Uuid;
 
 #[component]
 pub fn PopulatedRoleList(company_id: Uuid) -> Element {
-    let stores = use_context::<Arc<Mutex<StoreContext>>>();
+    let stores = use_context::<StoreContext>();
     let mut role_name_value = use_signal(|| "");
 
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<Arc<Mutex<StoreContext>>>()
+        use_context::<StoreContext>()
             .lock()
-            .expect("Could not lock role store")
+            .await
             .role_store()
             .get_for_company(company_id)
             .await
@@ -35,7 +35,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
             if let Some(role_name) = role_name {
                 if !role_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().expect("Could not lock role store");
+                    let mut stores_lock = stores.lock().await;
                     stores_lock
                         .role_store()
                         .create(Role::new(company_id, role_name, Timestamp::now()))

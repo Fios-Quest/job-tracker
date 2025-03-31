@@ -2,20 +2,20 @@ use super::flag_list_item::FlagListItem;
 use crate::StoreContext;
 use dioxus::prelude::*;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
-use storage::{Flag, FlagColor, FlagStore, Store};
+use storage::Store;
+use storage::{Flag, FlagColor, FlagStore, Stores};
 use uuid::Uuid;
 
 #[component]
 pub fn PopulatedFlagList(company_id: Uuid) -> Element {
-    let stores = use_context::<Arc<Mutex<StoreContext>>>();
+    let stores = use_context::<StoreContext>();
     let mut flag_name_value = use_signal(|| "");
 
     // Get flags for company
     let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<Arc<Mutex<StoreContext>>>()
+        use_context::<StoreContext>()
             .lock()
-            .expect("Could not lock flag store")
+            .await
             .flag_store()
             .get_for_company(company_id)
             .await
@@ -40,7 +40,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
             if let (Some(flag_name), Some(flag_color)) = (flag_name, flag_color) {
                 if !flag_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().expect("Could not lock flag store");
+                    let mut stores_lock = stores.lock().await;
 
                     let flag = match flag_color {
                         FlagColor::Green => Flag::new_green(company_id, flag_name),
