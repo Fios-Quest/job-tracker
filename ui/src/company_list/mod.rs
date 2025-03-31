@@ -3,18 +3,18 @@ mod company_list_item;
 use crate::StoreContext;
 use company_list_item::CompanyListItem;
 use dioxus::prelude::*;
-use std::sync::{Arc, Mutex};
-use storage::{Company, Store, Stores};
+use storage::Store;
+use storage::{Company, Stores};
 
 #[component]
 pub fn CompanyList() -> Element {
-    let stores = use_context::<Arc<Mutex<StoreContext>>>();
+    let stores = use_context::<StoreContext>();
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
 
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
-        use_context::<Arc<Mutex<StoreContext>>>()
+        use_context::<StoreContext>()
             .lock()
             .expect("Could not lock company store")
             .company_store()

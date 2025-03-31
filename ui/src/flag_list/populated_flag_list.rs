@@ -2,18 +2,18 @@ use super::flag_list_item::FlagListItem;
 use crate::StoreContext;
 use dioxus::prelude::*;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
-use storage::{Flag, FlagColor, FlagStore, Store, Stores};
+use storage::Store;
+use storage::{Flag, FlagColor, FlagStore, Stores};
 use uuid::Uuid;
 
 #[component]
 pub fn PopulatedFlagList(company_id: Uuid) -> Element {
-    let stores = use_context::<Arc<Mutex<StoreContext>>>();
+    let stores = use_context::<StoreContext>();
     let mut flag_name_value = use_signal(|| "");
 
     // Get flags for company
     let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<Arc<Mutex<StoreContext>>>()
+        use_context::<StoreContext>()
             .lock()
             .expect("Could not lock flag store")
             .flag_store()

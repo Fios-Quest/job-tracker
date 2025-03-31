@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
+use futures::executor::block_on;
+use std::fs;
+use std::path::Path;
 use std::sync::{Arc, Mutex};
-use storage::{ApplicationContext, StubStores};
+use storage::{ApplicationContext, RocksStore, RocksStores};
 use ui::Navbar;
 use views::{Blog, Home};
 
@@ -18,15 +21,38 @@ enum Route {
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
+async fn create_rocks() -> RocksStores {
+    let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
+        .expect("No valid home directory found!");
+    let mut data_dir = directories.data_dir().to_path_buf();
+    data_dir.push("database");
+
+    fs::create_dir_all(&data_dir).expect("Couldn't create database directory!");
+
+    // Rocks slightly sucks in that sometimes it doesn't clean up its own lock file 🙄
+    let mut lock_file = data_dir.clone();
+    lock_file.push("LOCK");
+    if lock_file.exists() {
+        fs::remove_file(lock_file.as_path()).expect("Failed to remove lock file");
+    }
+
+    RocksStores::new(data_dir)
+        .await
+        .expect("Could not start database")
+}
+
 fn main() {
-    dioxus::launch(App);
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let rocks_stores = rt.block_on(create_rocks());
+    let stores = Arc::new(Mutex::new(rocks_stores));
+
+    dioxus::LaunchBuilder::new()
+        .with_context(stores)
+        .launch(App);
 }
 
 #[component]
 fn App() -> Element {
-    let stores = Arc::new(Mutex::new(StubStores::new()));
-    use_context_provider(move || stores);
-
     let application_context = Signal::new(ApplicationContext::new());
     use_context_provider(move || application_context);
 

@@ -5,8 +5,11 @@ edition = "2021"
 
 [dependencies]
 dioxus = { workspace = true, features = ["router"] }
+directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
+tokio = { version = "1.44.0", features = ["rt", "macros"] }
+futures = { version = "0.3.31", features = ["executor"] }
 
 [features]
 default = []
