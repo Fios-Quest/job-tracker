@@ -1,4 +1,4 @@
 use super::Company;
-use crate::StubStore;
+use crate::store::StubStore;
 
 pub type StubCompanyStore = StubStore<Company>;

@@ -1,9 +1,10 @@
-use crate::{Company, FlagStore, RoleStore, Store};
+use crate::{Company, FlagStore, RoleStore};
 
 mod stub_stores;
 pub use stub_stores::*;
 
 mod rocks_stores;
+use crate::store::Store;
 pub use rocks_stores::*;
 
 pub trait Stores<C, R, F>

@@ -4,8 +4,9 @@ pub use stub_flag_store::StubFlagStore;
 mod rocks_flag_store;
 pub use rocks_flag_store::RocksFlagStore;
 
+use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::{StorageError, Store, Timestamp};
+use crate::Timestamp;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -101,7 +102,7 @@ pub trait FlagStore<T: Store<Flag> = Self>: Store<Flag> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Store;
+    use crate::store::Store;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Flag>>(store: &mut C) {
@@ -195,7 +196,7 @@ mod tests {
 
     // Module for each implementation
     mod stub_flag_store {
-        use crate::flag::stub_flag_store::StubFlagStore;
+        use crate::store::flag::stub_flag_store::StubFlagStore;
 
         #[tokio::test]
         async fn test_get_by_id() {

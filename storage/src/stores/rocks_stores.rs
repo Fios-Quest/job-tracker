@@ -1,5 +1,6 @@
-use crate::{RocksCompanyStore, RocksFlagStore, RocksRoleStore, StorageError, Stores};
-use std::path::Path;
+use crate::store::StorageError;
+use crate::{RocksCompanyStore, RocksFlagStore, RocksRoleStore, Stores};
+use std::path::PathBuf;
 use surrealdb::engine::local::RocksDb;
 use surrealdb::Surreal;
 
@@ -10,7 +11,7 @@ pub struct RocksStores {
 }
 
 impl RocksStores {
-    pub async fn new(path_to_db: &Path) -> Result<Self, StorageError> {
+    pub async fn new(path_to_db: PathBuf) -> Result<Self, StorageError> {
         let db = Surreal::new::<RocksDb>(path_to_db).await?;
         db.use_ns("test").use_db("test").await?;
 

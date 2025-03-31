@@ -4,12 +4,10 @@ pub use stub_company_store::StubCompanyStore;
 mod rocks_company_store;
 pub use rocks_company_store::RocksCompanyStore;
 
-use super::Timestamp;
+use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
+use crate::{Role, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use super::Role;
-use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Company {
@@ -65,7 +63,7 @@ impl Company {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{StorageError, Store};
+    use crate::store::{StorageError, Store};
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Company>>(store: &mut C) {

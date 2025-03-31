@@ -1,25 +1,10 @@
-use crate::{Company, StorageError, Store, Timestamp};
+use crate::store::{RocksStore, StorageError, Store};
+use crate::{Company, Timestamp};
 use async_trait::async_trait;
-use std::path::Path;
-use surrealdb::engine::local::{Db, RocksDb};
-use surrealdb::{Response, Surreal};
+use surrealdb::Response;
 use uuid::Uuid;
 
-pub struct RocksCompanyStore {
-    db: Surreal<Db>,
-}
-
-impl RocksCompanyStore {
-    pub fn new(db: Surreal<Db>) -> Self {
-        Self { db }
-    }
-
-    pub async fn new_from_path(path: &Path) -> Result<Self, StorageError> {
-        let db = Surreal::new::<RocksDb>(path).await?;
-        db.use_ns("test").use_db("test").await?;
-        Ok(Self::new(db))
-    }
-}
+pub type RocksCompanyStore = RocksStore<Company>;
 
 const COMPANY_TABLE_NAME: &str = "company";
 

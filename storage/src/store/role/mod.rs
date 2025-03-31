@@ -4,8 +4,9 @@ pub use stub_role_store::*;
 mod rocks_role_store;
 pub use rocks_role_store::RocksRoleStore;
 
+use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::{StorageError, Store, Timestamp};
+use crate::Timestamp;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -159,7 +160,7 @@ mod tests {
 
     // Module for each implementation
     mod stub_role_store {
-        use crate::role::stub_role_store::StubRoleStore;
+        use crate::store::role::stub_role_store::StubRoleStore;
 
         #[tokio::test]
         async fn test_get_by_id() {
