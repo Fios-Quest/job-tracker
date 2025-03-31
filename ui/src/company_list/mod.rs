@@ -16,7 +16,7 @@ pub fn CompanyList() -> Element {
         let search = company_name_search();
         use_context::<StoreContext>()
             .lock()
-            .expect("Could not lock company store")
+            .await
             .company_store()
             .find_by_name(&search)
             .await
@@ -37,7 +37,7 @@ pub fn CompanyList() -> Element {
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().expect("Could not lock company store");
+                    let mut stores_lock = stores.lock().await;
                     stores_lock
                         .company_store()
                         .create(Company::new(company_name))

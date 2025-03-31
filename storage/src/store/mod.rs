@@ -4,8 +4,8 @@ use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
 use uuid::Uuid;
 
+mod rocks;
 mod stub;
-pub use stub::*;
 
 mod company;
 pub use company::*;
@@ -16,9 +16,7 @@ pub use flag::*;
 mod role;
 pub use role::*;
 
-mod rocks;
 use crate::{GetDeleted, GetId, GetName, SetDeleted, Timestamp};
-pub use rocks::*;
 
 #[async_trait]
 pub trait Store<T> {
@@ -50,6 +48,12 @@ impl From<surrealdb::Error> for StorageError {
 #[derive(Clone)]
 pub struct StubStore<T> {
     store: Vec<T>,
+}
+
+impl<T> Default for StubStore<T> {
+    fn default() -> Self {
+        Self { store: Vec::new() }
+    }
 }
 
 #[derive(Debug, Clone)]

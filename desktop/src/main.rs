@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use std::fs;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use storage::{ApplicationContext, RocksStores};
+use tokio::sync::Mutex;
 use ui::Navbar;
 use views::{Blog, Home};
 

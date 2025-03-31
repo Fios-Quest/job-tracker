@@ -1,6 +1,7 @@
 use crate::stores::Stores;
 use crate::{StubCompanyStore, StubFlagStore, StubRoleStore};
 
+#[derive(Default)]
 pub struct StubStores {
     company_store: StubCompanyStore,
     role_store: StubRoleStore,
@@ -9,11 +10,7 @@ pub struct StubStores {
 
 impl StubStores {
     pub fn new() -> Self {
-        Self {
-            company_store: StubCompanyStore::new(),
-            role_store: StubRoleStore::new(),
-            flag_store: StubFlagStore::new(),
-        }
+        Self::default()
     }
 }
 

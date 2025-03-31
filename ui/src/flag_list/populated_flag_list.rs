@@ -15,7 +15,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
         use_context::<StoreContext>()
             .lock()
-            .expect("Could not lock flag store")
+            .await
             .flag_store()
             .get_for_company(company_id)
             .await
@@ -40,7 +40,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
             if let (Some(flag_name), Some(flag_color)) = (flag_name, flag_color) {
                 if !flag_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().expect("Could not lock flag store");
+                    let mut stores_lock = stores.lock().await;
 
                     let flag = match flag_color {
                         FlagColor::Green => Flag::new_green(company_id, flag_name),

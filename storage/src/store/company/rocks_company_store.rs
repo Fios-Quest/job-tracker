@@ -31,7 +31,7 @@ impl Store<Company> for RocksCompanyStore {
 
         let companies: Option<Company> = checked_response.take(0)?;
 
-        companies.ok_or_else(|| StorageError::NotFound)
+        companies.ok_or(StorageError::NotFound)
     }
 
     async fn get_by_name(&self, name: &str) -> Result<Company, StorageError> {
@@ -55,7 +55,7 @@ impl Store<Company> for RocksCompanyStore {
 
         let companies: Option<Company> = checked_response.take(0)?;
 
-        companies.ok_or_else(|| StorageError::NotFound)
+        companies.ok_or(StorageError::NotFound)
     }
 
     async fn find_by_name(&self, name: &str) -> Result<Vec<Company>, StorageError> {

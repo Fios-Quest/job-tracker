@@ -1,5 +1,6 @@
 //! This crate contains all shared UI for the workspace.
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 mod hero;
 pub use hero::Hero;

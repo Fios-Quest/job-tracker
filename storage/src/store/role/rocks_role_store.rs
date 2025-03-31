@@ -33,7 +33,7 @@ impl Store<Role> for RocksRoleStore {
 
         let companies: Option<Role> = checked_response.take(0)?;
 
-        companies.ok_or_else(|| StorageError::NotFound)
+        companies.ok_or(StorageError::NotFound)
     }
 
     async fn get_by_name(&self, name: &str) -> Result<Role, StorageError> {
@@ -59,7 +59,7 @@ impl Store<Role> for RocksRoleStore {
 
         let companies: Option<Role> = checked_response.take(0)?;
 
-        companies.ok_or_else(|| StorageError::NotFound)
+        companies.ok_or(StorageError::NotFound)
     }
 
     async fn find_by_name(&self, name: &str) -> Result<Vec<Role>, StorageError> {
