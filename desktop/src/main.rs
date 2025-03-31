@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
-use futures::executor::block_on;
 use std::fs;
-use std::path::Path;
 use std::sync::{Arc, Mutex};
-use storage::{ApplicationContext, RocksStore, RocksStores};
+use storage::{ApplicationContext, RocksStores};
 use ui::Navbar;
 use views::{Blog, Home};
 
