@@ -2,6 +2,7 @@ use core::ops::Deref;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Timestamp(i64);
 
 impl Timestamp {

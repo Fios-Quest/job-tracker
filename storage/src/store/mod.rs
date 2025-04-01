@@ -124,7 +124,7 @@ mod tests {
     async fn test_get_by_id() {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
-        assert!(store.create(storable.clone()).await.is_ok());
+        assert_eq!(store.create(storable.clone()).await, Ok(()));
 
         assert_eq!(storable.id, store.get_by_id(storable.id).await.unwrap().id);
     }
@@ -134,7 +134,7 @@ mod tests {
         let mut store = StubStore::new();
         let name = "Test";
         let storable = TestStorable::new(name.to_string());
-        assert!(store.create(storable).await.is_ok());
+        assert_eq!(store.create(storable).await, Ok(()));
 
         // Test can be found
         assert_eq!(name, store.get_by_name(name).await.unwrap().name);
@@ -150,7 +150,7 @@ mod tests {
         let mut store = StubStore::new();
         let name = "Test";
         let storable = TestStorable::new(name.to_string());
-        assert!(store.create(storable).await.is_ok());
+        assert_eq!(store.create(storable).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
@@ -164,7 +164,7 @@ mod tests {
         let storable = TestStorable::new("Test".to_string());
 
         // Should be able to create the item once
-        assert!(store.create(storable.clone()).await.is_ok());
+        assert_eq!(store.create(storable.clone()).await, Ok(()));
         assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
 
         // Should not be able to store an item with the same name
@@ -190,12 +190,12 @@ mod tests {
     async fn test_delete_by_id() {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
-        assert!(store.create(storable.clone()).await.is_ok());
+        assert_eq!(store.create(storable.clone()).await, Ok(()));
         assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
-        assert!(store
-            .delete_by_id(storable.id, Timestamp::now())
-            .await
-            .is_ok());
+        assert_eq!(
+            store.delete_by_id(storable.id, Timestamp::now()).await,
+            Ok(())
+        );
         assert_eq!(
             Err(StorageError::NotFound),
             store.get_by_id(storable.id).await
