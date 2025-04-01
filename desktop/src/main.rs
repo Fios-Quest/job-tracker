@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 use std::fs;
-use std::path::PathBuf;
 use std::sync::Arc;
-use storage::{ApplicationContext, LibSqlStores, RocksStores};
+use storage::{ApplicationContext, LibSqlStores};
 use tokio::sync::Mutex;
 use ui::Navbar;
 use views::{Blog, Home};

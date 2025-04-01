@@ -9,8 +9,6 @@ pub use rocks_flag_store::RocksFlagStore;
 mod libsql_flag_store;
 pub use libsql_flag_store::LibSqlFlagStore;
 
-pub use crate::store::role::libsql_role_store::LibSqlRoleStore;
-
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::Timestamp;
