@@ -20,6 +20,8 @@ pub use role_list::*;
 mod flag_list;
 pub use flag_list::*;
 
+mod error_message;
+
 #[cfg(feature = "desktop")]
 type StoreType = storage::LibSqlStores;
 type StoreContext = Arc<Mutex<StoreType>>;

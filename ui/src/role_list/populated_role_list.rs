@@ -1,24 +1,40 @@
 use super::role_list_item::RoleListItem;
+use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::prelude::*;
-use storage::Store;
 use storage::{Role, RoleStore, Stores, Timestamp};
+use storage::{StorageError, Store};
 use uuid::Uuid;
+
+fn handle_storage_error(error: StorageError) -> Option<String> {
+    match error {
+        StorageError::NotFound => Some("No role found".to_string()),
+        StorageError::AlreadyExists => Some("Role already exists".to_string()),
+        _ => Some("A database error has occurred".to_string()),
+    }
+}
 
 #[component]
 pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     let stores = use_context::<StoreContext>();
     let mut role_name_value = use_signal(|| "");
+    let mut error_message = use_signal(|| None);
 
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<StoreContext>()
+        let result = use_context::<StoreContext>()
             .lock()
             .await
             .role_store()
             .get_for_company(company_id)
-            .await
-            .expect("Did not get roles")
+            .await;
+        match result {
+            Ok(roles) => roles,
+            Err(e) => {
+                error_message.set(handle_storage_error(e));
+                Vec::with_capacity(0)
+            }
+        }
     }));
     let roles = roles_resource().unwrap_or_default();
     let roles_list = roles.iter().cloned().map(|role| {
@@ -36,17 +52,23 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
                 if !role_name.is_empty() {
                     // Store the name
                     let mut stores_lock = stores.lock().await;
-                    stores_lock
+                    let result = stores_lock
                         .role_store()
                         .create(Role::new(company_id, role_name, Timestamp::now()))
-                        .await
-                        .expect("Could not store new role");
+                        .await;
 
-                    // Reset the values to empty
-                    role_name_value.set("");
+                    match result {
+                        Ok(_) => {
+                            // Reset the values to empty
+                            role_name_value.set("");
 
-                    // Rerun the resource
-                    roles_resource.restart();
+                            // Rerun the resource
+                            roles_resource.restart();
+                        }
+                        Err(e) => {
+                            error_message.set(handle_storage_error(e));
+                        }
+                    }
                 }
             }
         }
@@ -61,6 +83,10 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
 
             ul {
                 { roles_list }
+            }
+
+            if let Some(message) = error_message() {
+                ErrorMessage { message }
             }
 
             form {

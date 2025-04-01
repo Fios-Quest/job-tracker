@@ -1,25 +1,41 @@
 use super::flag_list_item::FlagListItem;
+use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::prelude::*;
 use std::str::FromStr;
-use storage::Store;
 use storage::{Flag, FlagColor, FlagStore, Stores};
+use storage::{StorageError, Store};
 use uuid::Uuid;
+
+fn handle_storage_error(error: StorageError) -> Option<String> {
+    match error {
+        StorageError::NotFound => Some("No flag found".to_string()),
+        StorageError::AlreadyExists => Some("Flag already exists".to_string()),
+        _ => Some("A database error has occurred".to_string()),
+    }
+}
 
 #[component]
 pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     let stores = use_context::<StoreContext>();
     let mut flag_name_value = use_signal(|| "");
+    let mut error_message = use_signal(|| None);
 
     // Get flags for company
     let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        use_context::<StoreContext>()
+        let result = use_context::<StoreContext>()
             .lock()
             .await
             .flag_store()
             .get_for_company(company_id)
-            .await
-            .expect("Did not get flags")
+            .await;
+        match result {
+            Ok(flags) => flags,
+            Err(e) => {
+                error_message.set(handle_storage_error(e));
+                Vec::with_capacity(0)
+            }
+        }
     }));
     let flags = flags_resource().unwrap_or_default();
     let flags_list = flags.iter().cloned().map(|flag| {
@@ -47,17 +63,20 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
                         FlagColor::Red => Flag::new_red(company_id, flag_name),
                     };
 
-                    stores_lock
-                        .flag_store()
-                        .create(flag)
-                        .await
-                        .expect("Could not store new flag");
+                    let result = stores_lock.flag_store().create(flag).await;
 
-                    // Reset the values to empty
-                    flag_name_value.set("");
+                    match result {
+                        Ok(_) => {
+                            // Reset the values to empty
+                            flag_name_value.set("");
 
-                    // Rerun the resource
-                    flags_resource.restart();
+                            // Rerun the resource
+                            flags_resource.restart();
+                        }
+                        Err(e) => {
+                            error_message.set(handle_storage_error(e));
+                        }
+                    }
                 }
             }
         }
@@ -72,6 +91,10 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
 
             ul {
                 { flags_list }
+            }
+
+            if let Some(message) = error_message() {
+                ErrorMessage { message }
             }
 
             form {

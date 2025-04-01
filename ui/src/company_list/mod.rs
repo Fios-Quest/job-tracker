@@ -1,26 +1,42 @@
 mod company_list_item;
 
+use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use company_list_item::CompanyListItem;
 use dioxus::prelude::*;
-use storage::Store;
 use storage::{Company, Stores};
+use storage::{StorageError, Store};
+
+fn handle_storage_error(error: StorageError) -> Option<String> {
+    match error {
+        StorageError::NotFound => Some("No company found".to_string()),
+        StorageError::AlreadyExists => Some("Company already exists".to_string()),
+        _ => Some("A database error has occurred".to_string()),
+    }
+}
 
 #[component]
 pub fn CompanyList() -> Element {
     let stores = use_context::<StoreContext>();
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
+    let mut error_message = use_signal(|| None);
 
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
-        use_context::<StoreContext>()
+        let companies = use_context::<StoreContext>()
             .lock()
             .await
             .company_store()
             .find_by_name(&search)
-            .await
-            .expect("Did not get companies")
+            .await;
+        match companies {
+            Ok(companies) => companies,
+            Err(e) => {
+                error_message.set(handle_storage_error(e));
+                Vec::with_capacity(0)
+            }
+        }
     });
     let companies = companies_resource().unwrap_or_default();
     let companies_list = companies.iter().cloned().map(|company| {
@@ -31,6 +47,8 @@ pub fn CompanyList() -> Element {
 
     let create_company = move |event: Event<FormData>| {
         let stores = stores.clone();
+        error_message.set(None);
+
         async move {
             let company_name = event.values().get("company_name").map(|v| v.as_value());
 
@@ -38,18 +56,24 @@ pub fn CompanyList() -> Element {
                 if !company_name.is_empty() {
                     // Store the name
                     let mut stores_lock = stores.lock().await;
-                    stores_lock
+                    let store_result = stores_lock
                         .company_store()
                         .create(Company::new(company_name))
-                        .await
-                        .expect("Could not store new company");
+                        .await;
 
-                    // Reset the values to empty
-                    company_name_value.set("");
-                    company_name_search.set("".to_string());
+                    match store_result {
+                        Ok(()) => {
+                            // Reset the values to empty
+                            company_name_value.set("");
+                            company_name_search.set("".to_string());
 
-                    // Rerun the resource
-                    companies_resource.restart();
+                            // Rerun the resource
+                            companies_resource.restart();
+                        }
+                        Err(e) => {
+                            error_message.set(handle_storage_error(e));
+                        }
+                    }
                 }
             }
         }
@@ -66,10 +90,14 @@ pub fn CompanyList() -> Element {
 
             h3 { "Companies" }
 
-            input { id: "search_companies", value: company_name_search, onchange: company_search, }
+            input { id: "search_companies", value: company_name_search, oninput: company_search, }
 
             ul {
                 { companies_list }
+            }
+
+            if let Some(message) = error_message() {
+                ErrorMessage { message }
             }
 
             form {
