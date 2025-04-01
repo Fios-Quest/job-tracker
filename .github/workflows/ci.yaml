@@ -1,42 +1,57 @@
-on: [ push ]
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
 
 name: CI
 
 jobs:
+  build:
+    name: cargo test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cargo build --verbose
+
   test:
     name: cargo test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cargo test --verbose
 
   fmt:
-    name: cargo fmt
+    name: cargo test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --check
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cargo fmt --check
 
   clippy:
-    name: cargo fmt
+    name: cargo test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - run: cargo clippy
