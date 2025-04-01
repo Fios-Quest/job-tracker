@@ -97,13 +97,27 @@ mod tests {
     }
     async fn test_find_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
-        let role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
-        assert_eq!(store.create(role).await, Ok(()));
+        let t_role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
+        assert_eq!(store.create(t_role.clone()).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
+
+        // It should return all companies when search string is empty
+        let a_role = Role::new(Uuid::new_v4(), "Another role".to_string(), Timestamp::now());
+        let y_role = Role::new(
+            Uuid::new_v4(),
+            "Yet Another role".to_string(),
+            Timestamp::now(),
+        );
+        assert_eq!(store.create(a_role.clone()).await, Ok(()));
+        assert_eq!(store.create(y_role.clone()).await, Ok(()));
+        assert_eq!(
+            store.find_by_name("").await,
+            Ok(vec![a_role, t_role, y_role])
+        );
     }
     async fn test_create<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());

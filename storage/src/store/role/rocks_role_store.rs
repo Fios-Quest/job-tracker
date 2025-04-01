@@ -74,7 +74,8 @@ impl Store<Role> for RocksRoleStore {
                   date_deleted \
                 FROM type::table($table) \
                 WHERE name ~ $name \
-                  AND date_deleted = None;",
+                  AND date_deleted = None \
+                ORDER BY name ASC;",
             )
             .bind(("table", ROLE_TABLE_NAME))
             .bind(("name", name.to_string()))

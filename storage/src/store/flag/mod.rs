@@ -143,13 +143,23 @@ mod tests {
 
     async fn test_find_by_name<C: Store<Flag>>(store: &mut C) {
         let name = "Test";
-        let flag = Flag::new_red(Uuid::new_v4(), name.to_string());
-        assert_eq!(store.create(flag).await, Ok(()));
+        let t_flag = Flag::new_red(Uuid::new_v4(), name.to_string());
+        assert_eq!(store.create(t_flag.clone()).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
+
+        // It should return all companies when search string is empty
+        let a_flag = Flag::new_green(Uuid::new_v4(), "Another flag".to_string());
+        let y_flag = Flag::new_green(Uuid::new_v4(), "Yet Another flag".to_string());
+        assert_eq!(store.create(a_flag.clone()).await, Ok(()));
+        assert_eq!(store.create(y_flag.clone()).await, Ok(()));
+        assert_eq!(
+            store.find_by_name("").await,
+            Ok(vec![a_flag, t_flag, y_flag])
+        );
     }
 
     async fn test_create_flag<C: Store<Flag>>(store: &mut C) {

@@ -74,7 +74,7 @@ impl Store<Flag> for LibSqlFlagStore {
         let mut rows = self
             .conn
             .query(
-                "SELECT * FROM flag WHERE name LIKE ?1 AND date_deleted IS NULL LIMIT 1",
+                "SELECT * FROM flag WHERE name LIKE ?1 AND date_deleted IS NULL ORDER BY name ASC",
                 [pattern],
             )
             .await?;
