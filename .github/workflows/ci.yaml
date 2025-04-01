@@ -9,7 +9,7 @@ name: CI
 
 jobs:
   build:
-    name: cargo test
+    name: cargo build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,7 +33,7 @@ jobs:
       - run: cargo test --verbose
 
   fmt:
-    name: cargo test
+    name: cargo fmt
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,7 +45,7 @@ jobs:
       - run: cargo fmt --check
 
   clippy:
-    name: cargo test
+    name: cargo clippy
     runs-on: ubuntu-latest
     strategy:
       matrix:
