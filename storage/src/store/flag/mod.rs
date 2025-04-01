@@ -238,59 +238,40 @@ mod tests {
     // Module for each implementation
     mod rocks_flag_store {
         use crate::RocksFlagStore;
-        use tempdir::TempDir;
 
         #[tokio::test]
         async fn test_get_by_id() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_get_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_by_name() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_get_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_find_by_name() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_find_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_create_company() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_create_company(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_delete_by_id() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_for_company() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

@@ -1,4 +1,6 @@
+use ::libsql::Connection;
 use async_trait::async_trait;
+use serde::de;
 use std::marker::PhantomData;
 use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
@@ -18,6 +20,8 @@ pub use role::*;
 
 use crate::{GetDeleted, GetId, GetName, SetDeleted, Timestamp};
 
+mod libsql;
+
 #[async_trait]
 pub trait Store<T> {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError>;
@@ -32,17 +36,14 @@ pub trait Store<T> {
         -> Result<(), StorageError>;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum StorageError {
     NotFound,
     AlreadyExists,
+    CouldNotMapToObject(&'static str, String),
+    DeserializationError(de::value::Error),
     SurrealError(String), // Not ideal, but Surreal errors are a bit weird
-}
-
-impl From<surrealdb::Error> for StorageError {
-    fn from(e: surrealdb::Error) -> Self {
-        StorageError::SurrealError(e.to_string())
-    }
+    LibSqlError(String),  // LibSql errors do not implement clone or partialeq
 }
 
 #[derive(Clone)]
@@ -63,6 +64,14 @@ where
 {
     phantom_data: PhantomData<T>,
     db: Surreal<Db>,
+}
+
+pub struct LibSqlStore<T>
+where
+    T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
+{
+    phantom_data: PhantomData<T>,
+    conn: Connection,
 }
 
 #[cfg(test)]

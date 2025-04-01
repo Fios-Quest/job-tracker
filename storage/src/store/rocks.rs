@@ -5,6 +5,12 @@ use std::path::Path;
 use surrealdb::engine::local::{Db, RocksDb};
 use surrealdb::Surreal;
 
+impl From<surrealdb::Error> for StorageError {
+    fn from(e: surrealdb::Error) -> Self {
+        StorageError::SurrealError(e.to_string())
+    }
+}
+
 impl<T> RocksStore<T>
 where
     T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
@@ -12,10 +18,6 @@ where
     pub fn new(db: Surreal<Db>) -> Self {
         let phantom_data = PhantomData;
         Self { phantom_data, db }
-    }
-
-    pub fn get_db(&self) -> &Surreal<Db> {
-        &self.db
     }
 
     pub async fn new_from_path(path: &Path) -> Result<Self, StorageError> {

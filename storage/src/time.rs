@@ -26,6 +26,12 @@ impl From<i64> for Timestamp {
     }
 }
 
+impl From<Timestamp> for i64 {
+    fn from(value: Timestamp) -> Self {
+        value.0
+    }
+}
+
 impl Deref for Timestamp {
     type Target = i64;
 
