@@ -21,5 +21,5 @@ mod flag_list;
 pub use flag_list::*;
 
 #[cfg(feature = "desktop")]
-type StoreType = storage::RocksStores;
+type StoreType = storage::LibSqlStores;
 type StoreContext = Arc<Mutex<StoreType>>;

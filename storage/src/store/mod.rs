@@ -21,6 +21,7 @@ pub use role::*;
 use crate::{GetDeleted, GetId, GetName, SetDeleted, Timestamp};
 
 mod libsql;
+pub(crate) use libsql::*;
 
 #[async_trait]
 pub trait Store<T> {

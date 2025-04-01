@@ -1,6 +1,6 @@
 use crate::{GetDeleted, GetId, GetName, LibSqlStore, SetDeleted, StorageError};
 use async_trait::async_trait;
-use libsql::{Builder, Connection};
+use libsql::{Builder, Connection, OpenFlags};
 use serde::de;
 use std::marker::PhantomData;
 use std::path::Path;
@@ -32,7 +32,11 @@ where
     }
 
     pub async fn new_from_path(path: &Path) -> Result<Self, StorageError> {
-        let conn = Builder::new_local(path).build().await?.connect()?;
+        let conn = Builder::new_local(path)
+            .flags(OpenFlags::SQLITE_OPEN_CREATE)
+            .build()
+            .await?
+            .connect()?;
         T::create_table_name(&conn).await?;
         Ok(Self::new(conn))
     }

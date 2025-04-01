@@ -70,7 +70,7 @@ impl Store<Company> for LibSqlCompanyStore {
         let mut rows = self
             .conn
             .query(
-                "SELECT * FROM company WHERE name LIKE ?1 AND date_deleted IS NULL LIMIT 1",
+                "SELECT * FROM company WHERE name LIKE ?1 AND date_deleted IS NULL ORDER BY name ASC",
                 [pattern],
             )
             .await?;

@@ -4,7 +4,6 @@ use std::fmt;
 pub use stub_flag_store::StubFlagStore;
 
 mod rocks_flag_store;
-
 pub use rocks_flag_store::RocksFlagStore;
 
 mod libsql_flag_store;

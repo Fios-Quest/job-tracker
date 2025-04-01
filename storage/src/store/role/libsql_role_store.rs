@@ -74,7 +74,7 @@ impl Store<Role> for LibSqlRoleStore {
         let mut rows = self
             .conn
             .query(
-                "SELECT * FROM role WHERE name LIKE ?1 AND date_deleted IS NULL LIMIT 1",
+                "SELECT * FROM role WHERE name LIKE ?1 AND date_deleted IS NULL",
                 [pattern],
             )
             .await?;

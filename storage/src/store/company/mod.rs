@@ -4,12 +4,13 @@ pub use stub_company_store::StubCompanyStore;
 mod rocks_company_store;
 pub use rocks_company_store::RocksCompanyStore;
 
+mod libsql_company_store;
+pub use libsql_company_store::LibSqlCompanyStore;
+
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{Role, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-mod libsql_company_store;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Company {
@@ -93,13 +94,23 @@ mod tests {
 
     async fn test_find_by_name<C: Store<Company>>(store: &mut C) {
         let name = "Test";
-        let company = Company::new(name.to_string());
-        assert_eq!(store.create(company).await, Ok(()));
+        let t_company = Company::new(name.to_string());
+        assert_eq!(store.create(t_company.clone()).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
+
+        // It should return all companies when search string is empty
+        let a_company = Company::new("Another company".to_string());
+        let y_company = Company::new("Yet Another company".to_string());
+        assert_eq!(store.create(a_company.clone()).await, Ok(()));
+        assert_eq!(store.create(y_company.clone()).await, Ok(()));
+        assert_eq!(
+            store.find_by_name("").await,
+            Ok(vec![a_company, t_company, y_company])
+        );
     }
 
     async fn test_create_company<C: Store<Company>>(store: &mut C) {

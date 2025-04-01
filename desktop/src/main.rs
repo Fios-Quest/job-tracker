@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use std::fs;
+use std::path::PathBuf;
 use std::sync::Arc;
-use storage::{ApplicationContext, RocksStores};
+use storage::{ApplicationContext, LibSqlStores, RocksStores};
 use tokio::sync::Mutex;
 use ui::Navbar;
 use views::{Blog, Home};
@@ -20,29 +21,25 @@ enum Route {
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-async fn create_rocks() -> RocksStores {
+async fn create_libsql() -> LibSqlStores {
     let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
         .expect("No valid home directory found!");
+
     let mut data_dir = directories.data_dir().to_path_buf();
-    data_dir.push("database");
+    fs::create_dir_all(&data_dir).expect("Couldn't create data directory!");
 
-    fs::create_dir_all(&data_dir).expect("Couldn't create database directory!");
+    data_dir.push("database.db");
 
-    // Rocks slightly sucks in that sometimes it doesn't clean up its own lock file 🙄
-    let mut lock_file = data_dir.clone();
-    lock_file.push("LOCK");
-    if lock_file.exists() {
-        fs::remove_file(lock_file.as_path()).expect("Failed to remove lock file");
-    }
+    dbg!(&data_dir);
 
-    RocksStores::new(data_dir)
+    LibSqlStores::new(data_dir)
         .await
         .expect("Could not start database")
 }
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let rocks_stores = rt.block_on(create_rocks());
+    let rocks_stores = rt.block_on(create_libsql());
     let stores = Arc::new(Mutex::new(rocks_stores));
 
     dioxus::LaunchBuilder::new()

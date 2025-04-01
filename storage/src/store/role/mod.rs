@@ -243,7 +243,7 @@ mod tests {
     }
 
     mod libsql_role_store {
-        use crate::LibSqlRoleStore;
+        use super::*;
 
         #[tokio::test]
         async fn test_get_by_id() {
