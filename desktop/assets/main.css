@@ -4,3 +4,11 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 20px;
 }
+
+.error-message {
+    color: darkred;
+}
+
+.error-message::before {
+    content: '⚠️'
+}
