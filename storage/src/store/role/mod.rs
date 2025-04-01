@@ -4,6 +4,9 @@ pub use stub_role_store::*;
 mod rocks_role_store;
 pub use rocks_role_store::RocksRoleStore;
 
+pub mod libsql_role_store;
+pub use libsql_role_store::LibSqlRoleStore;
+
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::Timestamp;
@@ -74,7 +77,7 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert!(store.create(role.clone()).await.is_ok());
+        assert_eq!(store.create(role.clone()).await, Ok(()));
 
         assert_eq!(role.id, store.get_by_id(role.id).await.unwrap().id);
     }
@@ -82,7 +85,7 @@ mod tests {
     async fn test_get_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
         let role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
-        assert!(store.create(role).await.is_ok());
+        assert_eq!(store.create(role).await, Ok(()));
 
         // Test can be found
         assert_eq!(name, store.get_by_name(name).await.unwrap().name);
@@ -94,19 +97,33 @@ mod tests {
     }
     async fn test_find_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
-        let role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
-        assert!(store.create(role).await.is_ok());
+        let t_role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
+        assert_eq!(store.create(t_role.clone()).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
+
+        // It should return all companies when search string is empty
+        let a_role = Role::new(Uuid::new_v4(), "Another role".to_string(), Timestamp::now());
+        let y_role = Role::new(
+            Uuid::new_v4(),
+            "Yet Another role".to_string(),
+            Timestamp::now(),
+        );
+        assert_eq!(store.create(a_role.clone()).await, Ok(()));
+        assert_eq!(store.create(y_role.clone()).await, Ok(()));
+        assert_eq!(
+            store.find_by_name("").await,
+            Ok(vec![a_role, t_role, y_role])
+        );
     }
     async fn test_create<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
 
         // Should be able to create the role once
-        assert!(store.create(role.clone()).await.is_ok());
+        assert_eq!(store.create(role.clone()).await, Ok(()));
         assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
 
         // Should not be able to store a role with the same name
@@ -131,9 +148,9 @@ mod tests {
     }
     async fn test_delete_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert!(store.create(role.clone()).await.is_ok());
+        assert_eq!(store.create(role.clone()).await, Ok(()));
         assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
-        assert!(store.delete_by_id(role.id, Timestamp::now()).await.is_ok());
+        assert_eq!(store.delete_by_id(role.id, Timestamp::now()).await, Ok(()));
         assert_eq!(Err(StorageError::NotFound), store.get_by_id(role.id).await);
     }
 
@@ -144,10 +161,10 @@ mod tests {
         let role2 = Role::new(company1, "Test 2".to_string(), Timestamp::now());
         let role3 = Role::new(company2, "Test 3".to_string(), Timestamp::now());
         let role4 = Role::new(company2, "Test 4".to_string(), Timestamp::now());
-        assert!(store.create(role1.clone()).await.is_ok());
-        assert!(store.create(role2.clone()).await.is_ok());
-        assert!(store.create(role3.clone()).await.is_ok());
-        assert!(store.create(role4.clone()).await.is_ok());
+        assert_eq!(store.create(role1.clone()).await, Ok(()));
+        assert_eq!(store.create(role2.clone()).await, Ok(()));
+        assert_eq!(store.create(role3.clone()).await, Ok(()));
+        assert_eq!(store.create(role4.clone()).await, Ok(()));
         assert_eq!(
             Ok(vec![role1, role2]),
             store.get_for_company(company1).await
@@ -201,59 +218,80 @@ mod tests {
 
     mod rocks_role_store {
         use crate::RocksRoleStore;
-        use tempdir::TempDir;
 
         #[tokio::test]
         async fn test_get_by_id() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
             super::test_get_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_by_name() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
             super::test_get_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_find_by_name() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
             super::test_find_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_create_role() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
             super::test_create(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_delete_by_id() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn get_for_company() {
-            let tmp_dir = TempDir::new("role_test").unwrap();
-            let mut store = RocksRoleStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksRoleStore::new_tmp().await.unwrap();
+            super::test_get_for_company(&mut store).await;
+        }
+    }
+
+    mod libsql_role_store {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_role() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_create(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_delete_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn get_for_company() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

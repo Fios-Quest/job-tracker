@@ -1,8 +1,13 @@
 mod stub_flag_store;
+
+use std::fmt;
 pub use stub_flag_store::StubFlagStore;
 
 mod rocks_flag_store;
 pub use rocks_flag_store::RocksFlagStore;
+
+mod libsql_flag_store;
+pub use libsql_flag_store::LibSqlFlagStore;
 
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
@@ -13,6 +18,7 @@ use std::str::FromStr;
 use uuid::Uuid;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum FlagColor {
     Green,
     Red,
@@ -26,6 +32,15 @@ impl FromStr for FlagColor {
             "green" => Ok(Self::Green),
             "red" => Ok(Self::Red),
             _ => Err(format!("Invalid flag_color '{}'", s)),
+        }
+    }
+}
+
+impl fmt::Display for FlagColor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FlagColor::Green => write!(f, "green"),
+            FlagColor::Red => write!(f, "red"),
         }
     }
 }
@@ -107,7 +122,7 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_green(Uuid::new_v4(), "Test".to_string());
-        assert!(store.create(flag.clone()).await.is_ok());
+        assert_eq!(store.create(flag.clone()).await, Ok(()));
 
         assert_eq!(flag.id, store.get_by_id(flag.id).await.unwrap().id);
     }
@@ -115,7 +130,7 @@ mod tests {
     async fn test_get_by_name<C: Store<Flag>>(store: &mut C) {
         let name = "Test";
         let flag = Flag::new_red(Uuid::new_v4(), name.to_string());
-        assert!(store.create(flag).await.is_ok());
+        assert_eq!(store.create(flag).await, Ok(()));
 
         // Test can be found
         assert_eq!(name, store.get_by_name(name).await.unwrap().name);
@@ -125,65 +140,71 @@ mod tests {
             store.get_by_name(&name[..1]).await
         );
     }
+
     async fn test_find_by_name<C: Store<Flag>>(store: &mut C) {
         let name = "Test";
-        let flag = Flag::new_red(Uuid::new_v4(), name.to_string());
-        assert!(store.create(flag).await.is_ok());
+        let t_flag = Flag::new_red(Uuid::new_v4(), name.to_string());
+        assert_eq!(store.create(t_flag.clone()).await, Ok(()));
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
         // Test can be found with partial match
         assert!(!store.find_by_name(&name[..1]).await.unwrap().is_empty());
+
+        // It should return all companies when search string is empty
+        let a_flag = Flag::new_green(Uuid::new_v4(), "Another flag".to_string());
+        let y_flag = Flag::new_green(Uuid::new_v4(), "Yet Another flag".to_string());
+        assert_eq!(store.create(a_flag.clone()).await, Ok(()));
+        assert_eq!(store.create(y_flag.clone()).await, Ok(()));
+        assert_eq!(
+            store.find_by_name("").await,
+            Ok(vec![a_flag, t_flag, y_flag])
+        );
     }
-    async fn test_create_company<C: Store<Flag>>(store: &mut C) {
+
+    async fn test_create_flag<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
 
-        // Should be able to create the company once
-        assert!(store.create(flag.clone()).await.is_ok());
+        // Should be able to create the flag once
+        assert_eq!(store.create(flag.clone()).await, Ok(()));
         assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
 
-        // Should not be able to store a company with the same name
-        let company_same_name = Flag::new_red(Uuid::new_v4(), "Test".to_string());
+        // Should not be able to store a flag with the same name
+        let flag_same_name = Flag::new_red(Uuid::new_v4(), "Test".to_string());
         assert_eq!(
             Err(StorageError::AlreadyExists),
-            store.create(company_same_name).await
+            store.create(flag_same_name).await
         );
 
-        // Should not be able to store a company with the same id
-        let company_same_id = Flag {
+        // Should not be able to store a flag with the same id
+        let flag_same_id = Flag {
             name: "Test".to_string(),
             ..flag
         };
         assert_eq!(
             Err(StorageError::AlreadyExists),
-            store.create(company_same_id).await
+            store.create(flag_same_id).await
         );
     }
     async fn test_delete_by_id<C: Store<Flag>>(store: &mut C) {
-        let company = Flag::new_red(Uuid::new_v4(), "Test".to_string());
-        assert!(store.create(company.clone()).await.is_ok());
-        assert_eq!(Ok(company.clone()), store.get_by_id(company.id).await);
-        assert!(store
-            .delete_by_id(company.id, Timestamp::now())
-            .await
-            .is_ok());
-        assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_id(company.id).await
-        );
+        let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
+        assert_eq!(store.create(flag.clone()).await, Ok(()));
+        assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
+        assert_eq!(store.delete_by_id(flag.id, Timestamp::now()).await, Ok(()));
+        assert_eq!(Err(StorageError::NotFound), store.get_by_id(flag.id).await);
     }
 
-    async fn test_get_for_company<C: FlagStore>(store: &mut C) {
+    async fn test_get_for_flag<C: FlagStore>(store: &mut C) {
         let company1 = Uuid::new_v4();
         let company2 = Uuid::new_v4();
         let flag1 = Flag::new_red(company1, "Test 1".to_string());
         let flag2 = Flag::new_green(company1, "Test 2".to_string());
         let flag3 = Flag::new_red(company2, "Test 3".to_string());
         let flag4 = Flag::new_green(company2, "Test 4".to_string());
-        assert!(store.create(flag1.clone()).await.is_ok());
-        assert!(store.create(flag2.clone()).await.is_ok());
-        assert!(store.create(flag3.clone()).await.is_ok());
-        assert!(store.create(flag4.clone()).await.is_ok());
+        assert_eq!(store.create(flag1.clone()).await, Ok(()));
+        assert_eq!(store.create(flag2.clone()).await, Ok(()));
+        assert_eq!(store.create(flag3.clone()).await, Ok(()));
+        assert_eq!(store.create(flag4.clone()).await, Ok(()));
         assert_eq!(
             Ok(vec![flag1, flag2]),
             store.get_for_company(company1).await
@@ -217,9 +238,9 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn test_create_company() {
+        async fn test_create_flag() {
             let mut store = StubFlagStore::new();
-            super::test_create_company(&mut store).await;
+            super::test_create_flag(&mut store).await;
         }
 
         #[tokio::test]
@@ -229,69 +250,91 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn test_get_for_company() {
+        async fn test_get_for_flag() {
             let mut store = StubFlagStore::new();
-            super::test_get_for_company(&mut store).await;
+            super::test_get_for_flag(&mut store).await;
         }
     }
 
     // Module for each implementation
     mod rocks_flag_store {
         use crate::RocksFlagStore;
-        use tempdir::TempDir;
 
         #[tokio::test]
         async fn test_get_by_id() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_get_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_by_name() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_get_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_find_by_name() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_find_by_name(&mut store).await;
         }
 
         #[tokio::test]
-        async fn test_create_company() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
-            super::test_create_company(&mut store).await;
+        async fn test_create_flag() {
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
+            super::test_create_flag(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_delete_by_id() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
 
         #[tokio::test]
-        async fn test_get_for_company() {
-            let tmp_dir = TempDir::new("company_test").unwrap();
-            let mut store = RocksFlagStore::new_from_path(tmp_dir.as_ref())
-                .await
-                .unwrap();
-            super::test_get_for_company(&mut store).await;
+        async fn test_get_for_flag() {
+            let mut store = RocksFlagStore::new_tmp().await.unwrap();
+            super::test_get_for_flag(&mut store).await;
+        }
+    }
+
+    // Module for each implementation
+    mod libsql_flag_store {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_flag() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_create_flag(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_delete_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_for_flag() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_get_for_flag(&mut store).await;
         }
     }
 

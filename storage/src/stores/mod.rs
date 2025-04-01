@@ -4,8 +4,12 @@ mod stub_stores;
 pub use stub_stores::*;
 
 mod rocks_stores;
-use crate::store::Store;
 pub use rocks_stores::*;
+
+mod libsql_stores;
+pub use libsql_stores::*;
+
+use crate::store::Store;
 
 pub trait Stores<C, R, F>
 where

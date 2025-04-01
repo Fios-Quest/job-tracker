@@ -4,14 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-uuid = { version = "1.15.1", features = ["v4"] }
 async-trait = "0.1.87"
+libsql = "0.9.1"
 surrealdb = { version = "2.2.1", features = ["kv-rocksdb"] }
 serde = { version = "1.0.219", features = ["derive"] }
+uuid = { version = "1.15.1", features = ["v4"] }
 
 [dev-dependencies]
-tokio = { version = "1.44.1", features = ["rt", "macros"] }
 tempdir = "0.3.7"
+tokio = { version = "1.44.1", features = ["rt", "macros"] }
 
 [features]
 desktop = []
