@@ -1,0 +1,89 @@
+on:
+  push: # ToDo: Change before merge!
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: stable
+
+name: Release
+
+jobs:
+  windows:
+    name: Package Windows
+    runs-on: windows-latest
+    env:
+      PLATFORM: windows
+    strategy:
+      matrix:
+        package-type:
+          - msi
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install Dioxus-CLI
+        run: cargo binstall dioxus-cli --force
+
+      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: job-tracker-${{ matrix.package-type }}
+          path: build/${{ matrix.package-type }}/JobTracker_*
+
+  macos:
+    name: Package Macos
+    runs-on: macos-latest
+    env:
+      PLATFORM: macos
+    strategy:
+      matrix:
+        package-type:
+          - dmg
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install Dioxus-CLI
+        run: cargo binstall dioxus-cli --force
+
+      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: job-tracker-${{ matrix.package-type }}
+          path: build/${{ matrix.package-type }}/JobTracker_*
+
+  linux:
+    name: Package Linux
+    runs-on: ubuntu-latest
+    env:
+      PLATFORM: linux
+    strategy:
+      matrix:
+        package-type:
+          - deb
+          - rpm
+          - appimage
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install Dioxus-CLI
+        run: cargo binstall dioxus-cli --force
+
+      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: job-tracker-${{ matrix.package-type }}
+          path: build/${{ matrix.package-type }}/JobTracker_*
