@@ -1,0 +1,15 @@
+[application]
+
+name = "Job Tracker"
+
+[web.app]
+
+[web.watcher]
+
+[web.resource]
+
+[web.resource.dev]
+
+[bundle]
+identifier = "com.fios-quest.job-tracker"
+publisher = "Fios Quest"

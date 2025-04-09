@@ -47,7 +47,7 @@ impl Store<Company> for LibSqlCompanyStore {
             .await?;
         rows.next()
             .await?
-            .ok_or_else(|| StorageError::NotFound)
+            .ok_or(StorageError::NotFound)
             .and_then(|row| Ok(de::from_row::<Company>(&row)?))
     }
 
@@ -61,7 +61,7 @@ impl Store<Company> for LibSqlCompanyStore {
             .await?;
         rows.next()
             .await?
-            .ok_or_else(|| StorageError::NotFound)
+            .ok_or(StorageError::NotFound)
             .and_then(|row| Ok(de::from_row::<Company>(&row)?))
     }
 

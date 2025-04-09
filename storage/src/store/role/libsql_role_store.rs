@@ -25,11 +25,12 @@ impl HasLibSqlTable for Role {
 
 impl Role {
     fn into_params(self) -> Params {
-        let mut params = Vec::with_capacity(3);
-        params.push(Value::Text(self.id.to_string()));
-        params.push(Value::Text(self.company_id.to_string()));
-        params.push(Value::Text(self.name));
-        params.push(Value::Integer(self.date_applied.into()));
+        let mut params = vec![
+            Value::Text(self.id.to_string()),
+            Value::Text(self.company_id.to_string()),
+            Value::Text(self.name),
+            Value::Integer(self.date_applied.into()),
+        ];
         if let Some(date_deleted) = self.date_deleted {
             params.push(Value::Integer(date_deleted.into()));
         }
@@ -51,7 +52,7 @@ impl Store<Role> for LibSqlRoleStore {
             .await?;
         rows.next()
             .await?
-            .ok_or_else(|| StorageError::NotFound)
+            .ok_or(StorageError::NotFound)
             .and_then(|row| Ok(de::from_row::<Role>(&row)?))
     }
 
@@ -65,7 +66,7 @@ impl Store<Role> for LibSqlRoleStore {
             .await?;
         rows.next()
             .await?
-            .ok_or_else(|| StorageError::NotFound)
+            .ok_or(StorageError::NotFound)
             .and_then(|row| Ok(de::from_row::<Role>(&row)?))
     }
 
