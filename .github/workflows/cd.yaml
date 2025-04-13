@@ -60,30 +60,30 @@ jobs:
           name: job-tracker-${{ matrix.package-type }}
           path: build/${{ matrix.package-type }}/JobTracker_*
 
-  linux:
-    name: Package Linux
-    runs-on: ubuntu-latest
-    env:
-      PLATFORM: linux
-    strategy:
-      matrix:
-        package-type:
-          - deb
-          - rpm
-          - appimage
-    steps:
-      - uses: actions/checkout@v4
-
-      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
-
-      - uses: cargo-bins/cargo-binstall@main
-
-      - name: Install Dioxus-CLI
-        run: cargo binstall dioxus-cli --force
-
-      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: job-tracker-${{ matrix.package-type }}
-          path: build/${{ matrix.package-type }}/JobTracker_*
+#  linux:
+#    name: Package Linux
+#    runs-on: ubuntu-latest
+#    env:
+#      PLATFORM: linux
+#    strategy:
+#      matrix:
+#        package-type:
+#          - deb
+#          - rpm
+#          - appimage
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
+#
+#      - uses: cargo-bins/cargo-binstall@main
+#
+#      - name: Install Dioxus-CLI
+#        run: cargo binstall dioxus-cli --force
+#
+#      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+#
+#      - uses: actions/upload-artifact@v4
+#        with:
+#          name: job-tracker-${{ matrix.package-type }}
+#          path: build/${{ matrix.package-type }}/JobTracker_*
