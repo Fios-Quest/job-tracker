@@ -1,5 +1,8 @@
 on:
-  push: # ToDo: Change before merge!
+  push:
+    branches:
+      - main
+  pull_request:
 
 env:
   CARGO_TERM_COLOR: always
@@ -30,6 +33,7 @@ jobs:
       - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
 
       - uses: actions/upload-artifact@v4
+        if: "${{ github.ref == 'refs/heads/main' }}"
         with:
           name: job-tracker-${{ matrix.package-type }}
           path: build/${{ matrix.package-type }}/JobTracker_*
@@ -56,6 +60,7 @@ jobs:
       - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
 
       - uses: actions/upload-artifact@v4
+        if: "${{ github.ref == 'refs/heads/main' }}"
         with:
           name: job-tracker-${{ matrix.package-type }}
           path: build/${{ matrix.package-type }}/JobTracker_*
@@ -84,6 +89,7 @@ jobs:
 #      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
 #
 #      - uses: actions/upload-artifact@v4
+#        if: "${{ github.ref == 'refs/heads/main' }}"
 #        with:
 #          name: job-tracker-${{ matrix.package-type }}
 #          path: build/${{ matrix.package-type }}/JobTracker_*
