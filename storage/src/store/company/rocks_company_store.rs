@@ -103,6 +103,10 @@ impl Store<Company> for RocksCompanyStore {
         Ok(())
     }
 
+    async fn update(&mut self, _item: Company) -> Result<(), StorageError> {
+        todo!()
+    }
+
     async fn delete_by_id(
         &mut self,
         id: Uuid,

@@ -31,6 +31,7 @@ impl Role {
             Value::Text(self.id.to_string()),
             Value::Text(self.company_id.to_string()),
             Value::Text(self.name),
+            Value::Text(self.description),
             Value::Integer(self.date_applied.into()),
         ];
         if let Some(date_deleted) = self.date_deleted {
@@ -98,7 +99,23 @@ impl Store<Role> for LibSqlRoleStore {
 
         self.conn
             .execute(
-                "INSERT INTO role (id, company_id, name, date_applied, date_deleted) VALUES (?1, ?2, ?3, ?4, ?5)",
+                "INSERT INTO role (id, company_id, name, description, date_applied, date_deleted) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                item.into_params(),
+            )
+            .await?;
+        Ok(())
+    }
+
+    async fn update(&mut self, item: Role) -> Result<(), StorageError> {
+        self.conn
+            .execute(
+                "UPDATE role \
+                  SET company_id = ?2, \
+                      name = ?3,\
+                      description = ?4, \
+                      date_applied = ?5, \
+                      date_deleted = ?6 \
+                  WHERE id = ?1",
                 item.into_params(),
             )
             .await?;

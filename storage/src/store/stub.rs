@@ -55,6 +55,18 @@ where
         Ok(())
     }
 
+    async fn update(&mut self, item: T) -> Result<(), StorageError> {
+        let role = self
+            .store
+            .iter_mut()
+            .find(|role| role.get_id() == item.get_id())
+            .ok_or(StorageError::NotFound)?;
+
+        *role = item;
+
+        Ok(())
+    }
+
     async fn delete_by_id(
         &mut self,
         id: Uuid,

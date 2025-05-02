@@ -33,6 +33,8 @@ pub trait Store<T> {
 
     async fn create(&mut self, item: T) -> Result<(), StorageError>;
 
+    async fn update(&mut self, item: T) -> Result<(), StorageError>;
+
     async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
         -> Result<(), StorageError>;
 }

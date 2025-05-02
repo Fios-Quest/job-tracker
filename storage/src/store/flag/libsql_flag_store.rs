@@ -103,6 +103,20 @@ impl Store<Flag> for LibSqlFlagStore {
         Ok(())
     }
 
+    async fn update(&mut self, item: Flag) -> Result<(), StorageError> {
+        self.conn
+            .execute(
+                "UPDATE flag \
+                  SET company_id = ?2,\
+                      flag_color = ?3, \
+                      name = ?4, \
+                      date_deleted = ?5 \
+                  WHERE id = ?1",
+                item.into_params(),
+            )
+            .await?;
+        Ok(())
+    }
     async fn delete_by_id(
         &mut self,
         id: Uuid,

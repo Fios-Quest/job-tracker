@@ -139,6 +139,15 @@ mod tests {
         );
     }
 
+    async fn test_update_company<C: Store<Company>>(store: &mut C) {
+        let mut company = Company::new("Test".to_string());
+        assert_eq!(store.create(company.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
+        company.name = "Updated Name".to_string();
+        assert_eq!(store.update(company.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(company.id).await, Ok(company));
+    }
+
     async fn test_delete_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
         assert_eq!(store.create(company.clone()).await, Ok(()));
@@ -179,6 +188,12 @@ mod tests {
         async fn test_create_company() {
             let mut store = StubCompanyStore::new();
             super::test_create_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_company() {
+            let mut store = StubCompanyStore::new();
+            super::test_update_company(&mut store).await;
         }
 
         #[tokio::test]
@@ -247,6 +262,12 @@ mod tests {
         async fn test_create_company() {
             let mut store = LibSqlStore::new_tmp().await.unwrap();
             super::test_create_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_company() {
+            let mut store = LibSqlStore::new_tmp().await.unwrap();
+            super::test_update_company(&mut store).await;
         }
 
         #[tokio::test]

@@ -98,6 +98,19 @@ impl Store<Company> for LibSqlCompanyStore {
         Ok(())
     }
 
+    async fn update(&mut self, item: Company) -> Result<(), StorageError> {
+        self.conn
+            .execute(
+                "UPDATE company \
+                  SET name = ?2,\
+                      date_deleted = ?3 \
+                  WHERE id = ?1",
+                item.into_params(),
+            )
+            .await?;
+        Ok(())
+    }
+
     async fn delete_by_id(
         &mut self,
         id: Uuid,

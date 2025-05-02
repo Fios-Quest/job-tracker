@@ -161,6 +161,16 @@ mod tests {
             store.create(role_same_id).await
         );
     }
+
+    async fn test_update<C: Store<Role>>(store: &mut C) {
+        let mut role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
+        assert_eq!(store.create(role.clone()).await, Ok(()));
+        assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
+        role.description = "This is a description".to_string();
+        assert_eq!(store.update(role.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(role.id).await, Ok(role));
+    }
+
     async fn test_delete_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
         assert_eq!(store.create(role.clone()).await, Ok(()));
@@ -216,6 +226,12 @@ mod tests {
         async fn test_create_role() {
             let mut store = StubRoleStore::new();
             super::test_create(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_role() {
+            let mut store = StubRoleStore::new();
+            super::test_update(&mut store).await;
         }
 
         #[tokio::test]
@@ -296,6 +312,12 @@ mod tests {
         async fn test_create_role() {
             let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
             super::test_create(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_role() {
+            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
+            super::test_update(&mut store).await;
         }
 
         #[tokio::test]

@@ -119,6 +119,10 @@ impl Store<Role> for RocksRoleStore {
         Ok(())
     }
 
+    async fn update(&mut self, _item: Role) -> Result<(), StorageError> {
+        todo!()
+    }
+
     async fn delete_by_id(
         &mut self,
         id: Uuid,
