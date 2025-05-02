@@ -3,11 +3,14 @@ mod company_list_item;
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use company_list_item::CompanyListItem;
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use storage::{Company, Stores};
 use storage::{StorageError, Store};
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
     match error {
         StorageError::NotFound => Some("No company found".to_string()),
         StorageError::AlreadyExists => Some("Company already exists".to_string()),

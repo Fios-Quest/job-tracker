@@ -17,6 +17,8 @@ pub use company_list::CompanyList;
 mod role_list;
 pub use role_list::*;
 
+mod role_information;
+
 mod flag_list;
 pub use flag_list::*;
 

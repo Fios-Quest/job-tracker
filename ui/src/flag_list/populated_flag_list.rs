@@ -1,6 +1,7 @@
 use super::flag_list_item::FlagListItem;
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::str::FromStr;
 use storage::{Flag, FlagColor, FlagStore, Stores};
@@ -8,6 +9,8 @@ use storage::{StorageError, Store};
 use uuid::Uuid;
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
     match error {
         StorageError::NotFound => Some("No flag found".to_string()),
         StorageError::AlreadyExists => Some("Flag already exists".to_string()),
