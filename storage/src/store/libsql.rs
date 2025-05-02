@@ -7,7 +7,7 @@ use std::path::Path;
 
 #[async_trait]
 pub trait HasLibSqlTable {
-    async fn create_table_name(db: &Connection) -> Result<(), StorageError>;
+    async fn migrate(db: &Connection) -> Result<(), StorageError>;
 }
 
 impl From<libsql::Error> for StorageError {
@@ -37,7 +37,7 @@ where
             .build()
             .await?
             .connect()?;
-        T::create_table_name(&conn).await?;
+        T::migrate(&conn).await?;
         Ok(Self::new(conn))
     }
 

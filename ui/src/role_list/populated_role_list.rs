@@ -1,12 +1,15 @@
 use super::role_list_item::RoleListItem;
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use storage::{Role, RoleStore, Stores, Timestamp};
 use storage::{StorageError, Store};
 use uuid::Uuid;
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
     match error {
         StorageError::NotFound => Some("No role found".to_string()),
         StorageError::AlreadyExists => Some("Role already exists".to_string()),

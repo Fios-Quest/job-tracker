@@ -9,7 +9,7 @@ pub use libsql_role_store::LibSqlRoleStore;
 
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
-use crate::Timestamp;
+use crate::{GetDescription, SetDescription, Timestamp};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -19,6 +19,7 @@ pub struct Role {
     pub id: Uuid,
     pub company_id: Uuid,
     pub name: String,
+    pub description: String,
     pub date_applied: Timestamp,
     pub date_deleted: Option<Timestamp>,
 }
@@ -35,6 +36,7 @@ impl Role {
             id: Uuid::new_v4(),
             company_id,
             name,
+            description: "".to_string(),
             date_applied,
             date_deleted: None,
         }
@@ -62,6 +64,18 @@ impl GetDeleted for Role {
 impl SetDeleted for Role {
     fn set_deleted(&mut self, time: Timestamp) {
         self.date_deleted = Some(time);
+    }
+}
+
+impl GetDescription for Role {
+    fn get_description(&self) -> &String {
+        &self.description
+    }
+}
+
+impl SetDescription for Role {
+    fn set_description(&mut self, value: String) {
+        self.description = value;
     }
 }
 
@@ -138,6 +152,7 @@ mod tests {
             id: role.id,
             company_id: role.company_id,
             name: "Test".to_string(),
+            description: "".to_string(),
             date_applied: Timestamp::now(),
             date_deleted: None,
         };

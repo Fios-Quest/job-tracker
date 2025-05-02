@@ -7,18 +7,20 @@ use uuid::Uuid;
 
 #[async_trait]
 impl HasLibSqlTable for Role {
-    async fn create_table_name(conn: &Connection) -> Result<(), StorageError> {
+    async fn migrate(conn: &Connection) -> Result<(), StorageError> {
         conn.execute(
             "CREATE TABLE IF NOT EXISTS role ( \
                      id UUID PRIMARY KEY NOT NULL, \
                      company_id UUID NOT NULL, \
                      name STRING NOT NULL, \
+                     description TEXT NOT NULL DEFAULT '', \
                      date_applied INTEGER NOT NULL, \
                      date_deleted INTEGER \
                  )",
             (),
         )
         .await?;
+
         Ok(())
     }
 }
