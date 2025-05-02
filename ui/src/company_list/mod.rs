@@ -42,7 +42,7 @@ pub fn CompanyList() -> Element {
         }
     });
     let companies = companies_resource().unwrap_or_default();
-    let companies_list = companies.iter().cloned().map(|company| {
+    let companies_list = companies.into_iter().map(|company| {
         rsx! {
             CompanyListItem { company }
         }

@@ -38,8 +38,8 @@ async fn create_libsql() -> LibSqlStores {
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let rocks_stores = rt.block_on(create_libsql());
-    let stores = Arc::new(Mutex::new(rocks_stores));
+    let libsql_stores = rt.block_on(create_libsql());
+    let stores = Arc::new(Mutex::new(libsql_stores));
 
     dioxus::LaunchBuilder::new()
         .with_context(stores)

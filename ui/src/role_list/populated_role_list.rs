@@ -40,7 +40,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
         }
     }));
     let roles = roles_resource().unwrap_or_default();
-    let roles_list = roles.iter().cloned().map(|role| {
+    let roles_list = roles.into_iter().map(|role| {
         rsx! {
             RoleListItem { role }
         }

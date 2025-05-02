@@ -13,7 +13,9 @@ pub fn RoleListItem(role: Role) -> Element {
                 id: id.to_string(),
                 r#type: "radio",
                 name: "role",
-                onchange: move |_| application_context.set(application_context().set_role_id(id).unwrap()),
+                onchange: move |_| application_context.set(
+                    application_context().set_role_id(id).expect("CompanyId not set")
+                ),
             }
             label {
                 for: id.to_string(),
