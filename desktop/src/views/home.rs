@@ -6,6 +6,7 @@ use ui::{CompanyList, FlagList, RoleDescription, RoleList};
 pub fn Home() -> Element {
     let application_context = use_context::<Signal<ApplicationContext>>();
     let company_id = application_context().get_company_id();
+    let role = application_context().get_role().cloned();
 
     rsx! {
         div { id: "home",
@@ -16,7 +17,9 @@ pub fn Home() -> Element {
                 FlagList { company_id }
             }
 
-            section { id: "role-information", RoleDescription {} }
+            section { id: "role-information",
+                RoleDescription { role }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ use storage::{ApplicationContext, Role};
 #[component]
 pub fn RoleListItem(role: Role) -> Element {
     let mut application_context = use_context::<Signal<ApplicationContext>>();
+    let current_role = role.clone();
     let Role { id, name, .. } = role;
 
     rsx! {
@@ -13,8 +14,9 @@ pub fn RoleListItem(role: Role) -> Element {
                 r#type: "radio",
                 name: "role",
                 onchange: move |_| {
+                    let role = current_role.clone();
                     application_context
-                        .set(application_context().set_role_id(id).expect("CompanyId not set"))
+                        .set(application_context().set_role(role).expect("CompanyId not set"))
                 },
             }
             label { r#for: id.to_string(), "{name}" }
