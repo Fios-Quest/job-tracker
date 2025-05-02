@@ -72,6 +72,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
                         Ok(_) => {
                             // Reset the values to empty
                             flag_name_value.set("");
+                            error_message.set(None);
 
                             // Rerun the resource
                             flags_resource.restart();

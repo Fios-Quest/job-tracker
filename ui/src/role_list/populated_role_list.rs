@@ -64,6 +64,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
                         Ok(_) => {
                             // Reset the values to empty
                             role_name_value.set("");
+                            error_message.set(None);
 
                             // Rerun the resource
                             roles_resource.restart();

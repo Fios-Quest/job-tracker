@@ -69,6 +69,7 @@ pub fn CompanyList() -> Element {
                             // Reset the values to empty
                             company_name_value.set("");
                             company_name_search.set("".to_string());
+                            error_message.set(None);
 
                             // Rerun the resource
                             companies_resource.restart();
