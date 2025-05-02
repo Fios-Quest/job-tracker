@@ -7,20 +7,17 @@ pub fn RoleListItem(role: Role) -> Element {
     let Role { id, name, .. } = role;
 
     rsx! {
-        li {
-            key: id,
+        li { key: id,
             input {
                 id: id.to_string(),
                 r#type: "radio",
                 name: "role",
-                onchange: move |_| application_context.set(
-                    application_context().set_role_id(id).expect("CompanyId not set")
-                ),
+                onchange: move |_| {
+                    application_context
+                        .set(application_context().set_role_id(id).expect("CompanyId not set"))
+                },
             }
-            label {
-                for: id.to_string(),
-                "{name}"
-            }
+            label { r#for: id.to_string(), "{name}" }
         }
     }
 }

@@ -79,23 +79,22 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     };
 
     rsx! {
-        div {
-            id: "roles",
-            class: "{company_id}",
+        div { id: "roles", class: "{company_id}",
 
             h3 { "Roles" }
 
-            ul {
-                { roles_list }
-            }
+            ul { {roles_list} }
 
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
 
-            form {
-                onsubmit: create_role,
-                input { id: "add_role", name: "role_name", value: role_name_value }
+            form { onsubmit: create_role,
+                input {
+                    id: "add_role",
+                    name: "role_name",
+                    value: role_name_value,
+                }
                 input { r#type: "submit" }
             }
         }

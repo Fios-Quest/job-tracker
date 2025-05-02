@@ -87,29 +87,26 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     };
 
     rsx! {
-        div {
-            id: "flags",
-            class: "{company_id}",
+        div { id: "flags", class: "{company_id}",
 
             h3 { "Flags" }
 
-            ul {
-                { flags_list }
-            }
+            ul { {flags_list} }
 
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
 
-            form {
-                onsubmit: create_flag,
-                select {
-                    id: "flag_color",
-                    name: "flag_color",
+            form { onsubmit: create_flag,
+                select { id: "flag_color", name: "flag_color",
                     option { value: "red", "🚩 Red" }
                     option { value: "green", "💚 Green" }
                 }
-                input { id: "add_flag", name: "flag_name", value: flag_name_value }
+                input {
+                    id: "add_flag",
+                    name: "flag_name",
+                    value: flag_name_value,
+                }
                 input { r#type: "submit" }
             }
         }

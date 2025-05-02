@@ -89,24 +89,28 @@ pub fn CompanyList() -> Element {
     };
 
     rsx! {
-        div {
-            id: "companies",
+        div { id: "companies",
 
             h3 { "Companies" }
 
-            input { id: "search_companies", value: company_name_search, oninput: company_search, }
-
-            ul {
-                { companies_list }
+            input {
+                id: "search_companies",
+                value: company_name_search,
+                oninput: company_search,
             }
+
+            ul { {companies_list} }
 
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
 
-            form {
-                onsubmit: create_company,
-                input { id: "add_company", name: "company_name", value: company_name_value }
+            form { onsubmit: create_company,
+                input {
+                    id: "add_company",
+                    name: "company_name",
+                    value: company_name_value,
+                }
                 input { r#type: "submit" }
             }
         }

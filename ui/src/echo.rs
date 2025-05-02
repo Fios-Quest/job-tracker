@@ -9,12 +9,11 @@ pub fn Echo() -> Element {
 
     rsx! {
         document::Link { rel: "stylesheet", href: ECHO_CSS }
-        div {
-            id: "echo",
+        div { id: "echo",
             h4 { "ServerFn Echo" }
             input {
                 placeholder: "Type here to echo...",
-                oninput:  move |event| async move {
+                oninput: move |event| async move {
                     let data = server::echo(event.value()).await.unwrap();
                     response.set(data);
                 },

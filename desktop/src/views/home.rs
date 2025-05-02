@@ -8,20 +8,15 @@ pub fn Home() -> Element {
     let company_id = application_context().get_company_id();
 
     rsx! {
-        div {
-            id: "Home",
+        div { id: "Home",
 
-             section {
-                id: "left-home",
-                CompanyList { }
+            section { id: "left-home",
+                CompanyList {}
                 RoleList { company_id }
                 FlagList { company_id }
             }
 
-            section {
-                id: "role-information",
-                RoleDescription { }
-            }
+            section { id: "role-information", RoleDescription {} }
         }
     }
 }

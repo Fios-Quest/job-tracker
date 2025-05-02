@@ -65,14 +65,8 @@ fn App() -> Element {
 fn DesktopNavbar() -> Element {
     rsx! {
         Navbar {
-            Link {
-                to: Route::Home {},
-                "Home"
-            }
-            Link {
-                to: Route::Blog { id: 1 },
-                "Blog"
-            }
+            Link { to: Route::Home {}, "Home" }
+            Link { to: Route::Blog { id: 1 }, "Blog" }
         }
 
         Outlet::<Route> {}
