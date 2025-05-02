@@ -8,7 +8,7 @@ pub fn Home() -> Element {
     let company_id = application_context().get_company_id();
 
     rsx! {
-        div { id: "Home",
+        div { id: "home",
 
             section { id: "left-home",
                 CompanyList {}
