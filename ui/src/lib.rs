@@ -18,6 +18,7 @@ mod role_list;
 pub use role_list::*;
 
 mod role_information;
+pub use role_information::*;
 
 mod flag_list;
 pub use flag_list::*;
