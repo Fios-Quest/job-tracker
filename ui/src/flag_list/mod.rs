@@ -11,7 +11,11 @@ use uuid::Uuid;
 #[component]
 pub fn FlagList(company_id: Option<Uuid>) -> Element {
     match company_id {
-        Some(company_id) => rsx! { PopulatedFlagList { company_id } },
-        None => rsx! { EmptyFlagList {} },
+        Some(company_id) => rsx! {
+            PopulatedFlagList { company_id }
+        },
+        None => rsx! {
+            EmptyFlagList {}
+        },
     }
 }

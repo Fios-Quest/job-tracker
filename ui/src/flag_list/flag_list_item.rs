@@ -17,9 +17,6 @@ pub fn FlagListItem(flag: Flag) -> Element {
     let id = id.to_string();
 
     rsx! {
-        li {
-            id: "flag-{id}",
-            "{flag_icon} {name}"
-        }
+        li { id: "flag-{id}", "{flag_icon} {name}" }
     }
 }

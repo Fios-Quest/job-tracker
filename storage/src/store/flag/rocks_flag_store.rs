@@ -114,6 +114,10 @@ impl Store<Flag> for RocksFlagStore {
         Ok(())
     }
 
+    async fn update(&mut self, _item: Flag) -> Result<(), StorageError> {
+        todo!()
+    }
+
     async fn delete_by_id(
         &mut self,
         id: Uuid,

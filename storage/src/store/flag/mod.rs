@@ -186,6 +186,16 @@ mod tests {
             store.create(flag_same_id).await
         );
     }
+
+    async fn test_update_flag<C: Store<Flag>>(store: &mut C) {
+        let mut flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
+        assert_eq!(store.create(flag.clone()).await, Ok(()));
+        assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
+        flag.flag_color = FlagColor::Green;
+        assert_eq!(store.update(flag.clone()).await, Ok(()));
+        assert_eq!(store.get_by_id(flag.id).await, Ok(flag));
+    }
+
     async fn test_delete_by_id<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
         assert_eq!(store.create(flag.clone()).await, Ok(()));
@@ -241,6 +251,12 @@ mod tests {
         async fn test_create_flag() {
             let mut store = StubFlagStore::new();
             super::test_create_flag(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_flag() {
+            let mut store = StubFlagStore::new();
+            super::test_update_flag(&mut store).await;
         }
 
         #[tokio::test]
@@ -323,6 +339,12 @@ mod tests {
         async fn test_create_flag() {
             let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
             super::test_create_flag(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_flag() {
+            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            super::test_update_flag(&mut store).await;
         }
 
         #[tokio::test]

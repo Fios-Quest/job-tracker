@@ -18,6 +18,7 @@ impl Store<Role> for RocksRoleStore {
                    role_id as id, \
                    company_id, \
                    name, \
+                   description, \
                    date_applied, \
                    date_deleted \
                  FROM type::table($table) \
@@ -44,6 +45,7 @@ impl Store<Role> for RocksRoleStore {
                    role_id as id, \
                    company_id, \
                    name, \
+                   description, \
                    date_applied, \
                    date_deleted \
                  FROM type::table($table) \
@@ -70,6 +72,7 @@ impl Store<Role> for RocksRoleStore {
                   role_id as id, \
                   company_id, \
                   name, \
+                  description, \
                   date_applied, \
                   date_deleted \
                 FROM type::table($table) \
@@ -98,6 +101,7 @@ impl Store<Role> for RocksRoleStore {
                  SET role_id = $id, \
                      company_id = $company_id, \
                      name = $name, \
+                     description = $description, \
                      date_applied = $date_applied, \
                      date_deleted = $date_deleted",
             )
@@ -105,6 +109,7 @@ impl Store<Role> for RocksRoleStore {
             .bind(("id", role.id))
             .bind(("company_id", role.company_id))
             .bind(("name", role.name))
+            .bind(("description", role.description))
             .bind(("date_applied", role.date_applied))
             .bind(("date_deleted", role.date_deleted))
             .await?;
@@ -112,6 +117,10 @@ impl Store<Role> for RocksRoleStore {
         response.check()?;
 
         Ok(())
+    }
+
+    async fn update(&mut self, _item: Role) -> Result<(), StorageError> {
+        todo!()
     }
 
     async fn delete_by_id(
@@ -148,6 +157,7 @@ impl RoleStore for RocksRoleStore {
                    role_id as id, \
                    company_id, \
                    name, \
+                   description, \
                    date_applied, \
                    date_deleted \
                  FROM type::table($table) \

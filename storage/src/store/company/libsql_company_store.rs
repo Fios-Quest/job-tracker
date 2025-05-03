@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 #[async_trait]
 impl HasLibSqlTable for Company {
-    async fn create_table_name(conn: &Connection) -> Result<(), StorageError> {
+    async fn migrate(conn: &Connection) -> Result<(), StorageError> {
         conn.execute(
             "CREATE TABLE IF NOT EXISTS company ( \
                      id UUID PRIMARY KEY NOT NULL, \
@@ -92,6 +92,19 @@ impl Store<Company> for LibSqlCompanyStore {
         self.conn
             .execute(
                 "INSERT INTO company (id, name, date_deleted) VALUES (?1, ?2, ?3)",
+                item.into_params(),
+            )
+            .await?;
+        Ok(())
+    }
+
+    async fn update(&mut self, item: Company) -> Result<(), StorageError> {
+        self.conn
+            .execute(
+                "UPDATE company \
+                  SET name = ?2,\
+                      date_deleted = ?3 \
+                  WHERE id = ?1",
                 item.into_params(),
             )
             .await?;

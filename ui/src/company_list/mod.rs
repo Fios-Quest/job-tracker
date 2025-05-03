@@ -3,11 +3,14 @@ mod company_list_item;
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use company_list_item::CompanyListItem;
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use storage::{Company, Stores};
 use storage::{StorageError, Store};
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
     match error {
         StorageError::NotFound => Some("No company found".to_string()),
         StorageError::AlreadyExists => Some("Company already exists".to_string()),
@@ -39,7 +42,7 @@ pub fn CompanyList() -> Element {
         }
     });
     let companies = companies_resource().unwrap_or_default();
-    let companies_list = companies.iter().cloned().map(|company| {
+    let companies_list = companies.into_iter().map(|company| {
         rsx! {
             CompanyListItem { company }
         }
@@ -66,6 +69,7 @@ pub fn CompanyList() -> Element {
                             // Reset the values to empty
                             company_name_value.set("");
                             company_name_search.set("".to_string());
+                            error_message.set(None);
 
                             // Rerun the resource
                             companies_resource.restart();
@@ -85,24 +89,28 @@ pub fn CompanyList() -> Element {
     };
 
     rsx! {
-        div {
-            id: "companies",
+        div { id: "companies",
 
             h3 { "Companies" }
 
-            input { id: "search_companies", value: company_name_search, oninput: company_search, }
-
-            ul {
-                { companies_list }
+            input {
+                id: "search_companies",
+                value: company_name_search,
+                oninput: company_search,
             }
+
+            ul { {companies_list} }
 
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
 
-            form {
-                onsubmit: create_company,
-                input { id: "add_company", name: "company_name", value: company_name_value }
+            form { onsubmit: create_company,
+                input {
+                    id: "add_company",
+                    name: "company_name",
+                    value: company_name_value,
+                }
                 input { r#type: "submit" }
             }
         }

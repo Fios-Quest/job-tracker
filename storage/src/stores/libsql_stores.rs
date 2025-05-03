@@ -13,9 +13,9 @@ impl LibSqlStores {
     pub async fn new(path_to_db: PathBuf) -> Result<Self, StorageError> {
         let conn = Builder::new_local(path_to_db).build().await?.connect()?;
 
-        Company::create_table_name(&conn).await?;
-        Role::create_table_name(&conn).await?;
-        Flag::create_table_name(&conn).await?;
+        Company::migrate(&conn).await?;
+        Role::migrate(&conn).await?;
+        Flag::migrate(&conn).await?;
 
         Ok(Self {
             company_store: LibSqlCompanyStore::new(conn.clone()),

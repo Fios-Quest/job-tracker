@@ -1,6 +1,7 @@
 use super::flag_list_item::FlagListItem;
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::str::FromStr;
 use storage::{Flag, FlagColor, FlagStore, Stores};
@@ -8,6 +9,8 @@ use storage::{StorageError, Store};
 use uuid::Uuid;
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
     match error {
         StorageError::NotFound => Some("No flag found".to_string()),
         StorageError::AlreadyExists => Some("Flag already exists".to_string()),
@@ -69,6 +72,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
                         Ok(_) => {
                             // Reset the values to empty
                             flag_name_value.set("");
+                            error_message.set(None);
 
                             // Rerun the resource
                             flags_resource.restart();
@@ -83,29 +87,26 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     };
 
     rsx! {
-        div {
-            id: "flags",
-            class: "{company_id}",
+        div { id: "flags", class: "{company_id}",
 
             h3 { "Flags" }
 
-            ul {
-                { flags_list }
-            }
+            ul { {flags_list} }
 
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
 
-            form {
-                onsubmit: create_flag,
-                select {
-                    id: "flag_color",
-                    name: "flag_color",
+            form { onsubmit: create_flag,
+                select { id: "flag_color", name: "flag_color",
                     option { value: "red", "🚩 Red" }
                     option { value: "green", "💚 Green" }
                 }
-                input { id: "add_flag", name: "flag_name", value: flag_name_value }
+                input {
+                    id: "add_flag",
+                    name: "flag_name",
+                    value: flag_name_value,
+                }
                 input { r#type: "submit" }
             }
         }
