@@ -13,6 +13,7 @@ pub fn RoleListItem(role: Role) -> Element {
                 id: id.to_string(),
                 r#type: "radio",
                 name: "role",
+                checked: false,
                 onchange: move |_| {
                     let role = current_role.clone();
                     application_context
