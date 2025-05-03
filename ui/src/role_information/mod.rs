@@ -2,6 +2,7 @@ use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
+use std::ops::Not;
 use storage::{Role, SetDescription, StorageError, Store, Stores};
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
@@ -19,6 +20,8 @@ fn PopulatedRoleDescription(role: Role) -> Element {
     let role_description = role.description.clone();
     let mut role_description_value = use_signal(|| role_description);
     let mut error_message = use_signal(|| None);
+    let mut description_changed = use_signal(|| false);
+
     tracing::info!("Update {:?}", role);
 
     let update_role = move |event: Event<FormData>| {
@@ -43,6 +46,7 @@ fn PopulatedRoleDescription(role: Role) -> Element {
                             // Reset the values to empty
                             role_description_value.set(role_description);
                             error_message.set(None);
+                            description_changed.set(false);
                         }
                         Err(e) => {
                             error_message.set(handle_storage_error(e));
@@ -58,11 +62,16 @@ fn PopulatedRoleDescription(role: Role) -> Element {
 
 
         form { onsubmit: update_role,
-            textarea { id: "role_description", name: "role_description", {role_description_value} }
+            textarea {
+                id: "role_description",
+                name: "role_description",
+                oninput: move |_| { description_changed.set(true) },
+                {role_description_value}
+            }
             if let Some(message) = error_message() {
                 ErrorMessage { message }
             }
-            input { r#type: "submit" }
+            input { r#type: "submit", disabled: description_changed.read().not() }
         }
     }
 }
