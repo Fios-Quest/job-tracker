@@ -1,6 +1,9 @@
 mod stub_company_store;
 pub use stub_company_store::StubCompanyStore;
 
+mod json_company_store;
+pub use json_company_store::JsonCompanyStore;
+
 mod rocks_company_store;
 pub use rocks_company_store::RocksCompanyStore;
 
@@ -199,6 +202,52 @@ mod tests {
         #[tokio::test]
         async fn test_delete_by_id() {
             let mut store = StubCompanyStore::new();
+            super::test_delete_by_id(&mut store).await;
+        }
+    }
+
+    mod json_company_store {
+        use crate::{JsonCompanyStore as Subject, StubCompanyStore};
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_company() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
+            super::test_create_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_company() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
+            super::test_update_company(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let stub_store = StubCompanyStore::new();
+            let mut store = Subject::new_tmp(stub_store).await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
     }

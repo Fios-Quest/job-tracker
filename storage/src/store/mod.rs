@@ -6,6 +6,7 @@ use surrealdb::engine::local::Db;
 use surrealdb::Surreal;
 use uuid::Uuid;
 
+mod json;
 mod rocks;
 mod stub;
 
@@ -47,6 +48,8 @@ pub enum StorageError {
     DeserializationError(de::value::Error),
     SurrealError(String), // Not ideal, but Surreal errors are a bit weird
     LibSqlError(String),  // LibSql errors do not implement clone or partialeq
+    TokioIoError(String),
+    SerdeJsonError(String),
 }
 
 #[derive(Clone)]
