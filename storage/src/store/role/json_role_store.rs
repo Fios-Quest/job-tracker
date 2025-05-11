@@ -5,9 +5,9 @@ use crate::StubRoleStore;
 use async_trait::async_trait;
 use uuid::Uuid;
 
-pub type JsonRoleStore = JsonStore<Role, StubRoleStore>;
+pub type JsonRoleStore = JsonStore<Role>;
 
-impl JsonStoreConstructor<Role, StubRoleStore> for JsonRoleStore {
+impl JsonStoreConstructor<Role> for JsonRoleStore {
     fn create_stub_store() -> StubRoleStore {
         StubRoleStore::new()
     }

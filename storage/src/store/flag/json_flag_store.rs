@@ -1,11 +1,11 @@
 use crate::store::json::{JsonStore, JsonStoreConstructor};
-use crate::{Flag, FlagStore, StorageError, StubFlagStore, StubStore};
+use crate::{Flag, FlagStore, StorageError, StubFlagStore};
 use async_trait::async_trait;
 use uuid::Uuid;
 
-pub type JsonFlagStore = JsonStore<Flag, StubStore<Flag>>;
+pub type JsonFlagStore = JsonStore<Flag>;
 
-impl JsonStoreConstructor<Flag, StubFlagStore> for JsonFlagStore {
+impl JsonStoreConstructor<Flag> for JsonFlagStore {
     fn create_stub_store() -> StubFlagStore {
         StubFlagStore::new()
     }

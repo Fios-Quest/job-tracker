@@ -22,24 +22,11 @@ impl From<serde_json::Error> for StorageError {
 }
 
 #[async_trait]
-pub trait JsonStoreConstructor<T, S>
-where
-    T: GetName
-        + GetId
-        + GetDeleted
-        + SetDeleted
-        + Clone
-        + Send
-        + Sync
-        + Serialize
-        + DeserializeOwned,
-    S: Store<T> + Send + Sync,
-    Self: Sized + Send + Sync,
-{
+pub trait JsonStoreConstructor<T> {
     fn create_stub_store() -> StubStore<T>;
 }
 
-pub struct JsonStore<T, S>
+pub struct JsonStore<T>
 where
     T: GetName
         + GetId
@@ -50,16 +37,13 @@ where
         + Sync
         + Serialize
         + DeserializeOwned,
-    S: Store<T> + Send + Sync,
-    Self: JsonStoreConstructor<T, S>,
 {
     base_path: PathBuf,
     pub(crate) internal_store: StubStore<T>,
     phantom_item: PhantomData<T>,
-    phantom_store: PhantomData<S>,
 }
 
-impl<T, S> JsonStore<T, S>
+impl<T> JsonStore<T>
 where
     T: GetName
         + GetId
@@ -70,8 +54,7 @@ where
         + Sync
         + Serialize
         + DeserializeOwned,
-    S: Store<T> + Send + Sync,
-    Self: JsonStoreConstructor<T, S>,
+    Self: JsonStoreConstructor<T>,
 {
     pub async fn new(base_path: PathBuf) -> Result<Self, StorageError> {
         let mut internal_store = Self::create_stub_store();
@@ -90,7 +73,6 @@ where
             base_path,
             internal_store,
             phantom_item: PhantomData,
-            phantom_store: PhantomData,
         })
     }
 
@@ -116,7 +98,7 @@ where
 }
 
 #[async_trait]
-impl<T, S> Store<T> for JsonStore<T, S>
+impl<T> Store<T> for JsonStore<T>
 where
     T: GetName
         + GetId
@@ -127,8 +109,7 @@ where
         + Sync
         + Serialize
         + DeserializeOwned,
-    S: Store<T> + Send + Sync,
-    Self: JsonStoreConstructor<T, S>,
+    Self: JsonStoreConstructor<T>,
 {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError> {
         self.internal_store.get_by_id(id).await
@@ -170,11 +151,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Company, StubCompanyStore};
+    use crate::Company;
 
     #[tokio::test]
     async fn test_create_filename() {
-        let store = JsonStore::<Company, StubCompanyStore>::new_tmp()
+        let store = JsonStore::<Company>::new_tmp()
             .await
             .expect("Could not create store");
 
