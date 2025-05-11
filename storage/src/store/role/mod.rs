@@ -1,5 +1,8 @@
 mod stub_role_store;
-pub use stub_role_store::*;
+pub use stub_role_store::StubRoleStore;
+
+mod json_role_store;
+pub use json_role_store::JsonRoleStore;
 
 mod rocks_role_store;
 pub use rocks_role_store::RocksRoleStore;
@@ -243,6 +246,52 @@ mod tests {
         #[tokio::test]
         async fn get_for_company() {
             let mut store = StubRoleStore::new();
+            super::test_get_for_company(&mut store).await;
+        }
+    }
+
+    mod json_role_store {
+        use crate::store::role::json_role_store::JsonRoleStore;
+
+        #[tokio::test]
+        async fn test_get_by_id() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_get_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_get_by_name() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_get_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_find_by_name() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_find_by_name(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_create_role() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_create(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_update_role() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_update(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn test_delete_by_id() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
+            super::test_delete_by_id(&mut store).await;
+        }
+
+        #[tokio::test]
+        async fn get_for_company() {
+            let mut store = JsonRoleStore::new_tmp().await.unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

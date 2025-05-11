@@ -21,6 +21,24 @@ impl From<serde_json::Error> for StorageError {
     }
 }
 
+#[async_trait]
+pub trait JsonStoreConstructor<T, S>
+where
+    T: GetName
+        + GetId
+        + GetDeleted
+        + SetDeleted
+        + Clone
+        + Send
+        + Sync
+        + Serialize
+        + DeserializeOwned,
+    S: Store<T> + Send + Sync,
+    Self: Sized + Send + Sync,
+{
+    fn create_stub_store() -> StubStore<T>;
+}
+
 pub struct JsonStore<T, S>
 where
     T: GetName
@@ -33,9 +51,10 @@ where
         + Serialize
         + DeserializeOwned,
     S: Store<T> + Send + Sync,
+    Self: JsonStoreConstructor<T, S>,
 {
     base_path: PathBuf,
-    internal_store: StubStore<T>,
+    pub(crate) internal_store: StubStore<T>,
     phantom_item: PhantomData<T>,
     phantom_store: PhantomData<S>,
 }
@@ -52,11 +71,10 @@ where
         + Serialize
         + DeserializeOwned,
     S: Store<T> + Send + Sync,
+    Self: JsonStoreConstructor<T, S>,
 {
-    pub async fn new(
-        base_path: PathBuf,
-        mut internal_store: StubStore<T>,
-    ) -> Result<Self, StorageError> {
+    pub async fn new(base_path: PathBuf) -> Result<Self, StorageError> {
+        let mut internal_store = Self::create_stub_store();
         create_dir_all(&base_path).await?;
         let mut dir = read_dir(&base_path).await?;
 
@@ -77,15 +95,16 @@ where
     }
 
     #[cfg(test)]
-    pub async fn new_tmp(internal_store: StubStore<T>) -> Result<Self, StorageError> {
+    pub async fn new_tmp() -> Result<Self, StorageError> {
         let mut base_path = std::env::temp_dir();
         base_path.push(Uuid::new_v4().to_string());
-        Self::new(base_path, internal_store).await
+        Self::new(base_path).await
     }
 
     pub fn create_filename(&self, data: &T) -> PathBuf {
         let mut buf = self.base_path.clone();
-        buf.push(format!("{}.json", data.get_id()));
+        buf.push(data.get_id().to_string());
+        buf.set_extension("json");
         buf
     }
 
@@ -109,6 +128,7 @@ where
         + Serialize
         + DeserializeOwned,
     S: Store<T> + Send + Sync,
+    Self: JsonStoreConstructor<T, S>,
 {
     async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError> {
         self.internal_store.get_by_id(id).await
@@ -154,7 +174,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_filename() {
-        let store = JsonStore::<Company, StubCompanyStore>::new_tmp(StubCompanyStore::new())
+        let store = JsonStore::<Company, StubCompanyStore>::new_tmp()
             .await
             .expect("Could not create store");
 
