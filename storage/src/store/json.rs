@@ -78,9 +78,8 @@ where
 
     #[cfg(test)]
     pub async fn new_tmp() -> Result<Self, StorageError> {
-        let mut base_path = std::env::temp_dir();
-        base_path.push(Uuid::new_v4().to_string());
-        Self::new(base_path).await
+        let base_path = tempdir::TempDir::new("company_test")?;
+        Self::new(base_path.into_path()).await
     }
 
     pub fn create_filename(&self, data: &T) -> PathBuf {
