@@ -201,41 +201,41 @@ mod tests {
     }
 
     mod json_company_store {
-        use crate::JsonCompanyStore as Subject;
+        use crate::JsonCompanyStore;
 
         #[tokio::test]
         async fn test_get_by_id() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_get_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_by_name() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_get_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_find_by_name() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_find_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_create_company() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_create_company(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_update_company() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_update_company(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_delete_by_id() {
-            let mut store = Subject::new_tmp().await.unwrap();
+            let mut store = JsonCompanyStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
     }
