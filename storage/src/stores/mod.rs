@@ -6,12 +6,6 @@ pub use stub_stores::*;
 mod json_stores;
 pub use json_stores::*;
 
-mod rocks_stores;
-pub use rocks_stores::*;
-
-mod libsql_stores;
-pub use libsql_stores::*;
-
 use crate::store::Store;
 
 pub trait Stores<C, R, F>

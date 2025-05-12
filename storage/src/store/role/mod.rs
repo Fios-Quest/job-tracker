@@ -4,12 +4,6 @@ pub use stub_role_store::StubRoleStore;
 mod json_role_store;
 pub use json_role_store::JsonRoleStore;
 
-mod rocks_role_store;
-pub use rocks_role_store::RocksRoleStore;
-
-pub mod libsql_role_store;
-pub use libsql_role_store::LibSqlRoleStore;
-
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{GetDescription, SetDescription, Timestamp};
@@ -292,92 +286,6 @@ mod tests {
         #[tokio::test]
         async fn get_for_company() {
             let mut store = JsonRoleStore::new_tmp().await.unwrap();
-            super::test_get_for_company(&mut store).await;
-        }
-    }
-
-    mod rocks_role_store {
-        use crate::RocksRoleStore;
-
-        #[tokio::test]
-        async fn test_get_by_id() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_get_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_by_name() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_get_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_find_by_name() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_find_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_create_role() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_create(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_by_id() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_delete_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn get_for_company() {
-            let mut store = RocksRoleStore::new_tmp().await.unwrap();
-            super::test_get_for_company(&mut store).await;
-        }
-    }
-
-    mod libsql_role_store {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_get_by_id() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_get_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_by_name() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_get_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_find_by_name() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_find_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_create_role() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_create(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_update_role() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_update(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_by_id() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
-            super::test_delete_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn get_for_company() {
-            let mut store = LibSqlRoleStore::new_tmp().await.unwrap();
             super::test_get_for_company(&mut store).await;
         }
     }

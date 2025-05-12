@@ -4,12 +4,6 @@ pub use stub_company_store::StubCompanyStore;
 mod json_company_store;
 pub use json_company_store::JsonCompanyStore;
 
-mod rocks_company_store;
-pub use rocks_company_store::RocksCompanyStore;
-
-mod libsql_company_store;
-pub use libsql_company_store::LibSqlCompanyStore;
-
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{Role, Timestamp};
 use serde::{Deserialize, Serialize};
@@ -242,80 +236,6 @@ mod tests {
         #[tokio::test]
         async fn test_delete_by_id() {
             let mut store = Subject::new_tmp().await.unwrap();
-            super::test_delete_by_id(&mut store).await;
-        }
-    }
-
-    mod rocks_company_store {
-        use crate::RocksCompanyStore;
-
-        #[tokio::test]
-        async fn test_get_by_id() {
-            let mut store = RocksCompanyStore::new_tmp().await.unwrap();
-            super::test_get_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_by_name() {
-            let mut store = RocksCompanyStore::new_tmp().await.unwrap();
-            super::test_get_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_find_by_name() {
-            let mut store = RocksCompanyStore::new_tmp().await.unwrap();
-            super::test_find_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_create_company() {
-            let mut store = RocksCompanyStore::new_tmp().await.unwrap();
-            super::test_create_company(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_by_id() {
-            let mut store = RocksCompanyStore::new_tmp().await.unwrap();
-            super::test_delete_by_id(&mut store).await;
-        }
-    }
-
-    mod libsql_company_store {
-        use crate::LibSqlStore;
-
-        #[tokio::test]
-        async fn test_get_by_id() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
-            super::test_get_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_by_name() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
-            super::test_get_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_find_by_name() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
-            super::test_find_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_create_company() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
-            super::test_create_company(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_update_company() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
-            super::test_update_company(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_by_id() {
-            let mut store = LibSqlStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
     }
