@@ -1,13 +1,10 @@
-mod stub_flag_store;
-
 use std::fmt;
+
+mod stub_flag_store;
 pub use stub_flag_store::StubFlagStore;
 
-mod rocks_flag_store;
-pub use rocks_flag_store::RocksFlagStore;
-
-mod libsql_flag_store;
-pub use libsql_flag_store::LibSqlFlagStore;
+mod json_flag_store;
+pub use json_flag_store::JsonFlagStore;
 
 use crate::store::{StorageError, Store};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
@@ -273,89 +270,48 @@ mod tests {
     }
 
     // Module for each implementation
-    mod rocks_flag_store {
-        use crate::RocksFlagStore;
+    mod json_flag_store {
+        use crate::store::flag::json_flag_store::JsonFlagStore;
 
         #[tokio::test]
         async fn test_get_by_id() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_get_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_by_name() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_get_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_find_by_name() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_find_by_name(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_create_flag() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
-            super::test_create_flag(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_delete_by_id() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
-            super::test_delete_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_for_flag() {
-            let mut store = RocksFlagStore::new_tmp().await.unwrap();
-            super::test_get_for_flag(&mut store).await;
-        }
-    }
-
-    // Module for each implementation
-    mod libsql_flag_store {
-        use super::*;
-
-        #[tokio::test]
-        async fn test_get_by_id() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
-            super::test_get_by_id(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_get_by_name() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
-            super::test_get_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_find_by_name() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
-            super::test_find_by_name(&mut store).await;
-        }
-
-        #[tokio::test]
-        async fn test_create_flag() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_create_flag(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_update_flag() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_update_flag(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_delete_by_id() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_delete_by_id(&mut store).await;
         }
 
         #[tokio::test]
         async fn test_get_for_flag() {
-            let mut store = LibSqlFlagStore::new_tmp().await.unwrap();
+            let mut store = JsonFlagStore::new_tmp().await.unwrap();
             super::test_get_for_flag(&mut store).await;
         }
     }

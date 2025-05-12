@@ -1,7 +1,6 @@
 use dioxus::prelude::*;
-use std::fs;
 use std::sync::Arc;
-use storage::{ApplicationContext, LibSqlStores};
+use storage::{ApplicationContext, JsonStores};
 use tokio::sync::Mutex;
 use ui::Navbar;
 use views::{Blog, Home};
@@ -20,26 +19,25 @@ enum Route {
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-async fn create_libsql() -> LibSqlStores {
+async fn create_stores() -> JsonStores {
     let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
         .expect("No valid home directory found!");
 
     let mut data_dir = directories.data_dir().to_path_buf();
-    fs::create_dir_all(&data_dir).expect("Couldn't create data directory!");
-
-    data_dir.push("database.db");
 
     dbg!(&data_dir);
 
-    LibSqlStores::new(data_dir)
+    data_dir.push("storage");
+
+    JsonStores::new(data_dir)
         .await
         .expect("Could not start database")
 }
 
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let libsql_stores = rt.block_on(create_libsql());
-    let stores = Arc::new(Mutex::new(libsql_stores));
+    let stores = rt.block_on(create_stores());
+    let stores = Arc::new(Mutex::new(stores));
 
     dioxus::LaunchBuilder::new()
         .with_context(stores)

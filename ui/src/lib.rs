@@ -26,5 +26,5 @@ pub use flag_list::*;
 mod error_message;
 
 #[cfg(feature = "desktop")]
-type StoreType = storage::LibSqlStores;
+type StoreType = storage::JsonStores;
 type StoreContext = Arc<Mutex<StoreType>>;

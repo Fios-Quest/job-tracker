@@ -1,13 +1,8 @@
-use ::libsql::Connection;
 use async_trait::async_trait;
 use serde::de;
-use std::marker::PhantomData;
-use surrealdb::engine::local::Db;
-use surrealdb::Surreal;
 use uuid::Uuid;
 
 mod json;
-mod rocks;
 mod stub;
 
 mod company;
@@ -19,10 +14,7 @@ pub use flag::*;
 mod role;
 pub use role::*;
 
-use crate::{GetDeleted, GetId, GetName, SetDeleted, Timestamp};
-
-mod libsql;
-pub(crate) use libsql::*;
+use crate::Timestamp;
 
 #[async_trait]
 pub trait Store<T> {
@@ -61,23 +53,6 @@ impl<T> Default for StubStore<T> {
     fn default() -> Self {
         Self { store: Vec::new() }
     }
-}
-
-#[derive(Debug, Clone)]
-pub struct RocksStore<T>
-where
-    T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
-{
-    phantom_data: PhantomData<T>,
-    db: Surreal<Db>,
-}
-
-pub struct LibSqlStore<T>
-where
-    T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
-{
-    phantom_data: PhantomData<T>,
-    conn: Connection,
 }
 
 #[cfg(test)]

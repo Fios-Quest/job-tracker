@@ -3,11 +3,8 @@ use crate::{Company, FlagStore, RoleStore};
 mod stub_stores;
 pub use stub_stores::*;
 
-mod rocks_stores;
-pub use rocks_stores::*;
-
-mod libsql_stores;
-pub use libsql_stores::*;
+mod json_stores;
+pub use json_stores::*;
 
 use crate::store::Store;
 

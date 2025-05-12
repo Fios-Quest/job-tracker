@@ -5,12 +5,10 @@ edition = "2021"
 
 [dependencies]
 async-trait = "0.1.87"
-libsql = "0.9.1"
-surrealdb = { version = "2.2.1", features = ["kv-rocksdb"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-tokio = { version = "1.45.0", features = ["fs"] }
-uuid = { version = "1.15.1", features = ["v4"] }
+tokio = { version = "1.45.0", features = ["fs", "sync", "rt-multi-thread"] }
+uuid = { version = "1.15.1", features = ["v4", "serde"] }
 
 [dev-dependencies]
 tempdir = "0.3.7"
