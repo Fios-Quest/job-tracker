@@ -125,14 +125,14 @@ where
     }
 
     async fn create(&mut self, item: &T) -> Result<(), StorageError> {
-        self.internal_store.create(&item).await?;
-        self.write_file(&item).await?;
+        self.internal_store.create(item).await?;
+        self.write_file(item).await?;
         Ok(())
     }
 
     async fn update(&mut self, item: &T) -> Result<(), StorageError> {
-        self.internal_store.update(&item).await?;
-        self.write_file(&item).await?;
+        self.internal_store.update(item).await?;
+        self.write_file(item).await?;
         Ok(())
     }
 
