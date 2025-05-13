@@ -148,12 +148,9 @@ mod tests {
         assert_eq!(store.create(storable.clone()).await, Ok(()));
         assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
 
-        // Should not be able to store an item with the same name
+        // Should be able to store an item with the same name
         let storable_same_name = TestStorable::new("Test".to_string());
-        assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(storable_same_name).await
-        );
+        assert!(store.create(storable_same_name).await.is_ok());
 
         // Should not be able to store an item with the same id
         let storable_same_id = TestStorable {

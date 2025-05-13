@@ -166,12 +166,9 @@ mod tests {
         assert_eq!(store.create(flag.clone()).await, Ok(()));
         assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
 
-        // Should not be able to store a flag with the same name
+        // Should be able to store a flag with the same name
         let flag_same_name = Flag::new_red(Uuid::new_v4(), "Test".to_string());
-        assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(flag_same_name).await
-        );
+        assert!(store.create(flag_same_name).await.is_ok());
 
         // Should not be able to store a flag with the same id
         let flag_same_id = Flag {

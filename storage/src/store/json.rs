@@ -123,8 +123,8 @@ where
     }
 
     async fn create(&mut self, item: T) -> Result<(), StorageError> {
+        self.internal_store.create(item.clone()).await?;
         self.write_file(&item).await?;
-        self.internal_store.create(item).await?;
         Ok(())
     }
 

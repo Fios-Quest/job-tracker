@@ -46,9 +46,7 @@ where
 
     async fn create(&mut self, item: T) -> Result<(), StorageError> {
         // Todo: join these futures
-        if self.get_by_name(item.get_name()).await.is_ok()
-            || self.get_by_id(item.get_id()).await.is_ok()
-        {
+        if self.get_by_id(item.get_id()).await.is_ok() {
             return Err(StorageError::AlreadyExists);
         }
         self.store.push(item);
