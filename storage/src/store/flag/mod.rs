@@ -119,7 +119,7 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_green(Uuid::new_v4(), "Test".to_string());
-        assert_eq!(store.create(flag.clone()).await, Ok(()));
+        assert!(store.create(&flag).await.is_ok());
 
         assert_eq!(flag.id, store.get_by_id(flag.id).await.unwrap().id);
     }
@@ -127,21 +127,21 @@ mod tests {
     async fn test_get_by_name<C: Store<Flag>>(store: &mut C) {
         let name = "Test";
         let flag = Flag::new_red(Uuid::new_v4(), name.to_string());
-        assert_eq!(store.create(flag).await, Ok(()));
+        assert!(store.create(&flag).await.is_ok());
 
         // Test can be found
-        assert_eq!(name, store.get_by_name(name).await.unwrap().name);
+        assert_eq!(store.get_by_name(name).await.unwrap().name, name);
         // Test no partial match
         assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_name(&name[..1]).await
+            store.get_by_name(&name[..1]).await,
+            Err(StorageError::NotFound)
         );
     }
 
     async fn test_find_by_name<C: Store<Flag>>(store: &mut C) {
         let name = "Test";
         let t_flag = Flag::new_red(Uuid::new_v4(), name.to_string());
-        assert_eq!(store.create(t_flag.clone()).await, Ok(()));
+        assert!(store.create(&t_flag).await.is_ok());
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
@@ -151,8 +151,8 @@ mod tests {
         // It should return all companies when search string is empty
         let a_flag = Flag::new_green(Uuid::new_v4(), "Another flag".to_string());
         let y_flag = Flag::new_green(Uuid::new_v4(), "Yet Another flag".to_string());
-        assert_eq!(store.create(a_flag.clone()).await, Ok(()));
-        assert_eq!(store.create(y_flag.clone()).await, Ok(()));
+        assert!(store.create(&a_flag).await.is_ok());
+        assert!(store.create(&y_flag).await.is_ok());
         assert_eq!(
             store.find_by_name("").await,
             Ok(vec![a_flag, t_flag, y_flag])
@@ -163,12 +163,12 @@ mod tests {
         let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
 
         // Should be able to create the flag once
-        assert_eq!(store.create(flag.clone()).await, Ok(()));
-        assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
+        assert!(store.create(&flag).await.is_ok());
+        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
 
         // Should be able to store a flag with the same name
         let flag_same_name = Flag::new_red(Uuid::new_v4(), "Test".to_string());
-        assert!(store.create(flag_same_name).await.is_ok());
+        assert!(store.create(&flag_same_name).await.is_ok());
 
         // Should not be able to store a flag with the same id
         let flag_same_id = Flag {
@@ -176,25 +176,25 @@ mod tests {
             ..flag
         };
         assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(flag_same_id).await
+            store.create(&flag_same_id).await,
+            Err(StorageError::AlreadyExists)
         );
     }
 
     async fn test_update_flag<C: Store<Flag>>(store: &mut C) {
         let mut flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
-        assert_eq!(store.create(flag.clone()).await, Ok(()));
-        assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
+        assert!(store.create(&flag).await.is_ok());
+        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
         flag.flag_color = FlagColor::Green;
-        assert_eq!(store.update(flag.clone()).await, Ok(()));
-        assert_eq!(store.get_by_id(flag.id).await, Ok(flag));
+        assert!(store.update(&flag).await.is_ok());
+        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
     }
 
     async fn test_delete_by_id<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
-        assert_eq!(store.create(flag.clone()).await, Ok(()));
-        assert_eq!(Ok(flag.clone()), store.get_by_id(flag.id).await);
-        assert_eq!(store.delete_by_id(flag.id, Timestamp::now()).await, Ok(()));
+        assert!(store.create(&flag).await.is_ok());
+        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
+        assert!(store.delete_by_id(flag.id, Timestamp::now()).await.is_ok());
         assert_eq!(Err(StorageError::NotFound), store.get_by_id(flag.id).await);
     }
 
@@ -205,17 +205,17 @@ mod tests {
         let flag2 = Flag::new_green(company1, "Test 2".to_string());
         let flag3 = Flag::new_red(company2, "Test 3".to_string());
         let flag4 = Flag::new_green(company2, "Test 4".to_string());
-        assert_eq!(store.create(flag1.clone()).await, Ok(()));
-        assert_eq!(store.create(flag2.clone()).await, Ok(()));
-        assert_eq!(store.create(flag3.clone()).await, Ok(()));
-        assert_eq!(store.create(flag4.clone()).await, Ok(()));
+        assert!(store.create(&flag1).await.is_ok());
+        assert!(store.create(&flag2).await.is_ok());
+        assert!(store.create(&flag3).await.is_ok());
+        assert!(store.create(&flag4).await.is_ok());
         assert_eq!(
-            Ok(vec![flag1, flag2]),
-            store.get_for_company(company1).await
+            store.get_for_company(company1).await,
+            Ok(vec![flag1, flag2])
         );
         assert_eq!(
-            Ok(vec![flag3, flag4]),
-            store.get_for_company(company2).await
+            store.get_for_company(company2).await,
+            Ok(vec![flag3, flag4])
         );
     }
 

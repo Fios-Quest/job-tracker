@@ -61,7 +61,7 @@ pub fn CompanyList() -> Element {
                     let mut stores_lock = stores.lock().await;
                     let store_result = stores_lock
                         .company_store()
-                        .create(Company::new(company_name))
+                        .create(&Company::new(company_name))
                         .await;
 
                     match store_result {

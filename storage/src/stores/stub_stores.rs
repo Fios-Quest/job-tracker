@@ -40,11 +40,7 @@ mod tests {
         let mut stores = StubStores::new();
 
         let company = Company::new("Test Company".to_string());
-        stores
-            .company_store()
-            .create(company.clone())
-            .await
-            .unwrap();
+        stores.company_store().create(&company).await.unwrap();
         assert_eq!(
             stores
                 .company_store()
@@ -60,7 +56,7 @@ mod tests {
         let mut stores = StubStores::new();
 
         let role = Role::new(Uuid::new_v4(), "Test Role".to_string(), Timestamp::now());
-        stores.role_store().create(role.clone()).await.unwrap();
+        stores.role_store().create(&role).await.unwrap();
         assert_eq!(
             stores.role_store().get_by_id(role.get_id()).await.unwrap(),
             role
@@ -72,7 +68,7 @@ mod tests {
         let mut stores = StubStores::new();
 
         let flag = Flag::new_green(Uuid::new_v4(), "Test Flag".to_string());
-        stores.flag_store().create(flag.clone()).await.unwrap();
+        stores.flag_store().create(&flag).await.unwrap();
         assert_eq!(
             stores.flag_store().get_by_id(flag.get_id()).await.unwrap(),
             flag

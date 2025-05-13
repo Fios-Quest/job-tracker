@@ -88,7 +88,7 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert_eq!(store.create(role.clone()).await, Ok(()));
+        assert!(store.create(&role).await.is_ok());
 
         assert_eq!(role.id, store.get_by_id(role.id).await.unwrap().id);
     }
@@ -96,20 +96,20 @@ mod tests {
     async fn test_get_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
         let role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
-        assert_eq!(store.create(role).await, Ok(()));
+        assert!(store.create(&role).await.is_ok());
 
         // Test can be found
-        assert_eq!(name, store.get_by_name(name).await.unwrap().name);
+        assert_eq!(store.get_by_name(name).await.unwrap().name, name);
         // Test no partial match
         assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_name(&name[..1]).await
+            store.get_by_name(&name[..1]).await,
+            Err(StorageError::NotFound)
         );
     }
     async fn test_find_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
         let t_role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
-        assert_eq!(store.create(t_role.clone()).await, Ok(()));
+        assert!(store.create(&t_role).await.is_ok());
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
@@ -123,8 +123,8 @@ mod tests {
             "Yet Another role".to_string(),
             Timestamp::now(),
         );
-        assert_eq!(store.create(a_role.clone()).await, Ok(()));
-        assert_eq!(store.create(y_role.clone()).await, Ok(()));
+        assert!(store.create(&a_role).await.is_ok());
+        assert!(store.create(&y_role).await.is_ok());
         assert_eq!(
             store.find_by_name("").await,
             Ok(vec![a_role, t_role, y_role])
@@ -134,12 +134,12 @@ mod tests {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
 
         // Should be able to create the role once
-        assert_eq!(store.create(role.clone()).await, Ok(()));
-        assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
+        assert!(store.create(&role).await.is_ok());
+        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
 
         // Should be able to store a role with the same name
         let role_same_name = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert!(store.create(role_same_name).await.is_ok());
+        assert!(store.create(&role_same_name).await.is_ok());
 
         // Should not be able to store a role with the same id
         let role_same_id = Role {
@@ -152,24 +152,24 @@ mod tests {
         };
         assert_eq!(
             Err(StorageError::AlreadyExists),
-            store.create(role_same_id).await
+            store.create(&role_same_id).await
         );
     }
 
     async fn test_update<C: Store<Role>>(store: &mut C) {
         let mut role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert_eq!(store.create(role.clone()).await, Ok(()));
-        assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
+        assert!(store.create(&role).await.is_ok());
+        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
         role.description = "This is a description".to_string();
-        assert_eq!(store.update(role.clone()).await, Ok(()));
+        assert!(store.update(&role).await.is_ok());
         assert_eq!(store.get_by_id(role.id).await, Ok(role));
     }
 
     async fn test_delete_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert_eq!(store.create(role.clone()).await, Ok(()));
-        assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
-        assert_eq!(store.delete_by_id(role.id, Timestamp::now()).await, Ok(()));
+        assert!(store.create(&role).await.is_ok());
+        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
+        assert!(store.delete_by_id(role.id, Timestamp::now()).await.is_ok());
         assert_eq!(Err(StorageError::NotFound), store.get_by_id(role.id).await);
     }
 
@@ -180,10 +180,10 @@ mod tests {
         let role2 = Role::new(company1, "Test 2".to_string(), Timestamp::now());
         let role3 = Role::new(company2, "Test 3".to_string(), Timestamp::now());
         let role4 = Role::new(company2, "Test 4".to_string(), Timestamp::now());
-        assert_eq!(store.create(role1.clone()).await, Ok(()));
-        assert_eq!(store.create(role2.clone()).await, Ok(()));
-        assert_eq!(store.create(role3.clone()).await, Ok(()));
-        assert_eq!(store.create(role4.clone()).await, Ok(()));
+        assert!(store.create(&role1).await.is_ok());
+        assert!(store.create(&role2).await.is_ok());
+        assert!(store.create(&role3).await.is_ok());
+        assert!(store.create(&role4).await.is_ok());
         assert_eq!(
             Ok(vec![role1, role2]),
             store.get_for_company(company1).await

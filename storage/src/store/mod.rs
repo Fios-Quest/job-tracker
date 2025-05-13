@@ -24,9 +24,9 @@ pub trait Store<T> {
 
     async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError>;
 
-    async fn create(&mut self, item: T) -> Result<(), StorageError>;
+    async fn create(&mut self, item: &T) -> Result<(), StorageError>;
 
-    async fn update(&mut self, item: T) -> Result<(), StorageError>;
+    async fn update(&mut self, item: &T) -> Result<(), StorageError>;
 
     async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
         -> Result<(), StorageError>;
@@ -105,7 +105,7 @@ mod tests {
     async fn test_get_by_id() {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
-        assert_eq!(store.create(storable.clone()).await, Ok(()));
+        assert!(store.create(&storable).await.is_ok());
 
         assert_eq!(storable.id, store.get_by_id(storable.id).await.unwrap().id);
     }
@@ -115,7 +115,7 @@ mod tests {
         let mut store = StubStore::new();
         let name = "Test";
         let storable = TestStorable::new(name.to_string());
-        assert_eq!(store.create(storable).await, Ok(()));
+        assert!(store.create(&storable).await.is_ok());
 
         // Test can be found
         assert_eq!(name, store.get_by_name(name).await.unwrap().name);
@@ -131,7 +131,7 @@ mod tests {
         let mut store = StubStore::new();
         let name = "Test";
         let storable = TestStorable::new(name.to_string());
-        assert_eq!(store.create(storable).await, Ok(()));
+        assert!(store.create(&storable).await.is_ok());
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
@@ -145,12 +145,12 @@ mod tests {
         let storable = TestStorable::new("Test".to_string());
 
         // Should be able to create the item once
-        assert_eq!(store.create(storable.clone()).await, Ok(()));
-        assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
+        assert!(store.create(&storable).await.is_ok());
+        assert_eq!(store.get_by_id(storable.id).await.as_ref(), Ok(&storable));
 
         // Should be able to store an item with the same name
         let storable_same_name = TestStorable::new("Test".to_string());
-        assert!(store.create(storable_same_name).await.is_ok());
+        assert!(store.create(&storable_same_name).await.is_ok());
 
         // Should not be able to store an item with the same id
         let storable_same_id = TestStorable {
@@ -159,8 +159,8 @@ mod tests {
             date_deleted: None,
         };
         assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(storable_same_id).await
+            store.create(&storable_same_id).await,
+            Err(StorageError::AlreadyExists)
         );
     }
 
@@ -168,12 +168,12 @@ mod tests {
     async fn test_delete_by_id() {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
-        assert_eq!(store.create(storable.clone()).await, Ok(()));
-        assert_eq!(Ok(storable.clone()), store.get_by_id(storable.id).await);
-        assert_eq!(
-            store.delete_by_id(storable.id, Timestamp::now()).await,
-            Ok(())
-        );
+        assert!(store.create(&storable).await.is_ok());
+        assert_eq!(store.get_by_id(storable.id).await.as_ref(), Ok(&storable));
+        assert!(store
+            .delete_by_id(storable.id, Timestamp::now())
+            .await
+            .is_ok());
         assert_eq!(
             Err(StorageError::NotFound),
             store.get_by_id(storable.id).await

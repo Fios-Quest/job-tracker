@@ -39,7 +39,7 @@ fn PopulatedRoleDescription(role: Role) -> Element {
 
                     role.set_description(role_description.clone());
                     tracing::info!("Role set to {:?}", role);
-                    let result = stores_lock.role_store().update(role).await;
+                    let result = stores_lock.role_store().update(&role).await;
 
                     match result {
                         Ok(_) => {
