@@ -66,7 +66,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
                         FlagColor::Red => Flag::new_red(company_id, flag_name),
                     };
 
-                    let result = stores_lock.flag_store().create(flag).await;
+                    let result = stores_lock.flag_store().create(&flag).await;
 
                     match result {
                         Ok(_) => {

@@ -64,8 +64,10 @@ where
         while let Some(entry) = dir.next_entry().await? {
             if entry.path().is_file() && entry.path().extension() == Some(OsStr::new("json")) {
                 let file_date = read(&entry.path()).await?;
+                // ToDo: Could create a From<AsRef<T>> for some borrowed form of T to avoid double
+                //       alloc caused by StubStore in this one case
                 let item: T = serde_json::from_slice(&file_date)?;
-                internal_store.create(item).await?;
+                internal_store.create(&item).await?;
             }
         }
 
@@ -122,15 +124,15 @@ where
         self.internal_store.find_by_name(name).await
     }
 
-    async fn create(&mut self, item: T) -> Result<(), StorageError> {
-        self.internal_store.create(item.clone()).await?;
+    async fn create(&mut self, item: &T) -> Result<(), StorageError> {
+        self.internal_store.create(&item).await?;
         self.write_file(&item).await?;
         Ok(())
     }
 
-    async fn update(&mut self, item: T) -> Result<(), StorageError> {
+    async fn update(&mut self, item: &T) -> Result<(), StorageError> {
+        self.internal_store.update(&item).await?;
         self.write_file(&item).await?;
-        self.internal_store.update(item).await?;
         Ok(())
     }
 

@@ -44,23 +44,23 @@ where
         Ok(results)
     }
 
-    async fn create(&mut self, item: T) -> Result<(), StorageError> {
+    async fn create(&mut self, item: &T) -> Result<(), StorageError> {
         // Todo: join these futures
         if self.get_by_id(item.get_id()).await.is_ok() {
             return Err(StorageError::AlreadyExists);
         }
-        self.store.push(item);
+        self.store.push(item.clone());
         Ok(())
     }
 
-    async fn update(&mut self, item: T) -> Result<(), StorageError> {
+    async fn update(&mut self, item: &T) -> Result<(), StorageError> {
         let role = self
             .store
             .iter_mut()
             .find(|role| role.get_id() == item.get_id())
             .ok_or(StorageError::NotFound)?;
 
-        *role = item;
+        *role = item.clone();
 
         Ok(())
     }

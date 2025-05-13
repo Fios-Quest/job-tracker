@@ -57,7 +57,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
                     let mut stores_lock = stores.lock().await;
                     let result = stores_lock
                         .role_store()
-                        .create(Role::new(company_id, role_name, Timestamp::now()))
+                        .create(&Role::new(company_id, role_name, Timestamp::now()))
                         .await;
 
                     match result {

@@ -68,7 +68,7 @@ mod tests {
     // Reusable test functions
     async fn test_get_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
-        assert_eq!(store.create(company.clone()).await, Ok(()));
+        assert!(store.create(&company).await.is_ok());
 
         assert_eq!(store.get_by_id(company.id).await.unwrap().id, company.id);
     }
@@ -76,7 +76,7 @@ mod tests {
     async fn test_get_by_name<C: Store<Company>>(store: &mut C) {
         let name = "Test";
         let company = Company::new(name.to_string());
-        assert_eq!(store.create(company).await, Ok(()));
+        assert!(store.create(&company).await.is_ok());
 
         // Test can be found
         let result = store.get_by_name(name).await;
@@ -92,7 +92,7 @@ mod tests {
     async fn test_find_by_name<C: Store<Company>>(store: &mut C) {
         let name = "Test";
         let t_company = Company::new(name.to_string());
-        assert_eq!(store.create(t_company.clone()).await, Ok(()));
+        assert!(store.create(&t_company).await.is_ok());
 
         // Test can be found with exact match
         assert!(!store.find_by_name(name).await.unwrap().is_empty());
@@ -102,8 +102,8 @@ mod tests {
         // It should return all companies when search string is empty
         let a_company = Company::new("Another company".to_string());
         let y_company = Company::new("Yet Another company".to_string());
-        assert_eq!(store.create(a_company.clone()).await, Ok(()));
-        assert_eq!(store.create(y_company.clone()).await, Ok(()));
+        assert!(store.create(&a_company).await.is_ok());
+        assert!(store.create(&y_company).await.is_ok());
         assert_eq!(
             store.find_by_name("").await,
             Ok(vec![a_company, t_company, y_company])
@@ -114,12 +114,12 @@ mod tests {
         let company = Company::new("Test".to_string());
 
         // Should be able to create the company once
-        assert_eq!(store.create(company.clone()).await, Ok(()));
-        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
+        assert!(store.create(&company).await.is_ok());
+        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
 
         // Should be able to store a company with the same name
         let company_same_name = Company::new("Test".to_string());
-        assert!(store.create(company_same_name).await.is_ok(),);
+        assert!(store.create(&company_same_name).await.is_ok());
 
         // Should not be able to store a company with the same id
         let company_same_id = Company {
@@ -128,28 +128,28 @@ mod tests {
             date_deleted: None,
         };
         assert_eq!(
-            store.create(company_same_id).await,
+            store.create(&company_same_id).await,
             Err(StorageError::AlreadyExists)
         );
     }
 
     async fn test_update_company<C: Store<Company>>(store: &mut C) {
         let mut company = Company::new("Test".to_string());
-        assert_eq!(store.create(company.clone()).await, Ok(()));
-        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
+        assert!(store.create(&company).await.is_ok());
+        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
         company.name = "Updated Name".to_string();
-        assert_eq!(store.update(company.clone()).await, Ok(()));
+        assert!(store.update(&company).await.is_ok());
         assert_eq!(store.get_by_id(company.id).await, Ok(company));
     }
 
     async fn test_delete_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
-        assert_eq!(store.create(company.clone()).await, Ok(()));
-        assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
-        assert_eq!(
-            store.delete_by_id(company.id, Timestamp::now()).await,
-            Ok(())
-        );
+        assert!(store.create(&company).await.is_ok());
+        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
+        assert!(store
+            .delete_by_id(company.id, Timestamp::now())
+            .await
+            .is_ok());
         assert_eq!(
             store.get_by_id(company.id).await,
             Err(StorageError::NotFound)
