@@ -137,12 +137,9 @@ mod tests {
         assert_eq!(store.create(role.clone()).await, Ok(()));
         assert_eq!(Ok(role.clone()), store.get_by_id(role.id).await);
 
-        // Should not be able to store a role with the same name
+        // Should be able to store a role with the same name
         let role_same_name = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
-        assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(role_same_name).await
-        );
+        assert!(store.create(role_same_name).await.is_ok());
 
         // Should not be able to store a role with the same id
         let role_same_id = Role {

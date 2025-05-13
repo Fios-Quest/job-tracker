@@ -117,12 +117,9 @@ mod tests {
         assert_eq!(store.create(company.clone()).await, Ok(()));
         assert_eq!(store.get_by_id(company.id).await, Ok(company.clone()));
 
-        // Should not be able to store a company with the same name
+        // Should be able to store a company with the same name
         let company_same_name = Company::new("Test".to_string());
-        assert_eq!(
-            store.create(company_same_name).await,
-            Err(StorageError::AlreadyExists)
-        );
+        assert!(store.create(company_same_name).await.is_ok(),);
 
         // Should not be able to store a company with the same id
         let company_same_id = Company {
