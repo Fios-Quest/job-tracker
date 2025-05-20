@@ -23,6 +23,9 @@ pub use role_information::*;
 mod flag_list;
 pub use flag_list::*;
 
+mod editable;
+pub use editable::*;
+
 mod error_message;
 
 #[cfg(feature = "desktop")]

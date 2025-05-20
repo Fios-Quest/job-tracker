@@ -52,10 +52,9 @@ pub fn CompanyList() -> Element {
     let create_company = move |event: Event<FormData>| {
         let stores = stores.clone();
         error_message.set(None);
+        let company_name = event.values().get("company_name").map(|v| v.as_value());
 
         async move {
-            let company_name = event.values().get("company_name").map(|v| v.as_value());
-
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
