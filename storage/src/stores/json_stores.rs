@@ -1,4 +1,5 @@
-use crate::{JsonCompanyStore, JsonFlagStore, JsonRoleStore, StorageError, Stores};
+use crate::error::StorageError;
+use crate::{JsonCompanyStore, JsonFlagStore, JsonRoleStore, Stores};
 use std::path::PathBuf;
 
 pub struct JsonStores {

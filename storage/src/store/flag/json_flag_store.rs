@@ -1,5 +1,6 @@
+use crate::error::StorageError;
 use crate::store::json::{JsonStore, JsonStoreConstructor};
-use crate::{Flag, FlagStore, StorageError, StubFlagStore};
+use crate::{Flag, FlagStore, StubFlagStore};
 use async_trait::async_trait;
 use uuid::Uuid;
 

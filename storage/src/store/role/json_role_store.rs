@@ -1,6 +1,6 @@
 use super::{Role, RoleStore};
+use crate::error::StorageError;
 use crate::store::json::{JsonStore, JsonStoreConstructor};
-use crate::store::StorageError;
 use crate::StubRoleStore;
 use async_trait::async_trait;
 use uuid::Uuid;

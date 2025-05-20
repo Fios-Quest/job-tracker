@@ -1,5 +1,5 @@
 use super::{Flag, FlagStore};
-use crate::store::StorageError;
+use crate::error::StorageError;
 use crate::store::StubStore;
 use async_trait::async_trait;
 use uuid::Uuid;

@@ -6,7 +6,8 @@ pub use stub_flag_store::StubFlagStore;
 mod json_flag_store;
 pub use json_flag_store::JsonFlagStore;
 
-use crate::store::{StorageError, Store};
+use crate::error::StorageError;
+use crate::store::Store;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::Timestamp;
 use async_trait::async_trait;
@@ -132,10 +133,11 @@ mod tests {
         // Test can be found
         assert_eq!(store.get_by_name(name).await.unwrap().name, name);
         // Test no partial match
-        assert_eq!(
-            store.get_by_name(&name[..1]).await,
-            Err(StorageError::NotFound)
-        );
+        assert!(store
+            .get_by_name(&name[..1])
+            .await
+            .expect_err("Should not be found")
+            .is_not_found());
     }
 
     async fn test_find_by_name<C: Store<Flag>>(store: &mut C) {
@@ -154,8 +156,8 @@ mod tests {
         assert!(store.create(&a_flag).await.is_ok());
         assert!(store.create(&y_flag).await.is_ok());
         assert_eq!(
-            store.find_by_name("").await,
-            Ok(vec![a_flag, t_flag, y_flag])
+            store.find_by_name("").await.expect("Should find all items"),
+            vec![a_flag, t_flag, y_flag]
         );
     }
 
@@ -164,7 +166,10 @@ mod tests {
 
         // Should be able to create the flag once
         assert!(store.create(&flag).await.is_ok());
-        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
+        assert_eq!(
+            store.get_by_id(flag.id).await.expect("Should be created"),
+            flag
+        );
 
         // Should be able to store a flag with the same name
         let flag_same_name = Flag::new_red(Uuid::new_v4(), "Test".to_string());
@@ -175,27 +180,41 @@ mod tests {
             name: "Test".to_string(),
             ..flag
         };
-        assert_eq!(
-            store.create(&flag_same_id).await,
-            Err(StorageError::AlreadyExists)
-        );
+        assert!(store
+            .create(&flag_same_id)
+            .await
+            .expect_err("Should already exist")
+            .is_already_exists());
     }
 
     async fn test_update_flag<C: Store<Flag>>(store: &mut C) {
         let mut flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
         assert!(store.create(&flag).await.is_ok());
-        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
+        assert_eq!(
+            store.get_by_id(flag.id).await.expect("should be created"),
+            flag
+        );
         flag.flag_color = FlagColor::Green;
         assert!(store.update(&flag).await.is_ok());
-        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
+        assert_eq!(
+            store.get_by_id(flag.id).await.expect("should be updated"),
+            flag
+        );
     }
 
     async fn test_delete_by_id<C: Store<Flag>>(store: &mut C) {
         let flag = Flag::new_red(Uuid::new_v4(), "Test".to_string());
         assert!(store.create(&flag).await.is_ok());
-        assert_eq!(store.get_by_id(flag.id).await.as_ref(), Ok(&flag));
+        assert_eq!(
+            store.get_by_id(flag.id).await.expect("should be created"),
+            flag
+        );
         assert!(store.delete_by_id(flag.id, Timestamp::now()).await.is_ok());
-        assert_eq!(Err(StorageError::NotFound), store.get_by_id(flag.id).await);
+        assert!(store
+            .get_by_id(flag.id)
+            .await
+            .expect_err("Should not exist")
+            .is_not_found());
     }
 
     async fn test_get_for_flag<C: FlagStore>(store: &mut C) {
@@ -210,12 +229,18 @@ mod tests {
         assert!(store.create(&flag3).await.is_ok());
         assert!(store.create(&flag4).await.is_ok());
         assert_eq!(
-            store.get_for_company(company1).await,
-            Ok(vec![flag1, flag2])
+            store
+                .get_for_company(company1)
+                .await
+                .expect("Should be created"),
+            vec![flag1, flag2]
         );
         assert_eq!(
-            store.get_for_company(company2).await,
-            Ok(vec![flag3, flag4])
+            store
+                .get_for_company(company2)
+                .await
+                .expect("Should be created"),
+            vec![flag3, flag4]
         );
     }
 

@@ -3,7 +3,8 @@ use crate::StoreContext;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::ops::Not;
-use storage::{Role, SetDescription, StorageError, Store, Stores};
+use storage::StorageError;
+use storage::{Role, SetDescription, Store, Stores};
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
     tracing::error!("Role Storage Error: {:?}", error);

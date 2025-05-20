@@ -1,4 +1,5 @@
-use crate::{GetDeleted, GetId, GetName, SetDeleted, StorageError, Store, StubStore, Timestamp};
+use crate::error::StorageError;
+use crate::{GetDeleted, GetId, GetName, SetDeleted, Store, StubStore, Timestamp};
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -8,18 +9,6 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 use tokio::fs::{create_dir_all, read, read_dir};
 use uuid::Uuid;
-
-impl From<tokio::io::Error> for StorageError {
-    fn from(err: tokio::io::Error) -> Self {
-        Self::TokioIoError(err.to_string())
-    }
-}
-
-impl From<serde_json::Error> for StorageError {
-    fn from(err: serde_json::Error) -> Self {
-        Self::SerdeJsonError(err.to_string())
-    }
-}
 
 #[async_trait]
 pub trait JsonStoreConstructor<T> {

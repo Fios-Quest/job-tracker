@@ -1,4 +1,5 @@
-use crate::store::{StorageError, Store, StubStore};
+use crate::error::StorageError;
+use crate::store::{Store, StubStore};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{utils, Timestamp};
 use async_trait::async_trait;

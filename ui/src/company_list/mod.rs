@@ -5,8 +5,9 @@ use crate::StoreContext;
 use company_list_item::CompanyListItem;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
+use storage::StorageError;
+use storage::Store;
 use storage::{Company, Stores};
-use storage::{StorageError, Store};
 
 fn handle_storage_error(error: StorageError) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
