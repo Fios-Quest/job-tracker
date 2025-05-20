@@ -4,9 +4,10 @@ use dioxus::prelude::*;
 use storage::{ApplicationContext, Role, Store, Stores};
 
 #[component]
-pub fn RoleListItem(role: Role) -> Element {
+pub fn RoleListItem(role: Role, roles_resource: Resource<Vec<Role>>) -> Element {
     let mut application_context = use_context::<Signal<ApplicationContext>>();
     let stores = use_context::<StoreContext>();
+    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let Role { id, name, .. } = role.clone();
 
@@ -30,11 +31,11 @@ pub fn RoleListItem(role: Role) -> Element {
     };
 
     let role_clone = role.clone();
-    let update_role = move |event: Event<FormData>| {
+    if let Some(event) = form_receiver() {
         let stores = stores.clone();
         let role = role_clone.clone();
         let role_name = event.values().get("role_name").map(|v| v.as_value());
-        async move {
+        spawn(async move {
             if let Some(name) = role_name {
                 if !name.is_empty() {
                     let role = Role { name, ..role };
@@ -43,26 +44,29 @@ pub fn RoleListItem(role: Role) -> Element {
                         .role_store()
                         .update(&role)
                         .await;
+                    roles_resource.restart();
+                    form_receiver.set(None);
                 }
             }
-        }
-    };
+        });
+    }
 
-    let edit_form = rsx! {
-        form { onsubmit: update_role,
-            id: "role-input-{id}",
-            input {
-                id: id.to_string(),
-                r#type: "text",
-                name: "role_name",
-                value: name,
-            }
+    let editable = rsx! {
+        input {
+            id: id.to_string(),
+            r#type: "text",
+            name: "role_name",
+            value: name,
         }
     };
 
     rsx! {
         li { key: id,
-            Editable { display, edit_form, form_id: "role-input-{id}" }
+            if form_receiver().is_none() {
+                Editable { display, editable, form_receiver }
+            } else {
+                "pending"
+            }
         }
     }
 }

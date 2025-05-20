@@ -1,33 +1,37 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn Editable(display: Element, edit_form: Element, form_id: String) -> Element {
+pub fn Editable(
+    display: Element,
+    editable: Element,
+    form_receiver: Signal<Option<Event<FormData>>>,
+) -> Element {
     let mut is_editable = use_signal(|| false);
 
     rsx! {
         div { class: "editable",
             if is_editable() {
-                {edit_form}
-                " "
-                button {
-                    class: "button commit",
-                    type: "submit",
-                    form: form_id,
-                    onclick: move |_| is_editable.set(false),
-                    "✅"
-                }
-                a {
-                    class: "button undo",
-                    href: "#",
-                    onclick: move |_| is_editable.set(false),
-                    "❌"
+                form {
+                    onsubmit: move |e| {
+                        form_receiver.set(Some(e));
+                        is_editable.set(false);
+                    },
+                    {editable}
+                    " "
+                    button { class: "button commit", r#type: "submit", "✅" }
+                    button {
+                        class: "button undo",
+                        r#type: "button",
+                        onclick: move |_| is_editable.set(false),
+                        "❌"
+                    }
                 }
             } else {
                 {display}
                 " "
-                a {
-                    class: "button edit",
-                    href: "#",
+                button {
+                    class: "edit",
+                    r#type: "button",
                     onclick: move |_| is_editable.set(true),
                     "🖋️"
                 }

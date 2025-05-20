@@ -43,7 +43,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     let roles = roles_resource().unwrap_or_default();
     let roles_list = roles.into_iter().map(|role| {
         rsx! {
-            RoleListItem { role }
+            RoleListItem { role, roles_resource }
         }
     });
 
