@@ -1,3 +1,4 @@
+use anyhow::Result;
 use async_trait::async_trait;
 use uuid::Uuid;
 
@@ -11,24 +12,22 @@ mod flag;
 pub use flag::*;
 
 mod role;
-use crate::error::StorageError;
 use crate::Timestamp;
 pub use role::*;
 
 #[async_trait]
 pub trait Store<T> {
-    async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError>;
+    async fn get_by_id(&self, id: Uuid) -> Result<T>;
 
-    async fn get_by_name(&self, name: &str) -> Result<T, StorageError>;
+    async fn get_by_name(&self, name: &str) -> Result<T>;
 
-    async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError>;
+    async fn find_by_name(&self, name: &str) -> Result<Vec<T>>;
 
-    async fn create(&mut self, item: &T) -> Result<(), StorageError>;
+    async fn create(&mut self, item: &T) -> Result<()>;
 
-    async fn update(&mut self, item: &T) -> Result<(), StorageError>;
+    async fn update(&mut self, item: &T) -> Result<()>;
 
-    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
-        -> Result<(), StorageError>;
+    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp) -> Result<()>;
 }
 
 #[derive(Clone)]
@@ -45,7 +44,7 @@ impl<T> Default for StubStore<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{GetDeleted, GetId, GetName, SetDeleted};
+    use crate::{GetDeleted, GetId, GetName, SetDeleted, StorageError};
 
     #[derive(Debug, Clone, PartialEq)]
     struct TestStorable {
@@ -111,6 +110,8 @@ mod tests {
             .get_by_name(&name[..1])
             .await
             .expect_err("Should error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 
@@ -156,6 +157,8 @@ mod tests {
             .create(&storable_same_id)
             .await
             .expect_err("Should already exist")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_already_exists());
     }
 
@@ -179,6 +182,8 @@ mod tests {
             .get_by_id(storable.id)
             .await
             .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 }

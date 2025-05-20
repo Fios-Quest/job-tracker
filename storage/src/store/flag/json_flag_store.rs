@@ -1,6 +1,6 @@
-use crate::error::StorageError;
 use crate::store::json::{JsonStore, JsonStoreConstructor};
 use crate::{Flag, FlagStore, StubFlagStore};
+use anyhow::Result;
 use async_trait::async_trait;
 use uuid::Uuid;
 
@@ -14,7 +14,7 @@ impl JsonStoreConstructor<Flag> for JsonFlagStore {
 
 #[async_trait]
 impl FlagStore for JsonFlagStore {
-    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Flag>, StorageError> {
-        self.internal_store.get_for_company(id).await
+    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Flag>> {
+        Ok(self.internal_store.get_for_company(id).await?)
     }
 }

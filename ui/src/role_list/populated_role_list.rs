@@ -8,12 +8,12 @@ use storage::Store;
 use storage::{Role, RoleStore, Stores, Timestamp};
 use uuid::Uuid;
 
-fn handle_storage_error(error: StorageError) -> Option<String> {
+fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
 
-    match error {
-        StorageError::NotFound => Some("No role found".to_string()),
-        StorageError::AlreadyExists => Some("Role already exists".to_string()),
+    match error.downcast_ref::<StorageError>() {
+        Some(StorageError::NotFound) => Some("No role found".to_string()),
+        Some(StorageError::AlreadyExists) => Some("Role already exists".to_string()),
         _ => Some("A database error has occurred".to_string()),
     }
 }

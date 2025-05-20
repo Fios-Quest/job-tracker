@@ -6,10 +6,10 @@ pub use stub_flag_store::StubFlagStore;
 mod json_flag_store;
 pub use json_flag_store::JsonFlagStore;
 
-use crate::error::StorageError;
 use crate::store::Store;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::Timestamp;
+use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -109,13 +109,14 @@ impl Flag {
 
 #[async_trait]
 pub trait FlagStore<T: Store<Flag> = Self>: Store<Flag> {
-    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Flag>, StorageError>;
+    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Flag>>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::store::Store;
+    use crate::StorageError;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Flag>>(store: &mut C) {
@@ -137,6 +138,8 @@ mod tests {
             .get_by_name(&name[..1])
             .await
             .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 
@@ -184,6 +187,8 @@ mod tests {
             .create(&flag_same_id)
             .await
             .expect_err("Should already exist")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_already_exists());
     }
 
@@ -214,6 +219,8 @@ mod tests {
             .get_by_id(flag.id)
             .await
             .expect_err("Should not exist")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 

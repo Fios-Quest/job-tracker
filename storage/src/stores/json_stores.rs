@@ -1,5 +1,5 @@
-use crate::error::StorageError;
 use crate::{JsonCompanyStore, JsonFlagStore, JsonRoleStore, Stores};
+use anyhow::Result;
 use std::path::PathBuf;
 
 pub struct JsonStores {
@@ -9,7 +9,7 @@ pub struct JsonStores {
 }
 
 impl JsonStores {
-    pub async fn new(base_path: PathBuf) -> Result<Self, StorageError> {
+    pub async fn new(base_path: PathBuf) -> Result<Self> {
         Ok(JsonStores {
             company_store: JsonCompanyStore::new(base_path.join("company")).await?,
             role_store: JsonRoleStore::new(base_path.join("role")).await?,

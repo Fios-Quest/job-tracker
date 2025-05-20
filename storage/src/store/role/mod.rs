@@ -4,10 +4,10 @@ pub use stub_role_store::StubRoleStore;
 mod json_role_store;
 pub use json_role_store::JsonRoleStore;
 
-use crate::error::StorageError;
 use crate::store::Store;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{GetDescription, SetDescription, Timestamp};
+use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -79,12 +79,13 @@ impl SetDescription for Role {
 
 #[async_trait]
 pub trait RoleStore<T: Store<Role> = Self>: Store<Role> {
-    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>, StorageError>;
+    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::StorageError;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Role>>(store: &mut C) {
@@ -106,6 +107,8 @@ mod tests {
             .get_by_name(&name[..1])
             .await
             .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 
@@ -160,6 +163,8 @@ mod tests {
             .create(&role_same_id)
             .await
             .expect_err("Should not be created")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_already_exists());
     }
 
@@ -190,6 +195,8 @@ mod tests {
             .get_by_id(role.id)
             .await
             .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 

@@ -9,12 +9,12 @@ use storage::StorageError;
 use storage::Store;
 use storage::{Company, Stores};
 
-fn handle_storage_error(error: StorageError) -> Option<String> {
+fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
 
-    match error {
-        StorageError::NotFound => Some("No company found".to_string()),
-        StorageError::AlreadyExists => Some("Company already exists".to_string()),
+    match error.downcast_ref::<StorageError>() {
+        Some(StorageError::NotFound) => Some("No company found".to_string()),
+        Some(StorageError::AlreadyExists) => Some("Company already exists".to_string()),
         _ => Some("A database error has occurred".to_string()),
     }
 }

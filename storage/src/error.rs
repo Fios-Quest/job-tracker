@@ -1,4 +1,3 @@
-use serde::de;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -7,12 +6,6 @@ pub enum StorageError {
     NotFound,
     #[error("Already Exists")]
     AlreadyExists,
-    #[error("Deserialisation error: {0}")]
-    DeserializationError(de::value::Error),
-    #[error("File IO error: {0}")]
-    TokioIoError(#[from] tokio::io::Error),
-    #[error("Json Error: {0}")]
-    SerdeJsonError(#[from] serde_json::Error),
 }
 
 impl StorageError {

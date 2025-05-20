@@ -1,7 +1,7 @@
 use super::{Role, RoleStore};
-use crate::error::StorageError;
 use crate::store::json::{JsonStore, JsonStoreConstructor};
 use crate::StubRoleStore;
+use anyhow::Result;
 use async_trait::async_trait;
 use uuid::Uuid;
 
@@ -15,7 +15,7 @@ impl JsonStoreConstructor<Role> for JsonRoleStore {
 
 #[async_trait]
 impl RoleStore for JsonRoleStore {
-    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>, StorageError> {
-        self.internal_store.get_for_company(id).await
+    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>> {
+        Ok(self.internal_store.get_for_company(id).await?)
     }
 }

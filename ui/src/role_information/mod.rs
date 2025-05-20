@@ -1,16 +1,16 @@
 use crate::error_message::ErrorMessage;
 use crate::StoreContext;
+use anyhow::Error;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::ops::Not;
-use storage::StorageError;
-use storage::{Role, SetDescription, Store, Stores};
+use storage::{Role, SetDescription, StorageError, Store, Stores};
 
-fn handle_storage_error(error: StorageError) -> Option<String> {
+fn handle_storage_error(error: Error) -> Option<String> {
     tracing::error!("Role Storage Error: {:?}", error);
 
-    match error {
-        StorageError::NotFound => Some("No role found".to_string()),
+    match error.downcast_ref::<StorageError>() {
+        Some(StorageError::NotFound) => Some("No role found".to_string()),
         _ => Some("A database error has occurred".to_string()),
     }
 }

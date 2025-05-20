@@ -88,6 +88,8 @@ mod tests {
             .get_by_name(&name[..1])
             .await
             .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 
@@ -139,6 +141,8 @@ mod tests {
             .create(&company_same_id)
             .await
             .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_already_exists(),);
     }
 
@@ -183,6 +187,8 @@ mod tests {
             .get_by_id(company.id)
             .await
             .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
             .is_not_found());
     }
 
