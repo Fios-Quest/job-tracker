@@ -42,10 +42,11 @@ pub fn CompanyList() -> Element {
             }
         }
     });
+    let reload_companies = use_callback(move |()| companies_resource.restart());
     let companies = companies_resource().unwrap_or_default();
     let companies_list = companies.into_iter().map(|company| {
         rsx! {
-            CompanyListItem { company }
+            CompanyListItem { company, reload_companies }
         }
     });
 

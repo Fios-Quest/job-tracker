@@ -40,10 +40,11 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
             }
         }
     }));
+    let reload_roles = use_callback(move |()| roles_resource.restart());
     let roles = roles_resource().unwrap_or_default();
     let roles_list = roles.into_iter().map(|role| {
         rsx! {
-            RoleListItem { role, roles_resource }
+            RoleListItem { role, reload_roles }
         }
     });
 

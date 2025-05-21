@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use storage::{ApplicationContext, Role, Store, Stores};
 
 #[component]
-pub fn RoleListItem(role: Role, roles_resource: Resource<Vec<Role>>) -> Element {
+pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
     let mut application_context = use_context::<Signal<ApplicationContext>>();
     let stores = use_context::<StoreContext>();
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
@@ -44,7 +44,7 @@ pub fn RoleListItem(role: Role, roles_resource: Resource<Vec<Role>>) -> Element 
                         .role_store()
                         .update(&role)
                         .await;
-                    roles_resource.restart();
+                    reload_roles(());
                     form_receiver.set(None);
                 }
             }
