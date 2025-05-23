@@ -27,10 +27,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
         let result = use_context::<StoreContext>()
-            .lock()
-            .await
-            .role_store()
-            .get_for_company(company_id)
+            .get_roles_for_company(company_id)
             .await;
         match result {
             Ok(roles) => roles,
@@ -56,10 +53,8 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
             if let Some(role_name) = role_name {
                 if !role_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().await;
-                    let result = stores_lock
-                        .role_store()
-                        .create(&Role::new(company_id, role_name, Timestamp::now()))
+                    let result = stores
+                        .create_role(&Role::new(company_id, role_name, Timestamp::now()))
                         .await;
 
                     match result {

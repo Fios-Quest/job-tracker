@@ -29,10 +29,7 @@ pub fn CompanyList() -> Element {
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
         let companies = use_context::<StoreContext>()
-            .lock()
-            .await
-            .company_store()
-            .find_by_name(&search)
+            .find_company_by_name(&search)
             .await;
         match companies {
             Ok(companies) => companies,
@@ -59,11 +56,7 @@ pub fn CompanyList() -> Element {
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().await;
-                    let store_result = stores_lock
-                        .company_store()
-                        .create(&Company::new(company_name))
-                        .await;
+                    let store_result = stores.create_company(&Company::new(company_name)).await;
 
                     match store_result {
                         Ok(()) => {

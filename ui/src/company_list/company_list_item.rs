@@ -19,11 +19,7 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
             if let Some(name) = company_name {
                 if !name.is_empty() {
                     let company = Company { name, ..company };
-                    let mut stores_lock = stores.lock().await;
-                    let _result = stores_lock // ToDo: Handle errors
-                        .company_store()
-                        .update(&company)
-                        .await;
+                    let _result = stores.update_company(&company).await;
                     reload_companies(());
                     form_receiver.set(None);
                 }

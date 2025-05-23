@@ -39,10 +39,8 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
             if let Some(name) = role_name {
                 if !name.is_empty() {
                     let role = Role { name, ..role };
-                    let mut stores_lock = stores.lock().await;
-                    let _result = stores_lock // ToDo: Handle errors
-                        .role_store()
-                        .update(&role)
+                    let _result = stores // ToDo: Handle errors
+                        .update_role(&role)
                         .await;
                     reload_roles(());
                     form_receiver.set(None);

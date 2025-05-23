@@ -36,11 +36,9 @@ fn PopulatedRoleDescription(role: Role) -> Element {
             if let Some(role_description) = role_description {
                 if !role_description.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().await;
-
                     role.set_description(role_description.clone());
                     tracing::info!("Role set to {:?}", role);
-                    let result = stores_lock.role_store().update(&role).await;
+                    let result = stores.update_role(&role).await;
 
                     match result {
                         Ok(_) => {

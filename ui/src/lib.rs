@@ -1,4 +1,7 @@
 //! This crate contains all shared UI for the workspace.
+
+use anyhow::Result;
+use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -25,9 +28,63 @@ pub use flag_list::*;
 
 mod editable;
 pub use editable::*;
+use storage::{Company, Flag, FlagStore, GetId, Role, RoleStore, Store, Stores};
 
 mod error_message;
 
 #[cfg(feature = "desktop")]
 type StoreType = storage::JsonStores;
-type StoreContext = Arc<Mutex<StoreType>>;
+
+#[derive(Clone)]
+pub struct StoreContext(Arc<Mutex<StoreType>>);
+
+impl StoreContext {
+    pub fn new(store: StoreType) -> Self {
+        Self(Arc::new(Mutex::new(store)))
+    }
+
+    // --- Companies ---
+    pub(crate) async fn find_company_by_name(&self, name: &str) -> Result<Vec<Company>> {
+        self.0.lock().await.company_store().find_by_name(name).await
+    }
+
+    pub(crate) async fn create_company(&self, company: &Company) -> Result<()> {
+        self.0.lock().await.company_store().create(company).await
+    }
+
+    pub(crate) async fn update_company(&self, company: &Company) -> Result<()> {
+        self.0.lock().await.company_store().update(company).await
+    }
+
+    // --- Flags ---
+    pub(crate) async fn get_flags_for_company<I: GetId>(&self, company: I) -> Result<Vec<Flag>> {
+        self.0
+            .lock()
+            .await
+            .flag_store()
+            .get_for_company(company.get_id())
+            .await
+    }
+
+    pub(crate) async fn create_flag(&self, flag: &Flag) -> Result<()> {
+        self.0.lock().await.flag_store().create(flag).await
+    }
+
+    // --- Roles ---
+    pub(crate) async fn get_roles_for_company<I: GetId>(&self, company: I) -> Result<Vec<Role>> {
+        self.0
+            .lock()
+            .await
+            .role_store()
+            .get_for_company(company.get_id())
+            .await
+    }
+
+    pub(crate) async fn create_role(&self, role: &Role) -> Result<()> {
+        self.0.lock().await.role_store().create(role).await
+    }
+
+    pub(crate) async fn update_role(&self, role: &Role) -> Result<()> {
+        self.0.lock().await.role_store().update(role).await
+    }
+}
