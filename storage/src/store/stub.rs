@@ -1,6 +1,8 @@
-use crate::store::{StorageError, Store, StubStore};
+use crate::error::StorageError;
+use crate::store::{Store, StubStore};
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{utils, Timestamp};
+use anyhow::Result;
 use async_trait::async_trait;
 use uuid::Uuid;
 
@@ -15,25 +17,25 @@ impl<T> Store<T> for StubStore<T>
 where
     T: GetName + GetId + GetDeleted + SetDeleted + Clone + Send + Sync,
 {
-    async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError> {
+    async fn get_by_id(&self, id: Uuid) -> Result<T> {
         self.store
             .iter()
             .filter(|t| t.get_deleted().is_none())
             .find(|t| t.get_id() == id)
             .cloned()
-            .ok_or(StorageError::NotFound)
+            .ok_or(StorageError::NotFound.into())
     }
 
-    async fn get_by_name(&self, name: &str) -> Result<T, StorageError> {
+    async fn get_by_name(&self, name: &str) -> Result<T> {
         self.store
             .iter()
             .filter(|t| t.get_deleted().is_none())
             .find(|t| t.get_name() == name)
             .cloned()
-            .ok_or(StorageError::NotFound)
+            .ok_or(StorageError::NotFound.into())
     }
 
-    async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError> {
+    async fn find_by_name(&self, name: &str) -> Result<Vec<T>> {
         let mut results: Vec<_> = self
             .store
             .iter()
@@ -44,16 +46,16 @@ where
         Ok(results)
     }
 
-    async fn create(&mut self, item: &T) -> Result<(), StorageError> {
+    async fn create(&mut self, item: &T) -> Result<()> {
         // Todo: join these futures
         if self.get_by_id(item.get_id()).await.is_ok() {
-            return Err(StorageError::AlreadyExists);
+            return Err(StorageError::AlreadyExists.into());
         }
         self.store.push(item.clone());
         Ok(())
     }
 
-    async fn update(&mut self, item: &T) -> Result<(), StorageError> {
+    async fn update(&mut self, item: &T) -> Result<()> {
         let role = self
             .store
             .iter_mut()
@@ -65,11 +67,7 @@ where
         Ok(())
     }
 
-    async fn delete_by_id(
-        &mut self,
-        id: Uuid,
-        date_deleted: Timestamp,
-    ) -> Result<(), StorageError> {
+    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp) -> Result<()> {
         self.store
             .iter_mut()
             .filter(|c| c.get_id() == id)
@@ -77,6 +75,6 @@ where
                 t.set_deleted(date_deleted);
             })
             .next()
-            .ok_or(StorageError::NotFound)
+            .ok_or(StorageError::NotFound.into())
     }
 }

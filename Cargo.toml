@@ -10,6 +10,7 @@ members = [
 ]
 
 [workspace.dependencies]
+anyhow = "1.0.98"
 dioxus = { version = "0.6.0" }
 
 # workspace

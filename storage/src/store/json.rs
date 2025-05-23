@@ -1,4 +1,5 @@
-use crate::{GetDeleted, GetId, GetName, SetDeleted, StorageError, Store, StubStore, Timestamp};
+use crate::{GetDeleted, GetId, GetName, SetDeleted, Store, StubStore, Timestamp};
+use anyhow::Result;
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -8,18 +9,6 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 use tokio::fs::{create_dir_all, read, read_dir};
 use uuid::Uuid;
-
-impl From<tokio::io::Error> for StorageError {
-    fn from(err: tokio::io::Error) -> Self {
-        Self::TokioIoError(err.to_string())
-    }
-}
-
-impl From<serde_json::Error> for StorageError {
-    fn from(err: serde_json::Error) -> Self {
-        Self::SerdeJsonError(err.to_string())
-    }
-}
 
 #[async_trait]
 pub trait JsonStoreConstructor<T> {
@@ -56,7 +45,7 @@ where
         + DeserializeOwned,
     Self: JsonStoreConstructor<T>,
 {
-    pub async fn new(base_path: PathBuf) -> Result<Self, StorageError> {
+    pub async fn new(base_path: PathBuf) -> Result<Self> {
         let mut internal_store = Self::create_stub_store();
         create_dir_all(&base_path).await?;
         let mut dir = read_dir(&base_path).await?;
@@ -79,7 +68,7 @@ where
     }
 
     #[cfg(test)]
-    pub async fn new_tmp() -> Result<Self, StorageError> {
+    pub async fn new_tmp() -> Result<Self> {
         let base_path = tempdir::TempDir::new("company_test")?;
         Self::new(base_path.into_path()).await
     }
@@ -91,7 +80,7 @@ where
         buf
     }
 
-    async fn write_file(&self, data: &T) -> Result<(), StorageError> {
+    async fn write_file(&self, data: &T) -> Result<()> {
         let path = self.create_filename(data);
         tokio::fs::write(path, json!(data).to_string().as_bytes()).await?;
         Ok(())
@@ -112,35 +101,31 @@ where
         + DeserializeOwned,
     Self: JsonStoreConstructor<T>,
 {
-    async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError> {
-        self.internal_store.get_by_id(id).await
+    async fn get_by_id(&self, id: Uuid) -> Result<T> {
+        Ok(self.internal_store.get_by_id(id).await?)
     }
 
-    async fn get_by_name(&self, name: &str) -> Result<T, StorageError> {
+    async fn get_by_name(&self, name: &str) -> Result<T> {
         self.internal_store.get_by_name(name).await
     }
 
-    async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError> {
+    async fn find_by_name(&self, name: &str) -> Result<Vec<T>> {
         self.internal_store.find_by_name(name).await
     }
 
-    async fn create(&mut self, item: &T) -> Result<(), StorageError> {
+    async fn create(&mut self, item: &T) -> Result<()> {
         self.internal_store.create(item).await?;
         self.write_file(item).await?;
         Ok(())
     }
 
-    async fn update(&mut self, item: &T) -> Result<(), StorageError> {
+    async fn update(&mut self, item: &T) -> Result<()> {
         self.internal_store.update(item).await?;
         self.write_file(item).await?;
         Ok(())
     }
 
-    async fn delete_by_id(
-        &mut self,
-        id: Uuid,
-        date_deleted: Timestamp,
-    ) -> Result<(), StorageError> {
+    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp) -> Result<()> {
         let mut item = self.internal_store.get_by_id(id).await?;
         item.set_deleted(date_deleted);
         self.write_file(&item).await?;

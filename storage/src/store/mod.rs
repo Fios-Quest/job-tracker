@@ -1,5 +1,5 @@
+use anyhow::Result;
 use async_trait::async_trait;
-use serde::de;
 use uuid::Uuid;
 
 mod json;
@@ -12,36 +12,22 @@ mod flag;
 pub use flag::*;
 
 mod role;
-pub use role::*;
-
 use crate::Timestamp;
+pub use role::*;
 
 #[async_trait]
 pub trait Store<T> {
-    async fn get_by_id(&self, id: Uuid) -> Result<T, StorageError>;
+    async fn get_by_id(&self, id: Uuid) -> Result<T>;
 
-    async fn get_by_name(&self, name: &str) -> Result<T, StorageError>;
+    async fn get_by_name(&self, name: &str) -> Result<T>;
 
-    async fn find_by_name(&self, name: &str) -> Result<Vec<T>, StorageError>;
+    async fn find_by_name(&self, name: &str) -> Result<Vec<T>>;
 
-    async fn create(&mut self, item: &T) -> Result<(), StorageError>;
+    async fn create(&mut self, item: &T) -> Result<()>;
 
-    async fn update(&mut self, item: &T) -> Result<(), StorageError>;
+    async fn update(&mut self, item: &T) -> Result<()>;
 
-    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp)
-        -> Result<(), StorageError>;
-}
-
-#[derive(Debug, PartialEq)]
-pub enum StorageError {
-    NotFound,
-    AlreadyExists,
-    CouldNotMapToObject(&'static str, String),
-    DeserializationError(de::value::Error),
-    SurrealError(String), // Not ideal, but Surreal errors are a bit weird
-    LibSqlError(String),  // LibSql errors do not implement clone or partialeq
-    TokioIoError(String),
-    SerdeJsonError(String),
+    async fn delete_by_id(&mut self, id: Uuid, date_deleted: Timestamp) -> Result<()>;
 }
 
 #[derive(Clone)]
@@ -58,7 +44,7 @@ impl<T> Default for StubStore<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{GetDeleted, GetId, GetName, SetDeleted};
+    use crate::{GetDeleted, GetId, GetName, SetDeleted, StorageError};
 
     #[derive(Debug, Clone, PartialEq)]
     struct TestStorable {
@@ -120,10 +106,13 @@ mod tests {
         // Test can be found
         assert_eq!(name, store.get_by_name(name).await.unwrap().name);
         // Test no partial match
-        assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_name(&name[..1]).await
-        );
+        assert!(store
+            .get_by_name(&name[..1])
+            .await
+            .expect_err("Should error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
 
     #[tokio::test]
@@ -146,7 +135,13 @@ mod tests {
 
         // Should be able to create the item once
         assert!(store.create(&storable).await.is_ok());
-        assert_eq!(store.get_by_id(storable.id).await.as_ref(), Ok(&storable));
+        assert_eq!(
+            store
+                .get_by_id(storable.id)
+                .await
+                .expect("Should be created"),
+            storable
+        );
 
         // Should be able to store an item with the same name
         let storable_same_name = TestStorable::new("Test".to_string());
@@ -158,10 +153,13 @@ mod tests {
             name: "Test".to_string(),
             date_deleted: None,
         };
-        assert_eq!(
-            store.create(&storable_same_id).await,
-            Err(StorageError::AlreadyExists)
-        );
+        assert!(store
+            .create(&storable_same_id)
+            .await
+            .expect_err("Should already exist")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_already_exists());
     }
 
     #[tokio::test]
@@ -169,14 +167,23 @@ mod tests {
         let mut store = StubStore::new();
         let storable = TestStorable::new("Test".to_string());
         assert!(store.create(&storable).await.is_ok());
-        assert_eq!(store.get_by_id(storable.id).await.as_ref(), Ok(&storable));
+        assert_eq!(
+            store
+                .get_by_id(storable.id)
+                .await
+                .expect("Should be created"),
+            storable
+        );
         assert!(store
             .delete_by_id(storable.id, Timestamp::now())
             .await
             .is_ok());
-        assert_eq!(
-            Err(StorageError::NotFound),
-            store.get_by_id(storable.id).await
-        );
+        assert!(store
+            .get_by_id(storable.id)
+            .await
+            .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
 }

@@ -12,3 +12,6 @@ pub use time::*;
 
 mod utils;
 pub use utils::*;
+
+mod error;
+pub use error::*;

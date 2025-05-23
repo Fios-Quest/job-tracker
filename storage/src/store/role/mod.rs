@@ -4,9 +4,10 @@ pub use stub_role_store::StubRoleStore;
 mod json_role_store;
 pub use json_role_store::JsonRoleStore;
 
-use crate::store::{StorageError, Store};
+use crate::store::Store;
 use crate::utils::{GetDeleted, GetId, GetName, SetDeleted};
 use crate::{GetDescription, SetDescription, Timestamp};
+use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -78,12 +79,13 @@ impl SetDescription for Role {
 
 #[async_trait]
 pub trait RoleStore<T: Store<Role> = Self>: Store<Role> {
-    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>, StorageError>;
+    async fn get_for_company(&self, id: Uuid) -> Result<Vec<Role>>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::StorageError;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Role>>(store: &mut C) {
@@ -101,11 +103,15 @@ mod tests {
         // Test can be found
         assert_eq!(store.get_by_name(name).await.unwrap().name, name);
         // Test no partial match
-        assert_eq!(
-            store.get_by_name(&name[..1]).await,
-            Err(StorageError::NotFound)
-        );
+        assert!(store
+            .get_by_name(&name[..1])
+            .await
+            .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
+
     async fn test_find_by_name<C: Store<Role>>(store: &mut C) {
         let name = "Test";
         let t_role = Role::new(Uuid::new_v4(), name.to_string(), Timestamp::now());
@@ -126,8 +132,8 @@ mod tests {
         assert!(store.create(&a_role).await.is_ok());
         assert!(store.create(&y_role).await.is_ok());
         assert_eq!(
-            store.find_by_name("").await,
-            Ok(vec![a_role, t_role, y_role])
+            store.find_by_name("").await.expect("Should be created"),
+            vec![a_role, t_role, y_role]
         );
     }
     async fn test_create<C: Store<Role>>(store: &mut C) {
@@ -135,7 +141,10 @@ mod tests {
 
         // Should be able to create the role once
         assert!(store.create(&role).await.is_ok());
-        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
+        assert_eq!(
+            store.get_by_id(role.id).await.expect("Should be created"),
+            role
+        );
 
         // Should be able to store a role with the same name
         let role_same_name = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
@@ -150,27 +159,45 @@ mod tests {
             date_applied: Timestamp::now(),
             date_deleted: None,
         };
-        assert_eq!(
-            Err(StorageError::AlreadyExists),
-            store.create(&role_same_id).await
-        );
+        assert!(store
+            .create(&role_same_id)
+            .await
+            .expect_err("Should not be created")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_already_exists());
     }
 
     async fn test_update<C: Store<Role>>(store: &mut C) {
         let mut role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
         assert!(store.create(&role).await.is_ok());
-        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
+        assert_eq!(
+            store.get_by_id(role.id).await.expect("Should be created"),
+            role
+        );
         role.description = "This is a description".to_string();
         assert!(store.update(&role).await.is_ok());
-        assert_eq!(store.get_by_id(role.id).await, Ok(role));
+        assert_eq!(
+            store.get_by_id(role.id).await.expect("Should be updated"),
+            role
+        );
     }
 
     async fn test_delete_by_id<C: Store<Role>>(store: &mut C) {
         let role = Role::new(Uuid::new_v4(), "Test".to_string(), Timestamp::now());
         assert!(store.create(&role).await.is_ok());
-        assert_eq!(store.get_by_id(role.id).await.as_ref(), Ok(&role));
+        assert_eq!(
+            store.get_by_id(role.id).await.expect("Should be created"),
+            role
+        );
         assert!(store.delete_by_id(role.id, Timestamp::now()).await.is_ok());
-        assert_eq!(Err(StorageError::NotFound), store.get_by_id(role.id).await);
+        assert!(store
+            .get_by_id(role.id)
+            .await
+            .expect_err("Should not be found")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
 
     async fn test_get_for_company<C: RoleStore>(store: &mut C) {
@@ -185,12 +212,18 @@ mod tests {
         assert!(store.create(&role3).await.is_ok());
         assert!(store.create(&role4).await.is_ok());
         assert_eq!(
-            Ok(vec![role1, role2]),
-            store.get_for_company(company1).await
+            store
+                .get_for_company(company1)
+                .await
+                .expect("should be created"),
+            vec![role1, role2]
         );
         assert_eq!(
-            Ok(vec![role3, role4]),
-            store.get_for_company(company2).await
+            store
+                .get_for_company(company2)
+                .await
+                .expect("should be created"),
+            vec![role3, role4]
         );
     }
 

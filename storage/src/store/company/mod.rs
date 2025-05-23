@@ -63,7 +63,8 @@ impl Company {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::store::{StorageError, Store};
+    use crate::error::StorageError;
+    use crate::store::Store;
 
     // Reusable test functions
     async fn test_get_by_id<C: Store<Company>>(store: &mut C) {
@@ -83,10 +84,13 @@ mod tests {
 
         assert_eq!(result.unwrap().name, name);
         // Test no partial match
-        assert_eq!(
-            store.get_by_name(&name[..1]).await,
-            Err(StorageError::NotFound)
-        );
+        assert!(store
+            .get_by_name(&name[..1])
+            .await
+            .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
 
     async fn test_find_by_name<C: Store<Company>>(store: &mut C) {
@@ -105,8 +109,8 @@ mod tests {
         assert!(store.create(&a_company).await.is_ok());
         assert!(store.create(&y_company).await.is_ok());
         assert_eq!(
-            store.find_by_name("").await,
-            Ok(vec![a_company, t_company, y_company])
+            store.find_by_name("").await.expect("Should exist"),
+            vec![a_company, t_company, y_company]
         );
     }
 
@@ -115,7 +119,13 @@ mod tests {
 
         // Should be able to create the company once
         assert!(store.create(&company).await.is_ok());
-        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
+        assert_eq!(
+            store
+                .get_by_id(company.id)
+                .await
+                .expect("Should have been created"),
+            company
+        );
 
         // Should be able to store a company with the same name
         let company_same_name = Company::new("Test".to_string());
@@ -127,33 +137,59 @@ mod tests {
             name: "Test".to_string(),
             date_deleted: None,
         };
-        assert_eq!(
-            store.create(&company_same_id).await,
-            Err(StorageError::AlreadyExists)
-        );
+        assert!(store
+            .create(&company_same_id)
+            .await
+            .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_already_exists(),);
     }
 
     async fn test_update_company<C: Store<Company>>(store: &mut C) {
         let mut company = Company::new("Test".to_string());
         assert!(store.create(&company).await.is_ok());
-        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
+        assert_eq!(
+            store
+                .get_by_id(company.id)
+                .await
+                .expect("Should be created"),
+            company
+        );
+
         company.name = "Updated Name".to_string();
         assert!(store.update(&company).await.is_ok());
-        assert_eq!(store.get_by_id(company.id).await, Ok(company));
+        assert_eq!(
+            store
+                .get_by_id(company.id)
+                .await
+                .expect("Should be updated"),
+            company
+        );
     }
 
     async fn test_delete_by_id<C: Store<Company>>(store: &mut C) {
         let company = Company::new("Test".to_string());
         assert!(store.create(&company).await.is_ok());
-        assert_eq!(store.get_by_id(company.id).await.as_ref(), Ok(&company));
+        assert_eq!(
+            store
+                .get_by_id(company.id)
+                .await
+                .expect("Should be created"),
+            company
+        );
+
         assert!(store
             .delete_by_id(company.id, Timestamp::now())
             .await
             .is_ok());
-        assert_eq!(
-            store.get_by_id(company.id).await,
-            Err(StorageError::NotFound)
-        );
+        assert!(store
+            .get_by_id(company.id)
+            .await
+            .expect_err("Should be error")
+            .downcast::<StorageError>()
+            .expect("Should be StorageError")
+            .is_not_found());
     }
 
     // Module for each implementation
