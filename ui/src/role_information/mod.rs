@@ -23,6 +23,11 @@ fn PopulatedRoleDescription(role: Role) -> Element {
     let mut error_message = use_signal(|| None);
     let mut description_changed = use_signal(|| false);
 
+    // Write to a new String buffer.
+    let parser = pulldown_cmark::Parser::new(&role.description);
+    let mut role_description_html = String::new();
+    pulldown_cmark::html::push_html(&mut role_description_html, parser);
+
     tracing::info!("Update {:?}", role);
 
     let update_role = move |event: Event<FormData>| {
@@ -59,6 +64,7 @@ fn PopulatedRoleDescription(role: Role) -> Element {
     rsx! {
         h3 { "Role Description" }
 
+        div { dangerous_inner_html: role_description_html }
 
         form { onsubmit: update_role,
             textarea {
