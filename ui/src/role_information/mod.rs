@@ -4,7 +4,7 @@ use anyhow::Error;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::ops::Not;
-use storage::{Role, SetDescription, StorageError, Store, Stores};
+use storage::{Role, SetDescription, StorageError};
 
 fn handle_storage_error(error: Error) -> Option<String> {
     tracing::error!("Role Storage Error: {:?}", error);

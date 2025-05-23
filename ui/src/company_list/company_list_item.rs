@@ -1,6 +1,6 @@
 use crate::{Editable, StoreContext};
 use dioxus::prelude::*;
-use storage::{ApplicationContext, Company, Store, Stores};
+use storage::{ApplicationContext, Company};
 
 #[component]
 pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {
@@ -29,12 +29,12 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
 
     let display = rsx! {
         input {
-                id: id.to_string(),
-                r#type: "radio",
-                name: "company",
-                onchange: move |_| application_context.set(application_context().set_company_id(id)),
-            }
-            label { r#for: id.to_string(), "{name}" }
+            id: id.to_string(),
+            r#type: "radio",
+            name: "company",
+            onchange: move |_| application_context.set(application_context().set_company_id(id)),
+        }
+        label { r#for: id.to_string(), "{name}" }
     };
 
     let editable = rsx! {

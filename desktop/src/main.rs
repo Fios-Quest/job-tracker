@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
-use std::sync::Arc;
 use storage::{ApplicationContext, JsonStores};
-use tokio::sync::Mutex;
 use ui::{Navbar, StoreContext};
 use views::{Blog, Home};
 

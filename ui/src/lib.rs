@@ -1,7 +1,6 @@
 //! This crate contains all shared UI for the workspace.
 
 use anyhow::Result;
-use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -68,6 +67,10 @@ impl StoreContext {
 
     pub(crate) async fn create_flag(&self, flag: &Flag) -> Result<()> {
         self.0.lock().await.flag_store().create(flag).await
+    }
+
+    pub(crate) async fn update_flag(&self, flag: &Flag) -> Result<()> {
+        self.0.lock().await.flag_store().update(flag).await
     }
 
     // --- Roles ---

@@ -3,7 +3,7 @@ use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
-use storage::{Flag, FlagColor, FlagStore, StorageError, Store, Stores};
+use storage::{Flag, FlagColor, StorageError};
 use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
@@ -35,10 +35,11 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
             }
         }
     }));
+    let reload_flags = use_callback(move |()| flags_resource.restart());
     let flags = flags_resource().unwrap_or_default();
     let flags_list = flags.iter().cloned().map(|flag| {
         rsx! {
-            FlagListItem { flag }
+            FlagListItem { flag, reload_flags }
         }
     });
 

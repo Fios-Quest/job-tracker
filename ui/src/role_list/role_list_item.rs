@@ -1,7 +1,7 @@
 use crate::editable::Editable;
 use crate::StoreContext;
 use dioxus::prelude::*;
-use storage::{ApplicationContext, Role, Store, Stores};
+use storage::{ApplicationContext, Role};
 
 #[component]
 pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
