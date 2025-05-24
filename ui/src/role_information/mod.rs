@@ -4,7 +4,7 @@ use anyhow::Error;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::ops::Not;
-use storage::{Role, SetDescription, StorageError};
+use storage::{ApplicationContext, Role, SetDescription, StorageError};
 
 fn handle_storage_error(error: Error) -> Option<String> {
     tracing::error!("Role Storage Error: {:?}", error);
@@ -18,13 +18,16 @@ fn handle_storage_error(error: Error) -> Option<String> {
 #[component]
 fn PopulatedRoleDescription(role: Role) -> Element {
     let stores = use_context::<StoreContext>();
+    let mut application_context = use_context::<Signal<ApplicationContext>>();
+
     let role_description = role.description.clone();
-    let mut role_description_value = use_signal(|| role_description);
+    let mut role_description_signal = use_signal(|| role_description);
+    let role_description_value = role_description_signal();
     let mut error_message = use_signal(|| None);
     let mut description_changed = use_signal(|| false);
 
     // Write to a new String buffer.
-    let parser = pulldown_cmark::Parser::new(&role.description);
+    let parser = pulldown_cmark::Parser::new(&role_description_value);
     let mut role_description_html = String::new();
     pulldown_cmark::html::push_html(&mut role_description_html, parser);
 
@@ -48,7 +51,8 @@ fn PopulatedRoleDescription(role: Role) -> Element {
                     match result {
                         Ok(_) => {
                             // Reset the values to empty
-                            role_description_value.set(role_description);
+                            application_context.set(application_context().set_role(role).unwrap()); // ToDo: Handle errors better
+                            role_description_signal.set(role_description);
                             error_message.set(None);
                             description_changed.set(false);
                         }
