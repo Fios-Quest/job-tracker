@@ -5,9 +5,8 @@ use crate::StoreContext;
 use company_list_item::CompanyListItem;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
+use storage::Company;
 use storage::StorageError;
-use storage::Store;
-use storage::{Company, Stores};
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
@@ -29,10 +28,7 @@ pub fn CompanyList() -> Element {
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
         let companies = use_context::<StoreContext>()
-            .lock()
-            .await
-            .company_store()
-            .find_by_name(&search)
+            .find_company_by_name(&search)
             .await;
         match companies {
             Ok(companies) => companies,
@@ -42,28 +38,24 @@ pub fn CompanyList() -> Element {
             }
         }
     });
+    let reload_companies = use_callback(move |()| companies_resource.restart());
     let companies = companies_resource().unwrap_or_default();
     let companies_list = companies.into_iter().map(|company| {
         rsx! {
-            CompanyListItem { company }
+            CompanyListItem { company, reload_companies }
         }
     });
 
     let create_company = move |event: Event<FormData>| {
         let stores = stores.clone();
         error_message.set(None);
+        let company_name = event.values().get("company_name").map(|v| v.as_value());
 
         async move {
-            let company_name = event.values().get("company_name").map(|v| v.as_value());
-
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
-                    let mut stores_lock = stores.lock().await;
-                    let store_result = stores_lock
-                        .company_store()
-                        .create(&Company::new(company_name))
-                        .await;
+                    let store_result = stores.create_company(&Company::new(company_name)).await;
 
                     match store_result {
                         Ok(()) => {

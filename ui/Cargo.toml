@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 dioxus = { workspace = true }
+pulldown-cmark = "0.13.0"
 server = { workspace = true }
 storage = { workspace = true }
 uuid = { version = "1.15.1", features = ["v4"] }
