@@ -26,6 +26,21 @@ pub trait SetDescription {
     fn set_description(&mut self, description: String);
 }
 
+impl GetId for Uuid {
+    fn get_id(&self) -> Uuid {
+        *self
+    }
+}
+
+impl<T> GetId for &T
+where
+    T: GetId,
+{
+    fn get_id(&self) -> Uuid {
+        (*self).get_id()
+    }
+}
+
 pub fn create_name_sort<N: GetName>(partial_name: &str) -> impl Fn(&N, &N) -> Ordering {
     let partial_name = partial_name.to_lowercase();
     move |a, b| {

@@ -1,8 +1,6 @@
 use dioxus::prelude::*;
-use std::sync::Arc;
 use storage::{ApplicationContext, JsonStores};
-use tokio::sync::Mutex;
-use ui::Navbar;
+use ui::{Navbar, StoreContext};
 use views::{Home, Support};
 
 mod views;
@@ -37,10 +35,10 @@ async fn create_stores() -> JsonStores {
 fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let stores = rt.block_on(create_stores());
-    let stores = Arc::new(Mutex::new(stores));
+    let stores_context = StoreContext::new(stores);
 
     dioxus::LaunchBuilder::new()
-        .with_context(stores)
+        .with_context(stores_context)
         .launch(App);
 }
 

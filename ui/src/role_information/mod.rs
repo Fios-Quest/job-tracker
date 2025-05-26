@@ -1,88 +1,65 @@
-use crate::error_message::ErrorMessage;
-use crate::StoreContext;
-use anyhow::Error;
-use dioxus::logger::tracing;
 use dioxus::prelude::*;
-use std::ops::Not;
-use storage::{Role, SetDescription, StorageError, Store, Stores};
+use storage::{ApplicationContext, Role};
 
-fn handle_storage_error(error: Error) -> Option<String> {
-    tracing::error!("Role Storage Error: {:?}", error);
-
-    match error.downcast_ref::<StorageError>() {
-        Some(StorageError::NotFound) => Some("No role found".to_string()),
-        _ => Some("A database error has occurred".to_string()),
-    }
-}
+mod populated_role_description;
+use crate::{Editable, StoreContext};
+use populated_role_description::PopulatedRoleDescription;
 
 #[component]
-fn PopulatedRoleDescription(role: Role) -> Element {
+pub fn RoleDescription(role: Option<Role>) -> Element {
     let stores = use_context::<StoreContext>();
-    let role_description = role.description.clone();
-    let mut role_description_value = use_signal(|| role_description);
-    let mut error_message = use_signal(|| None);
-    let mut description_changed = use_signal(|| false);
+    let mut application_context = use_context::<Signal<ApplicationContext>>();
 
-    tracing::info!("Update {:?}", role);
+    let mut role_resource = use_resource(|| async {
+        if let Some(role) = use_context::<Signal<ApplicationContext>>()().get_role() {
+            use_context::<StoreContext>().get_role(role).await.ok()
+        } else {
+            None
+        }
+    });
 
-    let update_role = move |event: Event<FormData>| {
+    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
+
+    let Some(role) = role_resource().unwrap_or_default() else {
+        return rsx! {};
+    };
+
+    let input_name = "role_description";
+
+    if let Some(event) = form_receiver() {
         let stores = stores.clone();
-        let mut role = role.clone();
-        tracing::info!("Update Role");
-        async move {
-            let role_description = event.values().get("role_description").map(|v| v.as_value());
-            tracing::info!("Event {:?}", event.values());
-
-            if let Some(role_description) = role_description {
-                if !role_description.is_empty() {
-                    // Store the name
-                    let mut stores_lock = stores.lock().await;
-
-                    role.set_description(role_description.clone());
-                    tracing::info!("Role set to {:?}", role);
-                    let result = stores_lock.role_store().update(&role).await;
-
-                    match result {
-                        Ok(_) => {
-                            // Reset the values to empty
-                            role_description_value.set(role_description);
-                            error_message.set(None);
-                            description_changed.set(false);
-                        }
-                        Err(e) => {
-                            error_message.set(handle_storage_error(e));
-                        }
-                    }
+        let role = role.clone();
+        let role_description = event.values().get(input_name).map(|v| v.as_value());
+        spawn(async move {
+            if let Some(description) = role_description {
+                if !description.is_empty() {
+                    let role = Role {
+                        description,
+                        ..role.clone()
+                    };
+                    let _result = stores.update_role(&role).await;
+                    let new_context = application_context().set_role(role.clone()).unwrap(); // ToDo: Fix me
+                    application_context.set(new_context);
+                    role_resource.restart();
+                    form_receiver.set(None);
                 }
             }
-        }
+        });
+    }
+
+    let editable = rsx! {
+        textarea { name: input_name, "{role.description}" }
+    };
+    let display = rsx! {
+        PopulatedRoleDescription { role }
     };
 
     rsx! {
         h3 { "Role Description" }
-
-
-        form { onsubmit: update_role,
-            textarea {
-                id: "role_description",
-                name: "role_description",
-                oninput: move |_| { description_changed.set(true) },
-                {role_description_value}
-            }
-            if let Some(message) = error_message() {
-                ErrorMessage { message }
-            }
-            input { r#type: "submit", disabled: description_changed.read().not() }
+        if form_receiver().is_none() {
+            Editable { display, editable, form_receiver }
+        } else {
+            "pending"
         }
-    }
-}
-
-#[component]
-pub fn RoleDescription(role: Option<Role>) -> Element {
-    match role {
-        Some(role) => rsx! {
-            PopulatedRoleDescription { role }
-        },
-        None => rsx!(),
     }
 }
