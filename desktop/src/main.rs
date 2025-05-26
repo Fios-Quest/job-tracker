@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use storage::{ApplicationContext, JsonStores};
 use ui::{Navbar, StoreContext};
-use views::{Blog, Home};
+use views::{Home, Support};
 
 mod views;
 
@@ -11,8 +11,8 @@ enum Route {
     #[layout(DesktopNavbar)]
     #[route("/")]
     Home {},
-    #[route("/blog/:id")]
-    Blog { id: i32 },
+    #[route("/support")]
+    Support { },
 }
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -62,7 +62,7 @@ fn DesktopNavbar() -> Element {
     rsx! {
         Navbar {
             Link { to: Route::Home {}, "Home" }
-            Link { to: Route::Blog { id: 1 }, "Blog" }
+            Link { to: Route::Support {}, "Support ❤️" }
         }
 
         Outlet::<Route> {}
