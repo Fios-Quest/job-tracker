@@ -30,15 +30,16 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
         label { r#for: id.to_string(), "{name}" }
     };
 
-    let role_clone = role.clone();
     if let Some(event) = form_receiver() {
         let stores = stores.clone();
-        let role = role_clone.clone();
         let role_name = event.values().get("role_name").map(|v| v.as_value());
         spawn(async move {
             if let Some(name) = role_name {
                 if !name.is_empty() {
-                    let role = Role { name, ..role };
+                    let role = Role {
+                        name,
+                        ..role.clone()
+                    };
                     let _result = stores // ToDo: Handle errors
                         .update_role(&role)
                         .await;

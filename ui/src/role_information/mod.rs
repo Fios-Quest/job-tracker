@@ -34,8 +34,8 @@ pub fn RoleDescription(role: Option<Role>) -> Element {
             if let Some(description) = role_description {
                 if !description.is_empty() {
                     let role = Role {
-                        description: description.clone(),
-                        ..role
+                        description,
+                        ..role.clone()
                     };
                     let _result = stores.update_role(&role).await;
                     let new_context = application_context().set_role(role.clone()).unwrap(); // ToDo: Fix me
