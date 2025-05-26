@@ -1,0 +1,12 @@
+.warning {
+    display: flex;
+    padding: 10px;
+    border-radius: 20px;
+    background-color: darkred;
+    color: white;
+}
+
+.warning::before {
+    content: "⚠️";
+    padding: 0 10px;
+}
