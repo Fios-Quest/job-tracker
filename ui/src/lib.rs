@@ -74,6 +74,15 @@ impl StoreContext {
     }
 
     // --- Roles ---
+    pub(crate) async fn get_role<I: GetId>(&self, role: I) -> Result<Role> {
+        self.0
+            .lock()
+            .await
+            .role_store()
+            .get_by_id(role.get_id())
+            .await
+    }
+
     pub(crate) async fn get_roles_for_company<I: GetId>(&self, company: I) -> Result<Vec<Role>> {
         self.0
             .lock()
