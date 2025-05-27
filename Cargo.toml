@@ -12,6 +12,7 @@ members = [
 [workspace.dependencies]
 anyhow = "1.0.98"
 dioxus = { version = "0.6.0" }
+log = "0.4.27"
 
 # workspace
 ui = { path = "ui" }
