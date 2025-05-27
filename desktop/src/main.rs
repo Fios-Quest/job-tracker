@@ -11,7 +11,7 @@ use tracing_subscriber::prelude::*;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
 use ui::{Navbar, StoreContext};
-use views::{Home, Support};
+use views::{Help, Home, Support};
 
 mod views;
 
@@ -23,6 +23,9 @@ enum Route {
     Home {},
     #[route("/support")]
     Support { },
+    #[route("/help")]
+    Help { }
+    
 }
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -100,6 +103,7 @@ fn DesktopNavbar() -> Element {
         Navbar {
             Link { to: Route::Home {}, "Home" }
             Link { to: Route::Support {}, "Support ❤️" }
+            Link { to: Route::Help {}, "Help" }
         }
 
         Outlet::<Route> {}
