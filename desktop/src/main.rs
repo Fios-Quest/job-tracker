@@ -41,11 +41,12 @@ fn get_logs_directory() -> PathBuf {
     get_project_directory().join("logs")
 }
 
-async fn create_stores() -> JsonStores {
-    let mut data_dir = get_project_directory();
-    data_dir.push("storage");
+fn get_storage_directory() -> PathBuf {
+    get_project_directory().join("logs")
+}
 
-    JsonStores::new(data_dir)
+async fn create_stores() -> JsonStores {
+    JsonStores::new(get_storage_directory())
         .await
         .expect("Could not start database")
 }
