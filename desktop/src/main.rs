@@ -37,8 +37,11 @@ fn get_project_directory() -> PathBuf {
         .to_path_buf()
 }
 
+fn get_logs_directory() -> PathBuf {
+    get_project_directory().join("logs")
+}
+
 async fn create_stores() -> JsonStores {
-    log::info!("creating stores");
     let mut data_dir = get_project_directory();
     data_dir.push("storage");
 
@@ -48,11 +51,8 @@ async fn create_stores() -> JsonStores {
 }
 
 fn configure_logging() {
-    let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
-        .expect("No valid home directory found!");
+    let log_dir = get_logs_directory();
 
-    let mut log_dir = directories.data_dir().to_path_buf();
-    log_dir.push("logs");
     create_dir_all(&log_dir).expect("Could not create log dir");
 
     let date = Local::now();
