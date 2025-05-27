@@ -1,5 +1,15 @@
+use chrono::Local;
 use dioxus::prelude::*;
+use directories::ProjectDirs;
+use std::fs::{create_dir_all, File};
+use std::path::PathBuf;
 use storage::{ApplicationContext, JsonStores};
+use tracing::Level;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Registry;
 use ui::{Navbar, StoreContext};
 use views::{Home, Support};
 
@@ -17,14 +27,16 @@ enum Route {
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
+fn get_project_directory() -> PathBuf {
+    directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
+        .expect("No valid home directory found!")
+        .data_dir()
+        .to_path_buf()
+}
+
 async fn create_stores() -> JsonStores {
-    let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
-        .expect("No valid home directory found!");
-
-    let mut data_dir = directories.data_dir().to_path_buf();
-
-    dbg!(&data_dir);
-
+    log::info!("creating stores");
+    let mut data_dir = get_project_directory();
     data_dir.push("storage");
 
     JsonStores::new(data_dir)
@@ -32,7 +44,32 @@ async fn create_stores() -> JsonStores {
         .expect("Could not start database")
 }
 
+fn configure_logging() {
+    let directories = directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
+        .expect("No valid home directory found!");
+
+    let mut log_dir = directories.data_dir().to_path_buf();
+    log_dir.push("logs");
+    create_dir_all(&log_dir).expect("Could not create log dir");
+
+    let date = Local::now();
+
+    let log_file = log_dir.join(format!("{}.log", date.to_rfc3339()));
+
+    let log_file = File::create(log_file)
+        .expect("Could not create log file")
+        .with_max_level(Level::WARN);
+
+    let file_layer = tracing_subscriber::fmt::layer()
+        .json()
+        .with_writer(log_file);
+
+    Registry::default().with(file_layer).init();
+}
+
 fn main() {
+    configure_logging();
+
     let rt = tokio::runtime::Runtime::new().unwrap();
     let stores = rt.block_on(create_stores());
     let stores_context = StoreContext::new(stores);
