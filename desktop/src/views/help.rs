@@ -89,7 +89,7 @@ pub fn Help() -> Element {
             button {
                 onclick: move |_| {
                     spawn(async {
-                        clear_logs().await;
+                        clear_logs().await.expect("Could not clear logs");
                     });
                     logs_resource.restart();
                 },

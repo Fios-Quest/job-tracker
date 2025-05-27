@@ -1,6 +1,5 @@
 use chrono::Local;
 use dioxus::prelude::*;
-use directories::ProjectDirs;
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
 use storage::{ApplicationContext, JsonStores};
