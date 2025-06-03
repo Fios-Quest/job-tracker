@@ -1,15 +1,7 @@
-use crate::storable::object::company::Company;
-use crate::storable::object::flag::Flag;
-use crate::storable::object::role::Role;
-use crate::storable::property::has_company::HasCompany;
-use crate::storable::property::has_id::HasId;
-use crate::storable::property::has_name::HasName;
-use crate::storage::object_storage::company_store::CompanyStore;
-use crate::storage::object_storage::flag_store::FlagStore;
-use crate::storage::object_storage::role_store::RoleStore;
-use crate::storage::property::base_store::BaseStore;
-use crate::storage::property::recall_by_company::RecallByCompany;
-use crate::storage::property::recall_by_name::RecallByName;
+use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
+use crate::storage::{
+    BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallByName, RoleStore,
+};
 use crate::StorageError;
 
 pub struct StubStore<T> {
@@ -22,11 +14,11 @@ impl<T> Default for StubStore<T> {
     }
 }
 
-impl<T> BaseStore<T> for StubStore<T>
+impl<O> BaseStore<O> for StubStore<O>
 where
-    T: HasId + Clone,
+    O: HasId + Clone,
 {
-    async fn store(&mut self, storable: T) -> anyhow::Result<()> {
+    async fn store(&mut self, storable: O) -> anyhow::Result<()> {
         // Remove the item if its already stored
         self.store
             .retain(|stored_item| storable.get_id() != stored_item.get_id());
@@ -37,7 +29,7 @@ where
         Ok(())
     }
 
-    async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<T> {
+    async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
         Ok(self
             .store
             .iter()

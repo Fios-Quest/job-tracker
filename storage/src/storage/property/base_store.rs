@@ -1,4 +1,4 @@
-use crate::storable::property::has_id::HasId;
+use crate::storable::HasId;
 use anyhow::Result;
 
 pub trait BaseStore<T>
@@ -12,18 +12,17 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::storable::object::company::Company;
-    use crate::storable::object::flag::Flag;
-    use crate::storage::medium::stub_storage::StubStore;
-    use crate::storage::property::base_store::BaseStore;
-    use crate::storage::property::recall_by_company::RecallByCompany;
+    use super::*;
+    use crate::storable::{Company, Flag};
+    use crate::storage::StubStore;
 
     #[tokio::test]
     async fn test_company() {
         let company = Company::new("company");
         let mut store = StubStore::default();
         store.store(company.clone()).await.unwrap();
-        let recalled_company = store.recall_by_id(&company);
+        let recalled_company = store.recall_by_id(&company).await.unwrap();
+        assert_eq!(recalled_company, company);
     }
 
     #[tokio::test]

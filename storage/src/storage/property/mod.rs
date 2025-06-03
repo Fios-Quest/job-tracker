@@ -1,3 +1,8 @@
-pub mod base_store;
-pub mod recall_by_company;
-pub mod recall_by_name;
+mod base_store;
+pub use base_store::*;
+
+mod recall_by_company;
+pub use recall_by_company::*;
+
+mod recall_by_name;
+pub use recall_by_name::*;

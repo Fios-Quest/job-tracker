@@ -1,4 +1,4 @@
-use crate::storable::property::has_name::HasName;
+use crate::storable::HasName;
 use anyhow::Result;
 
 pub trait RecallByName<T>

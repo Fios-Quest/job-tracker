@@ -1,5 +1,4 @@
-use crate::storable::property::has_company::HasCompany;
-use crate::storable::property::has_id::HasId;
+use crate::storable::{HasCompany, HasId};
 use anyhow::Result;
 
 pub trait RecallByCompany<T>

@@ -1,2 +1,5 @@
-pub mod object;
-pub mod property;
+mod object;
+pub use object::*;
+
+mod property;
+pub use property::*;

@@ -1,7 +1,4 @@
-use crate::storable::property::has_company::HasCompany;
-use crate::storable::property::has_deleted::HasDeleted;
-use crate::storable::property::has_id::HasId;
-use crate::storable::property::has_name::HasName;
+use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
 use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

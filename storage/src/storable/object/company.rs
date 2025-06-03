@@ -1,7 +1,4 @@
-use crate::storable::object::role::Role;
-use crate::storable::property::has_deleted::HasDeleted;
-use crate::storable::property::has_id::HasId;
-use crate::storable::property::has_name::HasName;
+use crate::storable::{HasDeleted, HasId, HasName, Role};
 use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -11,6 +8,20 @@ pub struct Company {
     pub id: Uuid,
     pub name: String,
     pub date_deleted: Option<Timestamp>,
+}
+
+impl Company {
+    pub fn new<S: Into<String>>(name: S) -> Company {
+        Company {
+            id: Uuid::new_v4(),
+            name: name.into(),
+            date_deleted: None,
+        }
+    }
+
+    pub fn create_role(&self, name: String, date_created: Timestamp) -> Role {
+        Role::new(self.id, name, date_created)
+    }
 }
 
 impl PartialEq for Company {
@@ -34,20 +45,6 @@ impl HasName for Company {
 impl HasDeleted for Company {
     fn is_deleted(&self) -> bool {
         self.date_deleted.is_some()
-    }
-}
-
-impl Company {
-    pub fn new<S: Into<String>>(name: S) -> Company {
-        Company {
-            id: Uuid::new_v4(),
-            name: name.into(),
-            date_deleted: None,
-        }
-    }
-
-    pub fn create_role(&self, name: String, date_created: Timestamp) -> Role {
-        Role::new(self.id, name, date_created)
     }
 }
 

@@ -1,3 +1,8 @@
-pub mod company_store;
-pub mod flag_store;
-pub mod role_store;
+mod company_store;
+pub use company_store::*;
+
+mod flag_store;
+pub use flag_store::*;
+
+mod role_store;
+pub use role_store::*;

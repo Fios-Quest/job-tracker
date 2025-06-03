@@ -1,3 +1,8 @@
-pub mod company;
-pub mod flag;
-pub mod role;
+mod company;
+pub use company::*;
+
+mod flag;
+pub use flag::*;
+
+mod role;
+pub use role::*;
