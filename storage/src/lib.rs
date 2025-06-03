@@ -7,5 +7,6 @@ pub use time::*;
 mod error;
 pub use error::*;
 
+pub(crate) mod general_store;
 pub(crate) mod storable;
 pub(crate) mod storage;

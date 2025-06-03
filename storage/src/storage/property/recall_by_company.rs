@@ -1,9 +1,10 @@
 use crate::storable::property::has_company::HasCompany;
+use crate::storable::property::has_id::HasId;
 use anyhow::Result;
 
 pub trait RecallByCompany<T>
 where
     T: HasCompany + Clone,
 {
-    async fn recall_by_company<C: HasCompany>(&self, company: C) -> Result<Vec<T>>;
+    async fn recall_by_company<I: HasId>(&self, company_id: &I) -> Result<Vec<T>>;
 }

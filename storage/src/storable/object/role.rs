@@ -49,7 +49,7 @@ impl HasCompany for Role {
 
 impl HasName for Role {
     fn get_name(&self) -> &str {
-        todo!()
+        &self.name
     }
 }
 

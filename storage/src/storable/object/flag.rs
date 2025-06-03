@@ -1,3 +1,4 @@
+use crate::storable::property::has_company::HasCompany;
 use crate::storable::property::has_deleted::HasDeleted;
 use crate::storable::property::has_id::HasId;
 use crate::storable::property::has_name::HasName;
@@ -64,5 +65,11 @@ impl HasId for Flag {
 impl HasDeleted for Flag {
     fn is_deleted(&self) -> bool {
         self.date_deleted.is_some()
+    }
+}
+
+impl HasCompany for Flag {
+    fn get_company_id(&self) -> Uuid {
+        self.company_id
     }
 }
