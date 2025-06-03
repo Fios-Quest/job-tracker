@@ -1,6 +1,7 @@
 use crate::{Editable, StoreContext};
 use dioxus::prelude::*;
-use storage::{ApplicationContext, Company};
+use storage::storable::object::company::Company;
+use storage::ApplicationContext;
 
 #[component]
 pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {

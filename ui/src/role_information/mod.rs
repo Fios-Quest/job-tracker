@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
-use storage::{ApplicationContext, Role};
+use storage::ApplicationContext;
 
 mod populated_role_description;
 use crate::{Editable, StoreContext};
 use populated_role_description::PopulatedRoleDescription;
+use storage::storable::object::role::Role;
 
 #[component]
 pub fn RoleDescription(role: Option<Role>) -> Element {

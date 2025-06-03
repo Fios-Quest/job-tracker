@@ -27,7 +27,10 @@ pub use flag_list::*;
 
 mod editable;
 pub use editable::*;
-use storage::{Company, Flag, FlagStore, GetId, Role, RoleStore, Store, Stores};
+use storage::storable::object::company::Company;
+use storage::storable::object::flag::Flag;
+use storage::storable::object::role::Role;
+use storage::{FlagStore, GetId, RoleStore, Store, Stores};
 
 mod error_message;
 

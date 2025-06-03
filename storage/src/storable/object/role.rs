@@ -1,0 +1,60 @@
+use crate::storable::property::has_company::HasCompany;
+use crate::storable::property::has_deleted::HasDeleted;
+use crate::storable::property::has_id::HasId;
+use crate::storable::property::has_name::HasName;
+use crate::Timestamp;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Role {
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub name: String,
+    pub description: String,
+    pub date_applied: Timestamp,
+    pub date_deleted: Option<Timestamp>,
+}
+
+impl Role {
+    pub fn new(company_id: Uuid, name: String, date_applied: Timestamp) -> Role {
+        Role {
+            id: Uuid::new_v4(),
+            company_id,
+            name,
+            description: "".to_string(),
+            date_applied,
+            date_deleted: None,
+        }
+    }
+}
+
+impl PartialEq for Role {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.name == other.name && self.company_id == other.company_id
+    }
+}
+
+impl HasId for Role {
+    fn get_id(&self) -> Uuid {
+        self.id
+    }
+}
+
+impl HasCompany for Role {
+    fn get_company_id(&self) -> Uuid {
+        self.company_id
+    }
+}
+
+impl HasName for Role {
+    fn get_name(&self) -> &str {
+        todo!()
+    }
+}
+
+impl HasDeleted for Role {
+    fn is_deleted(&self) -> bool {
+        self.date_deleted.is_some()
+    }
+}

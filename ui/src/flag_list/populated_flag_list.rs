@@ -3,7 +3,8 @@ use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
-use storage::{Flag, FlagColor, StorageError};
+use storage::storable::object::flag::{Flag, FlagColor};
+use storage::StorageError;
 use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {

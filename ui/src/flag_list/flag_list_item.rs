@@ -1,7 +1,7 @@
 use crate::{Editable, StoreContext};
 use dioxus::prelude::*;
 use std::str::FromStr;
-use storage::{Flag, FlagColor};
+use storage::storable::object::flag::{Flag, FlagColor};
 
 #[component]
 pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {

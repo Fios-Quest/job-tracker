@@ -3,8 +3,9 @@ use crate::error_message::ErrorMessage;
 use crate::StoreContext;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
+use storage::storable::object::role::Role;
 use storage::StorageError;
-use storage::{Role, Timestamp};
+use storage::Timestamp;
 use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
