@@ -14,6 +14,45 @@ where
     role_store: R,
 }
 
+impl<C, F, R> GeneralStore<C, F, R>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    R: RoleStore,
+{
+    pub fn new(company_store: C, flag_store: F, role_store: R) -> Self {
+        Self {
+            company_store,
+            flag_store,
+            role_store,
+        }
+    }
+
+    pub fn company_store(&self) -> &C {
+        &self.company_store
+    }
+
+    pub fn flag_store(&self) -> &F {
+        &self.flag_store
+    }
+
+    pub fn role_store(&self) -> &R {
+        &self.role_store
+    }
+
+    pub fn company_store_mut(&mut self) -> &mut C {
+        &mut self.company_store
+    }
+
+    pub fn flag_store_mut(&mut self) -> &mut F {
+        &mut self.flag_store
+    }
+
+    pub fn role_store_mut(&mut self) -> &mut R {
+        &mut self.role_store
+    }
+}
+
 impl<C, F, R> Sealed for GeneralStore<C, F, R>
 where
     C: CompanyStore,
@@ -29,19 +68,20 @@ where
     R: RoleStore,
 {
     type Storage = C;
+    type MutStorage = C;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &'a mut C
+    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
     where
-        C: 'a,
+        <Self as HasStoreFor<Company>>::MutStorage: 'a,
     {
-        &mut self.company_store
+        self.company_store_mut()
     }
 
-    async fn get_store<'a>(&'a self) -> &'a C
+    async fn get_store<'a>(&'a self) -> &Self::Storage
     where
-        C: 'a,
+        <Self as HasStoreFor<Company>>::Storage: 'a,
     {
-        &self.company_store
+        self.company_store()
     }
 }
 
@@ -52,19 +92,20 @@ where
     R: RoleStore,
 {
     type Storage = F;
+    type MutStorage = F;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &'a mut F
+    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
     where
-        F: 'a,
+        <Self as HasStoreFor<Flag>>::MutStorage: 'a,
     {
-        &mut self.flag_store
+        self.flag_store_mut()
     }
 
-    async fn get_store<'a>(&'a self) -> &'a F
+    async fn get_store<'a>(&'a self) -> &Self::Storage
     where
-        F: 'a,
+        <Self as HasStoreFor<Flag>>::Storage: 'a,
     {
-        &self.flag_store
+        self.flag_store()
     }
 }
 
@@ -75,19 +116,20 @@ where
     R: RoleStore,
 {
     type Storage = R;
+    type MutStorage = R;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &'a mut R
+    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
     where
-        R: 'a,
+        <Self as HasStoreFor<Role>>::MutStorage: 'a,
     {
-        &mut self.role_store
+        self.role_store_mut()
     }
 
-    async fn get_store<'a>(&'a self) -> &'a R
+    async fn get_store<'a>(&'a self) -> &Self::Storage
     where
-        R: 'a,
+        <Self as HasStoreFor<Role>>::Storage: 'a,
     {
-        &self.role_store
+        self.role_store()
     }
 }
 
