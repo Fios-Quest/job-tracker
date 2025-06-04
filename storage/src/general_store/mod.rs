@@ -5,10 +5,12 @@ use crate::Sealed;
 
 pub mod stub_general_store;
 
-trait HasStoreFor<O, S>: Sealed {
-    fn get_mut_store(&mut self) -> &mut S;
+trait HasStoreFor<O>: Sealed {
+    type Storage;
 
-    fn get_store(&self) -> &S;
+    fn get_mut_store(&mut self) -> &mut Self::Storage;
+
+    fn get_store(&self) -> &Self::Storage;
 }
 
 pub struct GeneralStore<C, F, R>
@@ -30,12 +32,14 @@ where
 {
 }
 
-impl<C, F, R> HasStoreFor<Company, C> for GeneralStore<C, F, R>
+impl<C, F, R> HasStoreFor<Company> for GeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
     R: RoleStore,
 {
+    type Storage = C;
+
     fn get_mut_store(&mut self) -> &mut C {
         &mut self.company_store
     }
@@ -45,12 +49,14 @@ where
     }
 }
 
-impl<C, F, R> HasStoreFor<Flag, F> for GeneralStore<C, F, R>
+impl<C, F, R> HasStoreFor<Flag> for GeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
     R: RoleStore,
 {
+    type Storage = F;
+
     fn get_mut_store(&mut self) -> &mut F {
         &mut self.flag_store
     }
@@ -60,12 +66,14 @@ where
     }
 }
 
-impl<C, F, R> HasStoreFor<Role, R> for GeneralStore<C, F, R>
+impl<C, F, R> HasStoreFor<Role> for GeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
     R: RoleStore,
 {
+    type Storage = R;
+
     fn get_mut_store(&mut self) -> &mut R {
         &mut self.role_store
     }
@@ -75,11 +83,11 @@ where
     }
 }
 
-impl<T, O, S> BaseStore<O> for T
+impl<T, O> BaseStore<O> for T
 where
+    T: HasStoreFor<O>,
+    T::Storage: BaseStore<O>,
     O: HasId + Clone,
-    T: HasStoreFor<O, S>,
-    S: BaseStore<O>,
 {
     async fn store(&mut self, storable: O) -> anyhow::Result<()> {
         self.get_mut_store().store(storable).await
@@ -112,9 +120,9 @@ mod tests {
         all_store.store(flag.clone()).await.unwrap();
         all_store.store(role.clone()).await.unwrap();
 
-        let recalled_company = all_store.recall_by_id(&company).await.unwrap();
-        let recalled_flag = all_store.recall_by_id(&flag).await.unwrap();
-        let recalled_role = all_store.recall_by_id(&role).await.unwrap();
+        let recalled_company: Company = all_store.recall_by_id(&company).await.unwrap();
+        let recalled_flag: Flag = all_store.recall_by_id(&flag).await.unwrap();
+        let recalled_role: Role = all_store.recall_by_id(&role).await.unwrap();
 
         assert_eq!(recalled_company, company);
         assert_eq!(recalled_flag, flag);
