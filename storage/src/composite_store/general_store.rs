@@ -1,4 +1,4 @@
-use crate::general_store::HasStoreFor;
+use crate::composite_store::HasStoreFor;
 use crate::storable::{Company, Flag, Role};
 use crate::storage::{CompanyStore, FlagStore, RoleStore};
 use crate::Sealed;
@@ -30,11 +30,17 @@ where
 {
     type Storage = C;
 
-    fn get_mut_store(&mut self) -> &mut C {
+    async fn get_mut_store<'a>(&'a mut self) -> &'a mut C
+    where
+        C: 'a,
+    {
         &mut self.company_store
     }
 
-    fn get_store(&self) -> &C {
+    async fn get_store<'a>(&'a self) -> &'a C
+    where
+        C: 'a,
+    {
         &self.company_store
     }
 }
@@ -47,11 +53,17 @@ where
 {
     type Storage = F;
 
-    fn get_mut_store(&mut self) -> &mut F {
+    async fn get_mut_store<'a>(&'a mut self) -> &'a mut F
+    where
+        F: 'a,
+    {
         &mut self.flag_store
     }
 
-    fn get_store(&self) -> &F {
+    async fn get_store<'a>(&'a self) -> &'a F
+    where
+        F: 'a,
+    {
         &self.flag_store
     }
 }
@@ -64,19 +76,25 @@ where
 {
     type Storage = R;
 
-    fn get_mut_store(&mut self) -> &mut R {
+    async fn get_mut_store<'a>(&'a mut self) -> &'a mut R
+    where
+        R: 'a,
+    {
         &mut self.role_store
     }
 
-    fn get_store(&self) -> &R {
+    async fn get_store<'a>(&'a self) -> &'a R
+    where
+        R: 'a,
+    {
         &self.role_store
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::general_store::general_store::GeneralStore;
-    use crate::general_store::*;
+    use crate::composite_store::general_store::GeneralStore;
+    use crate::composite_store::*;
     use crate::storage::StubStore;
     use crate::Timestamp;
 

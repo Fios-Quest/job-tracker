@@ -8,9 +8,13 @@ pub mod general_store;
 trait HasStoreFor<O>: Sealed {
     type Storage;
 
-    fn get_mut_store(&mut self) -> &mut Self::Storage;
+    async fn get_mut_store<'a>(&'a mut self) -> &'a mut Self::Storage
+    where
+        <Self as HasStoreFor<O>>::Storage: 'a;
 
-    fn get_store(&self) -> &Self::Storage;
+    async fn get_store<'a>(&'a self) -> &'a Self::Storage
+    where
+        <Self as HasStoreFor<O>>::Storage: 'a;
 }
 
 impl<T, O> BaseStore<O> for T
