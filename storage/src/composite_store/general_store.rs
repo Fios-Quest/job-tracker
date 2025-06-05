@@ -1,4 +1,4 @@
-use crate::composite_store::HasStoreFor;
+use crate::composite_store::{HasMutStoreFor, HasStoreFor};
 use crate::storable::{Company, Flag, Role};
 use crate::storage::{CompanyStore, FlagStore, RoleStore};
 use crate::Sealed;
@@ -68,20 +68,22 @@ where
     R: RoleStore,
 {
     type Storage = C;
-    type MutStorage = C;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
-    where
-        <Self as HasStoreFor<Company>>::MutStorage: 'a,
-    {
-        self.company_store_mut()
-    }
-
-    async fn get_store<'a>(&'a self) -> &Self::Storage
-    where
-        <Self as HasStoreFor<Company>>::Storage: 'a,
-    {
+    fn get_store(&self) -> &Self::Storage {
         self.company_store()
+    }
+}
+
+impl<C, F, R> HasMutStoreFor<Company> for GeneralStore<C, F, R>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    R: RoleStore,
+{
+    type Storage = C;
+
+    fn get_mut_store(&mut self) -> &mut Self::Storage {
+        self.company_store_mut()
     }
 }
 
@@ -92,20 +94,22 @@ where
     R: RoleStore,
 {
     type Storage = F;
-    type MutStorage = F;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
-    where
-        <Self as HasStoreFor<Flag>>::MutStorage: 'a,
-    {
-        self.flag_store_mut()
-    }
-
-    async fn get_store<'a>(&'a self) -> &Self::Storage
-    where
-        <Self as HasStoreFor<Flag>>::Storage: 'a,
-    {
+    fn get_store(&self) -> &Self::Storage {
         self.flag_store()
+    }
+}
+
+impl<C, F, R> HasMutStoreFor<Flag> for GeneralStore<C, F, R>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    R: RoleStore,
+{
+    type Storage = F;
+
+    fn get_mut_store(&mut self) -> &mut Self::Storage {
+        self.flag_store_mut()
     }
 }
 
@@ -116,20 +120,21 @@ where
     R: RoleStore,
 {
     type Storage = R;
-    type MutStorage = R;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
-    where
-        <Self as HasStoreFor<Role>>::MutStorage: 'a,
-    {
-        self.role_store_mut()
-    }
-
-    async fn get_store<'a>(&'a self) -> &Self::Storage
-    where
-        <Self as HasStoreFor<Role>>::Storage: 'a,
-    {
+    fn get_store(&self) -> &Self::Storage {
         self.role_store()
+    }
+}
+impl<C, F, R> HasMutStoreFor<Role> for GeneralStore<C, F, R>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    R: RoleStore,
+{
+    type Storage = R;
+
+    fn get_mut_store(&mut self) -> &mut Self::Storage {
+        self.role_store_mut()
     }
 }
 
@@ -137,6 +142,7 @@ where
 mod tests {
     use crate::composite_store::general_store::GeneralStore;
     use crate::composite_store::*;
+    use crate::storable::{Company, Flag, Role};
     use crate::storage::StubStore;
     use crate::Timestamp;
 

@@ -1,6 +1,9 @@
 mod base_store;
 pub use base_store::*;
 
+mod recall_by_id;
+pub use recall_by_id::*;
+
 mod recall_by_company;
 pub use recall_by_company::*;
 

@@ -1,18 +1,18 @@
 use crate::storable::HasId;
 use anyhow::Result;
 
-pub trait BaseStore<T>
+pub trait RecallById<T>
 where
     T: HasId + Clone,
 {
-    async fn store(&mut self, storable: T) -> Result<()>;
+    async fn recall_by_id<I: HasId>(&self, id: &I) -> Result<T>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::storable::{Company, Flag};
-    use crate::storage::{RecallById, StubStore};
+    use crate::storage::{BaseStore, StubStore};
 
     #[tokio::test]
     async fn test_company() {

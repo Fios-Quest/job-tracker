@@ -1,40 +1,44 @@
-use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
-use crate::storage::{BaseStore, RecallByCompany, RecallByName};
-use crate::storage::{CompanyStore, FlagStore, RoleStore};
+use crate::storable::{HasCompany, HasId, HasName};
+use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName};
 use crate::Sealed;
 
 mod general_store;
 pub use general_store::*;
 
-mod thread_safe_general_store;
-pub use thread_safe_general_store::*;
+// mod thread_safe_general_store;
+// pub use thread_safe_general_store::*;
 
 trait HasStoreFor<O>: Sealed {
     type Storage;
-    type MutStorage;
 
-    async fn get_mut_store<'a>(&'a mut self) -> &mut Self::MutStorage
-    where
-        <Self as HasStoreFor<O>>::MutStorage: 'a;
+    fn get_store(&self) -> &Self::Storage;
+}
 
-    async fn get_store<'a>(&'a self) -> &Self::Storage
-    where
-        <Self as HasStoreFor<O>>::Storage: 'a;
+trait HasMutStoreFor<O>: Sealed {
+    type Storage;
+
+    fn get_mut_store(&mut self) -> &mut Self::Storage;
 }
 
 impl<T, O> BaseStore<O> for T
 where
-    T: HasStoreFor<O>,
+    T: HasMutStoreFor<O>,
     T::Storage: BaseStore<O>,
-    T::MutStorage: BaseStore<O>,
     O: HasId + Clone,
 {
     async fn store(&mut self, storable: O) -> anyhow::Result<()> {
-        self.get_mut_store().await.store(storable).await
+        self.get_mut_store().store(storable).await
     }
+}
 
+impl<T, O> RecallById<O> for T
+where
+    T: HasStoreFor<O>,
+    T::Storage: RecallById<O>,
+    O: HasId + Clone,
+{
     async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
-        self.get_store().await.recall_by_id(id).await
+        self.get_store().recall_by_id(id).await
     }
 }
 
@@ -42,11 +46,10 @@ impl<T, O> RecallByName<O> for T
 where
     T: HasStoreFor<O>,
     T::Storage: RecallByName<O>,
-    T::MutStorage: RecallByName<O>,
     O: HasName + Clone,
 {
     async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<O>> {
-        self.get_store().await.recall_by_name(name).await
+        self.get_store().recall_by_name(name).await
     }
 }
 
@@ -54,10 +57,9 @@ impl<T, O> RecallByCompany<O> for T
 where
     T: HasStoreFor<O>,
     T::Storage: RecallByCompany<O>,
-    T::MutStorage: RecallByCompany<O>,
     O: HasCompany + Clone,
 {
     async fn recall_by_company<I: HasId>(&self, company_id: &I) -> anyhow::Result<Vec<O>> {
-        self.get_store().await.recall_by_company(company_id).await
+        self.get_store().recall_by_company(company_id).await
     }
 }

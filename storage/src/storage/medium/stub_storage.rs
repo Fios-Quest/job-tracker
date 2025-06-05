@@ -1,6 +1,6 @@
 use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
 use crate::storage::{
-    BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallByName, RoleStore,
+    BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallById, RecallByName, RoleStore,
 };
 use crate::StorageError;
 
@@ -28,7 +28,12 @@ where
 
         Ok(())
     }
+}
 
+impl<O> RecallById<O> for StubStore<O>
+where
+    O: HasId + Clone,
+{
     async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
         Ok(self
             .store
