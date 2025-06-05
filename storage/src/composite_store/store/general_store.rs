@@ -27,27 +27,15 @@ where
         }
     }
 
-    pub fn company_store(&self) -> &C {
-        &self.company_store
-    }
-
-    pub fn flag_store(&self) -> &F {
-        &self.flag_store
-    }
-
-    pub fn role_store(&self) -> &R {
-        &self.role_store
-    }
-
-    pub fn company_store_mut(&mut self) -> &mut C {
+    pub fn company_store(&mut self) -> &mut C {
         &mut self.company_store
     }
 
-    pub fn flag_store_mut(&mut self) -> &mut F {
+    pub fn flag_store(&mut self) -> &mut F {
         &mut self.flag_store
     }
 
-    pub fn role_store_mut(&mut self) -> &mut R {
+    pub fn role_store(&mut self) -> &mut R {
         &mut self.role_store
     }
 }

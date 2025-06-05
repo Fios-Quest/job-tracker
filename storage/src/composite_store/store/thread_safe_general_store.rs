@@ -31,21 +31,15 @@ where
     }
 
     pub async fn company_store(&self) -> MappedMutexGuard<C> {
-        MutexGuard::map(self.general_store.lock().await, |lock| {
-            lock.company_store_mut()
-        })
+        MutexGuard::map(self.general_store.lock().await, |lock| lock.company_store())
     }
 
     pub async fn flag_store(&self) -> MappedMutexGuard<F> {
-        MutexGuard::map(self.general_store.lock().await, |lock| {
-            lock.flag_store_mut()
-        })
+        MutexGuard::map(self.general_store.lock().await, |lock| lock.flag_store())
     }
 
     pub async fn role_store(&self) -> MappedMutexGuard<R> {
-        MutexGuard::map(self.general_store.lock().await, |lock| {
-            lock.role_store_mut()
-        })
+        MutexGuard::map(self.general_store.lock().await, |lock| lock.role_store())
     }
 }
 
@@ -140,8 +134,6 @@ mod tests {
     #[tokio::test]
     async fn test_recall_by_name() {
         let company = Company::new("name");
-        let flag = Flag::new_green(company.id, "good".to_string());
-        let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
         let mut all_store = ThreadSafeGeneralStore::new(
             StubStore::default(),
