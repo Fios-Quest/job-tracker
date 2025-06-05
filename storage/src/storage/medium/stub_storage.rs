@@ -81,3 +81,31 @@ where
 impl CompanyStore for StubStore<Company> {}
 impl RoleStore for StubStore<Role> {}
 impl FlagStore for StubStore<Flag> {}
+
+#[cfg(test)]
+mod test_helper {
+    use super::*;
+    use crate::test_helper::TestHelper;
+
+    #[cfg(test)]
+    impl<O> TestHelper for StubStore<O>
+    where
+        O: HasId + Clone,
+    {
+        #[cfg(test)]
+        async fn new_test() -> anyhow::Result<Self> {
+            Ok(Self::default())
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_helper::*;
+    use paste::paste;
+
+    test_base_store!(StubStore, Company);
+    test_base_store!(StubStore, Flag);
+    test_base_store!(StubStore, Role);
+}

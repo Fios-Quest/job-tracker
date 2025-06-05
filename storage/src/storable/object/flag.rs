@@ -70,3 +70,27 @@ impl HasCompany for Flag {
         self.company_id
     }
 }
+
+#[cfg(test)]
+mod test_helper {
+    use super::*;
+    use crate::test_helper::{TestCounter, TestHelper};
+    use uuid::Uuid;
+
+    impl TestHelper for Flag {
+        async fn new_test() -> anyhow::Result<Self> {
+            const TEST_COUNTER: TestCounter = TestCounter::new();
+            let next = TEST_COUNTER.next();
+            match next % 2 == 0 {
+                true => Ok(Flag::new_green(
+                    Uuid::new_v4(),
+                    format!("Green Flag {}", next / 2),
+                )),
+                false => Ok(Flag::new_red(
+                    Uuid::new_v4(),
+                    format!("Red Flag {}", next / 2),
+                )),
+            }
+        }
+    }
+}

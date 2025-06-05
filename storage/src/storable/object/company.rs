@@ -49,6 +49,19 @@ impl HasDeleted for Company {
 }
 
 #[cfg(test)]
+mod test_helper {
+    use crate::storable::Company;
+    use crate::test_helper::{TestCounter, TestHelper};
+
+    impl TestHelper for Company {
+        async fn new_test() -> anyhow::Result<Self> {
+            const TEST_COUNTER: TestCounter = TestCounter::new();
+            Ok(Company::new(format!("Company {}", TEST_COUNTER.next())))
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 

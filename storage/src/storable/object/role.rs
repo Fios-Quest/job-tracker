@@ -55,3 +55,21 @@ impl HasDeleted for Role {
         self.date_deleted.is_some()
     }
 }
+
+#[cfg(test)]
+mod test_helper {
+    use super::*;
+    use crate::test_helper::{TestCounter, TestHelper};
+    use uuid::Uuid;
+
+    impl TestHelper for Role {
+        async fn new_test() -> anyhow::Result<Self> {
+            const TEST_COUNTER: TestCounter = TestCounter::new();
+            Ok(Role::new(
+                Uuid::new_v4(),
+                format!("Role {}", TEST_COUNTER.next()),
+                Timestamp::now(),
+            ))
+        }
+    }
+}
