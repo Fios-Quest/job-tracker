@@ -1,20 +1,20 @@
-use crate::composite_store::{HasMutStoreFor, HasStoreFor};
+use crate::composite_store::{GeneralStore, HasFutureStoreFor};
 use crate::storable::{Company, Flag, Role};
 use crate::storage::{CompanyStore, FlagStore, RoleStore};
 use crate::Sealed;
+use std::sync::Arc;
+use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
-pub struct GeneralStore<C, F, R>
+pub struct ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
     R: RoleStore,
 {
-    company_store: C,
-    flag_store: F,
-    role_store: R,
+    general_store: Arc<Mutex<GeneralStore<C, F, R>>>,
 }
 
-impl<C, F, R> GeneralStore<C, F, R>
+impl<C, F, R> ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
@@ -22,38 +22,34 @@ where
 {
     pub fn new(company_store: C, flag_store: F, role_store: R) -> Self {
         Self {
-            company_store,
-            flag_store,
-            role_store,
+            general_store: Arc::new(Mutex::new(GeneralStore::new(
+                company_store,
+                flag_store,
+                role_store,
+            ))),
         }
     }
 
-    pub fn company_store(&self) -> &C {
-        &self.company_store
+    pub async fn company_store(&self) -> MappedMutexGuard<C> {
+        MutexGuard::map(self.general_store.lock().await, |lock| {
+            lock.company_store_mut()
+        })
     }
 
-    pub fn flag_store(&self) -> &F {
-        &self.flag_store
+    pub async fn flag_store(&self) -> MappedMutexGuard<F> {
+        MutexGuard::map(self.general_store.lock().await, |lock| {
+            lock.flag_store_mut()
+        })
     }
 
-    pub fn role_store(&self) -> &R {
-        &self.role_store
-    }
-
-    pub fn company_store_mut(&mut self) -> &mut C {
-        &mut self.company_store
-    }
-
-    pub fn flag_store_mut(&mut self) -> &mut F {
-        &mut self.flag_store
-    }
-
-    pub fn role_store_mut(&mut self) -> &mut R {
-        &mut self.role_store
+    pub async fn role_store(&self) -> MappedMutexGuard<R> {
+        MutexGuard::map(self.general_store.lock().await, |lock| {
+            lock.role_store_mut()
+        })
     }
 }
 
-impl<C, F, R> Sealed for GeneralStore<C, F, R>
+impl<C, F, R> Sealed for ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
@@ -61,7 +57,7 @@ where
 {
 }
 
-impl<C, F, R> HasStoreFor<Company> for GeneralStore<C, F, R>
+impl<C, F, R> HasFutureStoreFor<Company> for ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
@@ -69,25 +65,15 @@ where
 {
     type Storage = C;
 
-    fn get_store(&self) -> &Self::Storage {
-        self.company_store()
+    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    where
+        Self::Storage: 'a,
+    {
+        self.company_store().await
     }
 }
 
-impl<C, F, R> HasMutStoreFor<Company> for GeneralStore<C, F, R>
-where
-    C: CompanyStore,
-    F: FlagStore,
-    R: RoleStore,
-{
-    type Storage = C;
-
-    fn get_mut_store(&mut self) -> &mut Self::Storage {
-        self.company_store_mut()
-    }
-}
-
-impl<C, F, R> HasStoreFor<Flag> for GeneralStore<C, F, R>
+impl<C, F, R> HasFutureStoreFor<Flag> for ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
@@ -95,25 +81,15 @@ where
 {
     type Storage = F;
 
-    fn get_store(&self) -> &Self::Storage {
-        self.flag_store()
+    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    where
+        Self::Storage: 'a,
+    {
+        self.flag_store().await
     }
 }
 
-impl<C, F, R> HasMutStoreFor<Flag> for GeneralStore<C, F, R>
-where
-    C: CompanyStore,
-    F: FlagStore,
-    R: RoleStore,
-{
-    type Storage = F;
-
-    fn get_mut_store(&mut self) -> &mut Self::Storage {
-        self.flag_store_mut()
-    }
-}
-
-impl<C, F, R> HasStoreFor<Role> for GeneralStore<C, F, R>
+impl<C, F, R> HasFutureStoreFor<Role> for ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,
     F: FlagStore,
@@ -121,29 +97,19 @@ where
 {
     type Storage = R;
 
-    fn get_store(&self) -> &Self::Storage {
-        self.role_store()
-    }
-}
-impl<C, F, R> HasMutStoreFor<Role> for GeneralStore<C, F, R>
-where
-    C: CompanyStore,
-    F: FlagStore,
-    R: RoleStore,
-{
-    type Storage = R;
-
-    fn get_mut_store(&mut self) -> &mut Self::Storage {
-        self.role_store_mut()
+    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    where
+        Self::Storage: 'a,
+    {
+        self.role_store().await
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::composite_store::general_store::GeneralStore;
-    use crate::composite_store::*;
+    use crate::composite_store::ThreadSafeGeneralStore;
     use crate::storable::{Company, Flag, Role};
-    use crate::storage::StubStore;
+    use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName, StubStore};
     use crate::Timestamp;
 
     #[tokio::test]
@@ -152,11 +118,11 @@ mod tests {
         let flag = Flag::new_green(company.id, "good".to_string());
         let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
-        let mut all_store = GeneralStore {
-            company_store: StubStore::default(),
-            flag_store: StubStore::default(),
-            role_store: StubStore::default(),
-        };
+        let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
+            StubStore::default(),
+            StubStore::default(),
+        );
 
         all_store.store(company.clone()).await.unwrap();
         all_store.store(flag.clone()).await.unwrap();
@@ -177,11 +143,11 @@ mod tests {
         let flag = Flag::new_green(company.id, "good".to_string());
         let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
-        let mut all_store = GeneralStore {
-            company_store: StubStore::default(),
-            flag_store: StubStore::default(),
-            role_store: StubStore::default(),
-        };
+        let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
+            StubStore::default(),
+            StubStore::default(),
+        );
 
         all_store.store(company.clone()).await.unwrap();
 
@@ -196,11 +162,11 @@ mod tests {
         let flag = Flag::new_green(company.id, "good".to_string());
         let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
-        let mut all_store = GeneralStore {
-            company_store: StubStore::default(),
-            flag_store: StubStore::default(),
-            role_store: StubStore::default(),
-        };
+        let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
+            StubStore::default(),
+            StubStore::default(),
+        );
 
         all_store.store(flag.clone()).await.unwrap();
         all_store.store(role.clone()).await.unwrap();
