@@ -6,7 +6,7 @@ use tokio::sync::MappedMutexGuard;
 pub trait HasFutureStoreFor<O>: Sealed {
     type Storage;
 
-    async fn get_store<'a>(&'a self) -> MappedMutexGuard<Self::Storage>
+    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
     where
         <Self as HasFutureStoreFor<O>>::Storage: 'a;
 }
@@ -50,7 +50,7 @@ where
     T::Storage: RecallByCompany<O>,
     O: HasCompany + Clone,
 {
-    async fn recall_by_company<I: HasId>(&self, company_id: &I) -> anyhow::Result<Vec<O>> {
+    async fn recall_by_company<I: HasId>(&self, company_id: I) -> anyhow::Result<Vec<O>> {
         self.get_store().await.recall_by_company(company_id).await
     }
 }

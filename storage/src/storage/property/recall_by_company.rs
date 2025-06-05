@@ -5,7 +5,7 @@ pub trait RecallByCompany<T>
 where
     T: HasCompany + Clone,
 {
-    async fn recall_by_company<I: HasId>(&self, company_id: &I) -> Result<Vec<T>>;
+    async fn recall_by_company<I: HasId>(&self, company_id: I) -> Result<Vec<T>>;
 }
 
 #[cfg(test)]

@@ -2,11 +2,12 @@ use chrono::Local;
 use dioxus::prelude::*;
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
-use storage::{ApplicationContext, JsonStores};
+use storage::prelude::*;
+use tokio::join;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
-use ui::{Navbar, StoreContext};
+use ui::{Navbar, StoreType};
 use views::{Help, Home, Support};
 
 mod views;
@@ -41,10 +42,20 @@ fn get_storage_directory() -> PathBuf {
     get_project_directory().join("logs")
 }
 
-async fn create_stores() -> JsonStores {
-    JsonStores::new(get_storage_directory())
-        .await
-        .expect("Could not start database")
+async fn create_stores() -> StoreType {
+    let path = get_storage_directory();
+
+    let (company_store, flag_store, role_store) = join!(
+        JsonStore::<Company>::new_scoped(path.clone()),
+        JsonStore::<Flag>::new_scoped(path.clone()),
+        JsonStore::<Role>::new_scoped(path.clone()),
+    );
+
+    StoreType::new(
+        company_store.expect("Store failed to initialise"),
+        flag_store.expect("Store failed to initialise"),
+        role_store.expect("Store failed to initialise"),
+    )
 }
 
 fn configure_logging() {
@@ -72,10 +83,9 @@ fn main() {
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let stores = rt.block_on(create_stores());
-    let stores_context = StoreContext::new(stores);
 
     dioxus::LaunchBuilder::new()
-        .with_context(stores_context)
+        .with_context(stores)
         .launch(App);
 }
 

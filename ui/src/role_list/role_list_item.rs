@@ -1,13 +1,13 @@
 use crate::editable::Editable;
-use crate::StoreContext;
+use crate::StoreType;
 use dioxus::prelude::*;
-use storage::storable::object::role::Role;
+use storage::prelude::*;
 use storage::ApplicationContext;
 
 #[component]
 pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
     let mut application_context = use_context::<Signal<ApplicationContext>>();
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let Role { id, name, .. } = role.clone();
@@ -32,7 +32,7 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
     };
 
     if let Some(event) = form_receiver() {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         let role_name = event.values().get("role_name").map(|v| v.as_value());
         spawn(async move {
             if let Some(name) = role_name {
@@ -42,7 +42,7 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
                         ..role.clone()
                     };
                     let _result = stores // ToDo: Handle errors
-                        .update_role(&role)
+                        .store(role)
                         .await;
                     reload_roles(());
                     form_receiver.set(None);

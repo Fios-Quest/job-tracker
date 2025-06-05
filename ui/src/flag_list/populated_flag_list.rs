@@ -1,10 +1,9 @@
 use super::flag_list_item::FlagListItem;
 use crate::error_message::ErrorMessage;
-use crate::StoreContext;
+use crate::StoreType;
 use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
-use storage::storable::object::flag::{Flag, FlagColor};
-use storage::StorageError;
+use storage::prelude::*;
 use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
@@ -19,14 +18,14 @@ fn handle_storage_error(error: anyhow::Error) -> Option<String> {
 
 #[component]
 pub fn PopulatedFlagList(company_id: Uuid) -> Element {
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
     let mut flag_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
 
     // Get flags for company
     let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        let result = use_context::<StoreContext>()
-            .get_flags_for_company(&company_id)
+        let result = use_context::<StoreType>()
+            .recall_by_company(company_id)
             .await;
         match result {
             Ok(flags) => flags,
@@ -45,7 +44,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     });
 
     let create_flag = move |event: Event<FormData>| {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         async move {
             let flag_name = event.values().get("flag_name").map(|v| v.as_value());
             let flag_color = event
@@ -60,7 +59,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
                         FlagColor::Green => Flag::new_green(company_id, flag_name),
                         FlagColor::Red => Flag::new_red(company_id, flag_name),
                     };
-                    let result = stores.create_flag(&flag).await;
+                    let result = stores.store(flag).await;
 
                     match result {
                         Ok(_) => {

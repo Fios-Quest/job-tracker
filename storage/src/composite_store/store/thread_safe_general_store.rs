@@ -5,6 +5,7 @@ use crate::Sealed;
 use std::sync::Arc;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
+#[derive(Clone)]
 pub struct ThreadSafeGeneralStore<C, F, R>
 where
     C: CompanyStore,

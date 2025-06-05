@@ -1,6 +1,7 @@
 use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
 use crate::Timestamp;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 use uuid::Uuid;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -8,6 +9,18 @@ use uuid::Uuid;
 pub enum FlagColor {
     Green,
     Red,
+}
+
+impl FromStr for FlagColor {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "green" => Ok(Self::Green),
+            "red" => Ok(Self::Red),
+            _ => Err(format!("Invalid flag_color '{}'", s)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

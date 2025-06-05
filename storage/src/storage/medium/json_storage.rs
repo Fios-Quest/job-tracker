@@ -11,6 +11,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use tokio::fs::{create_dir_all, read, read_dir};
 
+#[derive(Clone)]
 pub struct JsonStore<O> {
     base_path: PathBuf,
     pub(crate) internal_store: StubStore<O>,
@@ -53,6 +54,34 @@ where
     }
 }
 
+pub trait ScopedJsonStoreFor
+where
+    Self: Sized,
+{
+    async fn new_scoped(base_path: PathBuf) -> Result<Self>;
+}
+
+impl ScopedJsonStoreFor for JsonStore<Company> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("company");
+        Self::new(base_path).await
+    }
+}
+
+impl ScopedJsonStoreFor for JsonStore<Flag> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("flag");
+        Self::new(base_path).await
+    }
+}
+
+impl ScopedJsonStoreFor for JsonStore<Role> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("role");
+        Self::new(base_path).await
+    }
+}
+
 impl<O> BaseStore<O> for JsonStore<O>
 where
     O: HasId + Clone + Serialize + DeserializeOwned,
@@ -86,7 +115,7 @@ impl<T> RecallByCompany<T> for JsonStore<T>
 where
     T: HasCompany + Clone + Serialize + DeserializeOwned,
 {
-    async fn recall_by_company<C: HasId>(&self, company: &C) -> anyhow::Result<Vec<T>> {
+    async fn recall_by_company<C: HasId>(&self, company: C) -> anyhow::Result<Vec<T>> {
         self.internal_store.recall_by_company(company).await
     }
 }

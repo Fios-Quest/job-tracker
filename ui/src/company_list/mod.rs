@@ -1,12 +1,11 @@
 mod company_list_item;
 
 use crate::error_message::ErrorMessage;
-use crate::StoreContext;
+use crate::StoreType;
 use company_list_item::CompanyListItem;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
-use storage::storable::object::company::Company;
-use storage::StorageError;
+use storage::prelude::*;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
@@ -20,16 +19,14 @@ fn handle_storage_error(error: anyhow::Error) -> Option<String> {
 
 #[component]
 pub fn CompanyList() -> Element {
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
     let mut error_message = use_signal(|| None);
 
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
-        let companies = use_context::<StoreContext>()
-            .find_company_by_name(&search)
-            .await;
+        let companies = use_context::<StoreType>().recall_by_name(search).await;
         match companies {
             Ok(companies) => companies,
             Err(e) => {
@@ -47,7 +44,7 @@ pub fn CompanyList() -> Element {
     });
 
     let create_company = move |event: Event<FormData>| {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         error_message.set(None);
         let company_name = event.values().get("company_name").map(|v| v.as_value());
 
@@ -55,7 +52,7 @@ pub fn CompanyList() -> Element {
             if let Some(company_name) = company_name {
                 if !company_name.is_empty() {
                     // Store the name
-                    let store_result = stores.create_company(&Company::new(company_name)).await;
+                    let store_result = stores.store(Company::new(company_name)).await;
 
                     match store_result {
                         Ok(()) => {

@@ -1,11 +1,9 @@
 use super::role_list_item::RoleListItem;
 use crate::error_message::ErrorMessage;
-use crate::StoreContext;
+use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
-use storage::storable::object::role::Role;
-use storage::StorageError;
-use storage::Timestamp;
+use storage::prelude::*;
 use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
@@ -20,14 +18,14 @@ fn handle_storage_error(error: anyhow::Error) -> Option<String> {
 
 #[component]
 pub fn PopulatedRoleList(company_id: Uuid) -> Element {
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
     let mut role_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
 
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
-        let result = use_context::<StoreContext>()
-            .get_roles_for_company(company_id)
+        let result = use_context::<StoreType>()
+            .recall_by_company(&company_id)
             .await;
         match result {
             Ok(roles) => roles,
@@ -46,7 +44,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     });
 
     let create_role = move |event: Event<FormData>| {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         async move {
             let role_name = event.values().get("role_name").map(|v| v.as_value());
 
@@ -54,7 +52,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
                 if !role_name.is_empty() {
                     // Store the name
                     let result = stores
-                        .create_role(&Role::new(company_id, role_name, Timestamp::now()))
+                        .store(Role::new(company_id, role_name, Timestamp::now()))
                         .await;
 
                     match result {

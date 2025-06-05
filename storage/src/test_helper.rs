@@ -21,31 +21,26 @@ impl TestCounter {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::prelude::*;
+    use crate::test_helper::TestCounter;
 
-    mod test_counter {
-        use crate::test_helper::TestCounter;
+    const NEW_COUNTER: TestCounter = TestCounter::new();
 
-        const NEW_COUNTER: TestCounter = TestCounter::new();
-
-        #[test]
-        fn test_new_counter() {
-            assert_eq!(NEW_COUNTER.next(), 1);
-        }
-
-        #[test]
-        fn test_non_const() {
-            let counter = TestCounter::new();
-            assert_eq!(counter.next(), 1);
-        }
-
-        // #[test]
-        // fn test_next_counter() {
-        //     let counter = TestCounter::new();
-        //     assert_eq!(NEW_COUNTER.next(), 1);
-        //     assert_eq!(NEW_COUNTER.next(), 2);
-        //     assert_eq!(NEW_COUNTER.next(), 3);
-        // }
+    #[test]
+    fn test_new_counter() {
+        assert_eq!(NEW_COUNTER.next(), 1);
     }
+
+    #[test]
+    fn test_non_const() {
+        let counter = TestCounter::new();
+        assert_eq!(counter.next(), 1);
+    }
+
+    // #[test]
+    // fn test_next_counter() {
+    //     let counter = TestCounter::new();
+    //     assert_eq!(NEW_COUNTER.next(), 1);
+    //     assert_eq!(NEW_COUNTER.next(), 2);
+    //     assert_eq!(NEW_COUNTER.next(), 3);
+    // }
 }

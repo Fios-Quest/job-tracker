@@ -1,18 +1,18 @@
-use crate::{Editable, StoreContext};
+use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use std::str::FromStr;
-use storage::storable::object::flag::{Flag, FlagColor};
+use storage::prelude::*;
 
 #[component]
 pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
 
     let input_name = "flag_name";
     let input_color = "flag_color";
 
     if let Some(event) = form_receiver() {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         let flag = flag.clone();
         let flag_name = event.values().get(input_name).map(|v| v.as_value());
         let flag_color = event
@@ -28,7 +28,7 @@ pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
                         flag_color,
                         ..flag
                     };
-                    let _result = stores.update_flag(&flag).await;
+                    let _result = stores.store(flag).await;
                     reload_flags(());
                     form_receiver.set(None);
                 }

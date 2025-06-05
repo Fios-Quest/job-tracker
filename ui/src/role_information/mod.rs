@@ -2,18 +2,18 @@ use dioxus::prelude::*;
 use storage::ApplicationContext;
 
 mod populated_role_description;
-use crate::{Editable, StoreContext};
+use crate::{Editable, StoreType};
 use populated_role_description::PopulatedRoleDescription;
-use storage::storable::object::role::Role;
+use storage::prelude::*;
 
 #[component]
 pub fn RoleDescription(role: Option<Role>) -> Element {
-    let stores = use_context::<StoreContext>();
+    let stores = use_context::<StoreType>();
     let mut application_context = use_context::<Signal<ApplicationContext>>();
 
     let mut role_resource = use_resource(|| async {
         if let Some(role) = use_context::<Signal<ApplicationContext>>()().get_role() {
-            use_context::<StoreContext>().get_role(role).await.ok()
+            use_context::<StoreType>().recall_by_id(role).await.ok()
         } else {
             None
         }
@@ -21,14 +21,14 @@ pub fn RoleDescription(role: Option<Role>) -> Element {
 
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
-    let Some(role) = role_resource().unwrap_or_default() else {
+    let Some(role): Option<Role> = role_resource().unwrap_or_default() else {
         return rsx! {};
     };
 
     let input_name = "role_description";
 
     if let Some(event) = form_receiver() {
-        let stores = stores.clone();
+        let mut stores = stores.clone();
         let role = role.clone();
         let role_description = event.values().get(input_name).map(|v| v.as_value());
         spawn(async move {
@@ -38,7 +38,7 @@ pub fn RoleDescription(role: Option<Role>) -> Element {
                         description,
                         ..role.clone()
                     };
-                    let _result = stores.update_role(&role).await;
+                    let _result = stores.store(role.clone()).await;
                     let new_context = application_context().set_role(role.clone()).unwrap(); // ToDo: Fix me
                     application_context.set(new_context);
                     role_resource.restart();

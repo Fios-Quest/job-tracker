@@ -26,7 +26,7 @@ pub mod prelude {
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,
-        RoleStore,
+        RoleStore, ScopedJsonStoreFor,
     };
     pub use crate::time::Timestamp;
 }

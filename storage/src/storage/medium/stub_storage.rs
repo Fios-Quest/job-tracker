@@ -4,6 +4,7 @@ use crate::storage::{
 };
 use crate::StorageError;
 
+#[derive(Clone)]
 pub struct StubStore<T> {
     store: Vec<T>,
 }
@@ -68,7 +69,7 @@ impl<T> RecallByCompany<T> for StubStore<T>
 where
     T: HasCompany + Clone,
 {
-    async fn recall_by_company<C: HasId>(&self, company: &C) -> anyhow::Result<Vec<T>> {
+    async fn recall_by_company<C: HasId>(&self, company: C) -> anyhow::Result<Vec<T>> {
         Ok(self
             .store
             .iter()
