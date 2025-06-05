@@ -1,3 +1,10 @@
+// ToDo: Can we do a better job with this code?
+// - async_fn_in_trait <- explicit future types seem to not like future in future as future is not
+//   Send
+// - private_bounds <- Need to figure out how to prevent conflicting implementations of
+//   HasFutureStoreFor
+#![allow(async_fn_in_trait, private_bounds)]
+
 mod application_context;
 pub use application_context::*;
 
