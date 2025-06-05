@@ -116,6 +116,7 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storage::base_store::test_helper::test_base_store;
     use crate::test_helper::*;
     use paste::paste;
 
