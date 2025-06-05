@@ -64,6 +64,7 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storable::HasCompany;
 
     #[test]
     fn test_partial_eq_same_company() {
@@ -100,5 +101,12 @@ mod tests {
         let company1 = Company::new("name".to_string());
         let company2 = Company::new("name".to_string());
         assert_ne!(company1, company2);
+    }
+
+    #[test]
+    fn test_create_role() {
+        let company = Company::new("company".to_string());
+        let role = company.create_role("role".to_string(), Timestamp::now());
+        assert_eq!(company.get_id(), role.get_company_id());
     }
 }

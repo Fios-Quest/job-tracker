@@ -102,14 +102,20 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storage::base_store::test_helper::test_base_store;
-    use crate::storage::recall_by_company::test_helper::test_recall_by_company;
+    use crate::storage::{
+        base_store::test_helper::test_base_store,
+        recall_by_company::test_helper::test_recall_by_company,
+        recall_by_name::test_helper::test_recall_by_name,
+    };
     use crate::test_helper::*;
     use paste::paste;
 
     test_base_store!(StubStore, Company);
     test_base_store!(StubStore, Flag);
     test_base_store!(StubStore, Role);
+    test_recall_by_name!(StubStore, Company);
+    test_recall_by_name!(StubStore, Flag);
+    test_recall_by_name!(StubStore, Role);
     test_recall_by_company!(StubStore, Flag);
     test_recall_by_company!(StubStore, Role);
 }

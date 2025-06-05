@@ -14,11 +14,11 @@ pub struct Role {
 }
 
 impl Role {
-    pub fn new(company_id: Uuid, name: String, date_applied: Timestamp) -> Role {
+    pub fn new<S: Into<String>>(company_id: Uuid, name: S, date_applied: Timestamp) -> Role {
         Role {
             id: Uuid::new_v4(),
             company_id,
-            name,
+            name: name.into(),
             description: "".to_string(),
             date_applied,
             date_deleted: None,

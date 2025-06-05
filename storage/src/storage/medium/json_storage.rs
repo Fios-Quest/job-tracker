@@ -116,11 +116,42 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storage::base_store::test_helper::test_base_store;
+    use crate::storage::{
+        base_store::test_helper::test_base_store,
+        recall_by_company::test_helper::test_recall_by_company,
+        recall_by_name::test_helper::test_recall_by_name,
+    };
     use crate::test_helper::*;
     use paste::paste;
 
     test_base_store!(JsonStore, Company);
     test_base_store!(JsonStore, Flag);
     test_base_store!(JsonStore, Role);
+    test_recall_by_name!(JsonStore, Company);
+    test_recall_by_name!(JsonStore, Flag);
+    test_recall_by_name!(JsonStore, Role);
+    test_recall_by_company!(JsonStore, Flag);
+    test_recall_by_company!(JsonStore, Role);
+
+    #[tokio::test]
+    async fn test_load_from_file() {
+        let base_path = tempdir::TempDir::new("json_store_test")
+            .unwrap()
+            .into_path();
+
+        let company = Company::new("company");
+
+        // Scoped store to drop it
+        {
+            let mut initial_store = JsonStore::new(base_path.clone()).await.unwrap();
+            initial_store.store(company.clone()).await.unwrap();
+        }
+        // Second scoped store
+        let recalled_company = {
+            let loaded_store = JsonStore::<Company>::new(base_path).await.unwrap();
+            loaded_store.recall_by_id(&company.get_id()).await.unwrap()
+        };
+
+        assert_eq!(recalled_company, company);
+    }
 }

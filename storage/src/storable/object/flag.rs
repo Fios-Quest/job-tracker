@@ -20,22 +20,22 @@ pub struct Flag {
 }
 
 impl Flag {
-    pub fn new_green(company_id: Uuid, name: String) -> Self {
+    pub fn new_green<S: Into<String>>(company_id: Uuid, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
             company_id,
             flag_color: FlagColor::Green,
-            name,
+            name: name.into(),
             date_deleted: None,
         }
     }
 
-    pub fn new_red(company_id: Uuid, name: String) -> Self {
+    pub fn new_red<S: Into<String>>(company_id: Uuid, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
             company_id,
             flag_color: FlagColor::Red,
-            name,
+            name: name.into(),
             date_deleted: None,
         }
     }
@@ -77,9 +77,10 @@ mod test_helper {
     use crate::test_helper::{TestCounter, TestHelper};
     use uuid::Uuid;
 
+    const TEST_COUNTER: TestCounter = TestCounter::new();
+
     impl TestHelper for Flag {
         async fn new_test() -> anyhow::Result<Self> {
-            const TEST_COUNTER: TestCounter = TestCounter::new();
             let next = TEST_COUNTER.next();
             match next % 2 == 0 {
                 true => Ok(Flag::new_green(

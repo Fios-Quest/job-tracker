@@ -1,7 +1,8 @@
-// use crate::composite_store::{HasMutStoreFor, HasStoreFor};
 use crate::storage::{CompanyStore, FlagStore, RoleStore};
 use crate::Sealed;
 
+// Note: General Store can not be as a general store (I know 🙄) used like Thread Safe General Store
+// due to conflicting implementations for the Storage properties
 pub struct GeneralStore<C, F, R>
 where
     C: CompanyStore,

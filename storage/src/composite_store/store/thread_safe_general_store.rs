@@ -100,11 +100,48 @@ where
 }
 
 #[cfg(test)]
+mod test_helper {
+    use super::*;
+    use crate::storage::StubStore;
+    use crate::test_helper::TestHelper;
+
+    #[cfg(test)]
+    impl TestHelper for ThreadSafeGeneralStore<StubStore<Company>, StubStore<Flag>, StubStore<Role>> {
+        #[cfg(test)]
+        async fn new_test() -> anyhow::Result<Self> {
+            let store = ThreadSafeGeneralStore::new(
+                StubStore::default(),
+                StubStore::default(),
+                StubStore::default(),
+            );
+            Ok(store)
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use crate::composite_store::ThreadSafeGeneralStore;
-    use crate::storable::{Company, Flag, Role};
-    use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName, StubStore};
+    use crate::prelude::*;
+    use crate::storage::{
+        base_store::test_helper::test_base_store,
+        recall_by_company::test_helper::test_recall_by_company,
+        recall_by_name::test_helper::test_recall_by_name, StubStore,
+    };
+    use crate::test_helper::*;
     use crate::Timestamp;
+    use paste::paste;
+
+    test_base_store!(ThreadSafeGeneralStore, Company);
+    test_base_store!(ThreadSafeGeneralStore, Flag);
+    test_base_store!(ThreadSafeGeneralStore, Role);
+    test_recall_by_name!(ThreadSafeGeneralStore, Company);
+    test_recall_by_name!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_name!(ThreadSafeGeneralStore, Role);
+    test_recall_by_company!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_company!(ThreadSafeGeneralStore, Role);
+
+    // ---- The following tests are more to show how the API of ThreadSafeGeneralStore ----
 
     #[tokio::test]
     async fn test_base_store() {
