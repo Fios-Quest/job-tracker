@@ -152,6 +152,8 @@ mod tests {
     };
     use crate::test_helper::*;
     use paste::paste;
+    use std::fs::File;
+    use std::io::Write;
 
     test_base_store!(JsonStore, Company);
     test_base_store!(JsonStore, Flag);
@@ -170,17 +172,51 @@ mod tests {
 
         let company = Company::new("company");
 
-        // Scoped store to drop it
-        {
-            let mut initial_store = JsonStore::new(base_path.clone()).await.unwrap();
-            initial_store.store(company.clone()).await.unwrap();
-        }
-        // Second scoped store
-        let recalled_company = {
-            let loaded_store = JsonStore::<Company>::new(base_path).await.unwrap();
-            loaded_store.recall_by_id(&company.get_id()).await.unwrap()
-        };
+        // Store some actual json
+        let mut initial_store = JsonStore::new(base_path.clone()).await.unwrap();
+        initial_store.store(company.clone()).await.unwrap();
+        drop(initial_store);
+
+        // Create a dummy file
+        let file_name = base_path.join("test.txt");
+        let mut file = File::create(file_name).unwrap();
+        file.write_all(b"I am not json!").unwrap();
+        drop(file);
+
+        // Read the json back (but not the dummy file
+        let loaded_store = JsonStore::<Company>::new(base_path).await.unwrap();
+        let recalled_company = loaded_store.recall_by_id(&company.get_id()).await.unwrap();
 
         assert_eq!(recalled_company, company);
+    }
+
+    #[tokio::test]
+    async fn test_company_scoped() {
+        let base_path = tempdir::TempDir::new("json_store_test")
+            .unwrap()
+            .into_path();
+
+        let company_store = JsonStore::<Company>::new_scoped(base_path).await.unwrap();
+        assert!(company_store.base_path.ends_with("company"));
+    }
+
+    #[tokio::test]
+    async fn test_flag_scoped() {
+        let base_path = tempdir::TempDir::new("json_store_test")
+            .unwrap()
+            .into_path();
+
+        let flag_store = JsonStore::<Flag>::new_scoped(base_path).await.unwrap();
+        assert!(flag_store.base_path.ends_with("flag"));
+    }
+
+    #[tokio::test]
+    async fn test_role_scoped() {
+        let base_path = tempdir::TempDir::new("json_store_test")
+            .unwrap()
+            .into_path();
+
+        let role_store = JsonStore::<Role>::new_scoped(base_path).await.unwrap();
+        assert!(role_store.base_path.ends_with("role"));
     }
 }
