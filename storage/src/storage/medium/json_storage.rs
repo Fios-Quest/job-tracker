@@ -184,7 +184,7 @@ mod tests {
         file.write_all(b"I am not json!").unwrap();
         drop(file);
 
-        // Read the json back (but not the dummy file
+        // Read the json back (but not the dummy file)
         let loaded_store = JsonStore::<Company>::new(base_path).await.unwrap();
         let recalled_company = loaded_store.recall_by_id(&company.get_id()).await.unwrap();
 

@@ -25,7 +25,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     // Get roles for company
     let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
         let result = use_context::<StoreType>()
-            .recall_by_company(&company_id)
+            .recall_by_company(company_id)
             .await;
         match result {
             Ok(roles) => roles,

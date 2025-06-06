@@ -21,7 +21,6 @@ enum Route {
     Support { },
     #[route("/help")]
     Help { }
-    
 }
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
