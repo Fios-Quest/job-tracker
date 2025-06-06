@@ -1,4 +1,4 @@
-use crate::storable::{HasCompany, HasId, HasName};
+use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
 use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName};
 use crate::Sealed;
 use tokio::sync::MappedMutexGuard;
@@ -26,7 +26,7 @@ impl<T, O> RecallById<O> for T
 where
     T: HasFutureStoreFor<O>,
     T::Storage: RecallById<O>,
-    O: HasId + Clone,
+    O: HasId + HasDeleted + Clone,
 {
     async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
         self.get_store().await.recall_by_id(id).await
@@ -37,7 +37,7 @@ impl<T, O> RecallByName<O> for T
 where
     T: HasFutureStoreFor<O>,
     T::Storage: RecallByName<O>,
-    O: HasName + Clone,
+    O: HasName + HasDeleted + Clone,
 {
     async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<O>> {
         self.get_store().await.recall_by_name(name).await
@@ -48,7 +48,7 @@ impl<T, O> RecallByCompany<O> for T
 where
     T: HasFutureStoreFor<O>,
     T::Storage: RecallByCompany<O>,
-    O: HasCompany + Clone,
+    O: HasCompany + HasDeleted + Clone,
 {
     async fn recall_by_company<I: HasId>(&self, company_id: I) -> anyhow::Result<Vec<O>> {
         self.get_store().await.recall_by_company(company_id).await

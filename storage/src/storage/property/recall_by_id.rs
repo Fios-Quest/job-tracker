@@ -1,9 +1,10 @@
+use crate::prelude::HasDeleted;
 use crate::storable::HasId;
 use anyhow::Result;
 
 pub trait RecallById<T>
 where
-    T: HasId + Clone,
+    T: HasId + HasDeleted + Clone,
 {
     async fn recall_by_id<I: HasId>(&self, id: &I) -> Result<T>;
 }

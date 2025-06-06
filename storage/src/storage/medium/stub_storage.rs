@@ -1,3 +1,4 @@
+use crate::prelude::HasDeleted;
 use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
 use crate::storage::{
     BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallById, RecallByName, RoleStore,
@@ -33,12 +34,13 @@ where
 
 impl<O> RecallById<O> for StubStore<O>
 where
-    O: HasId + Clone,
+    O: HasId + HasDeleted + Clone,
 {
     async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
         Ok(self
             .store
             .iter()
+            .filter(|item| !item.is_deleted())
             .find(|stored_item| id.get_id() == stored_item.get_id())
             .cloned()
             .ok_or(StorageError::NotFound)?)
@@ -47,7 +49,7 @@ where
 
 impl<T> RecallByName<T> for StubStore<T>
 where
-    T: HasName + Clone,
+    T: HasName + HasDeleted + Clone,
 {
     async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<T>> {
         let search_string = name.get_name().to_lowercase();
@@ -60,6 +62,7 @@ where
                     .to_lowercase()
                     .contains(&search_string)
             })
+            .filter(|item| !item.is_deleted())
             .cloned()
             .collect())
     }
@@ -67,13 +70,14 @@ where
 
 impl<T> RecallByCompany<T> for StubStore<T>
 where
-    T: HasCompany + Clone,
+    T: HasCompany + HasDeleted + Clone,
 {
     async fn recall_by_company<C: HasId>(&self, company: C) -> anyhow::Result<Vec<T>> {
         Ok(self
             .store
             .iter()
             .filter(|stored_item| stored_item.get_company_id() == company.get_id())
+            .filter(|item| !item.is_deleted())
             .cloned()
             .collect())
     }

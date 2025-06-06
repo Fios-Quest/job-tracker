@@ -1,3 +1,4 @@
+use crate::prelude::HasDeleted;
 use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
 use crate::storage::{
     BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallById, RecallByName, RoleStore,
@@ -95,7 +96,7 @@ where
 
 impl<O> RecallById<O> for JsonStore<O>
 where
-    O: HasId + Clone + Serialize + DeserializeOwned,
+    O: HasId + HasDeleted + Clone + Serialize + DeserializeOwned,
 {
     async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
         self.internal_store.recall_by_id(id).await
@@ -104,7 +105,7 @@ where
 
 impl<T> RecallByName<T> for JsonStore<T>
 where
-    T: HasName + Clone + Serialize + DeserializeOwned,
+    T: HasName + HasDeleted + Clone + Serialize + DeserializeOwned,
 {
     async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<T>> {
         self.internal_store.recall_by_name(name).await
@@ -113,7 +114,7 @@ where
 
 impl<T> RecallByCompany<T> for JsonStore<T>
 where
-    T: HasCompany + Clone + Serialize + DeserializeOwned,
+    T: HasCompany + HasDeleted + Clone + Serialize + DeserializeOwned,
 {
     async fn recall_by_company<C: HasId>(&self, company: C) -> anyhow::Result<Vec<T>> {
         self.internal_store.recall_by_company(company).await
