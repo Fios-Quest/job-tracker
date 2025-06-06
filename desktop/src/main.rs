@@ -2,11 +2,11 @@ use chrono::Local;
 use dioxus::prelude::*;
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
-use storage::{ApplicationContext, JsonStores};
+use storage::prelude::*;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
-use ui::{Navbar, StoreContext};
+use ui::{Navbar, StoreType};
 use views::{Help, Home, Support};
 
 mod views;
@@ -21,7 +21,6 @@ enum Route {
     Support { },
     #[route("/help")]
     Help { }
-    
 }
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -41,10 +40,11 @@ fn get_storage_directory() -> PathBuf {
     get_project_directory().join("logs")
 }
 
-async fn create_stores() -> JsonStores {
-    JsonStores::new(get_storage_directory())
+async fn create_stores() -> StoreType {
+    let path = get_storage_directory();
+    JsonThreadSafeGeneralStore::new_json(path)
         .await
-        .expect("Could not start database")
+        .expect("Could not create store")
 }
 
 fn configure_logging() {
@@ -72,10 +72,9 @@ fn main() {
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let stores = rt.block_on(create_stores());
-    let stores_context = StoreContext::new(stores);
 
     dioxus::LaunchBuilder::new()
-        .with_context(stores_context)
+        .with_context(stores)
         .launch(App);
 }
 

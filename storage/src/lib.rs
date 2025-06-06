@@ -1,17 +1,41 @@
+// ToDo: Can we do a better job with this code?
+// - async_fn_in_trait <- explicit future types seem to not like future in future as future is not
+//   Send
+// - private_bounds <- Need to figure out how to prevent conflicting implementations of
+//   HasFutureStoreFor
+#![allow(async_fn_in_trait, private_bounds)]
+
 mod application_context;
 pub use application_context::*;
-
-mod store;
-pub use store::*;
-
-mod stores;
-pub use stores::*;
 
 mod time;
 pub use time::*;
 
-mod utils;
-pub use utils::*;
-
 mod error;
 pub use error::*;
+
+mod composite_store;
+mod storable;
+mod storage;
+
+#[cfg(test)]
+mod test_helper;
+
+// prevent traits being externally implemented
+trait Sealed {}
+
+pub mod prelude {
+    pub use crate::application_context::{ApplicationContext, ApplicationContextError};
+    pub use crate::composite_store::{
+        HasFutureStoreFor, JsonThreadSafeGeneralStore, ThreadSafeGeneralStore,
+    };
+    pub use crate::error::StorageError;
+    pub use crate::storable::{
+        Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, Role,
+    };
+    pub use crate::storage::{
+        BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,
+        RoleStore, ScopedJsonStoreFor,
+    };
+    pub use crate::time::Timestamp;
+}

@@ -1,4 +1,4 @@
-use crate::Role;
+use crate::storable::Role;
 use std::fmt;
 use uuid::Uuid;
 

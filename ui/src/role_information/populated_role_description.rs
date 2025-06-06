@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use storage::Role;
+use storage::prelude::*;
 
 #[component]
 pub fn PopulatedRoleDescription(role: Role) -> Element {
