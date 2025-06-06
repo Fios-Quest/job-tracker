@@ -51,8 +51,8 @@ impl<T> RecallByName<T> for StubStore<T>
 where
     T: HasName + HasDeleted + Clone,
 {
-    async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<T>> {
-        let search_string = name.get_name().to_lowercase();
+    async fn recall_by_name<N: AsRef<str>>(&self, name: N) -> anyhow::Result<Vec<T>> {
+        let search_string = name.as_ref().to_lowercase();
         Ok(self
             .store
             .iter()

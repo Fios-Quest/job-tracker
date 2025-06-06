@@ -181,7 +181,8 @@ mod tests {
 
         all_store.store(company.clone()).await.unwrap();
 
-        let recalled_companies: Vec<Company> = all_store.recall_by_name(&company).await.unwrap();
+        let recalled_companies: Vec<Company> =
+            all_store.recall_by_name(&company.name).await.unwrap();
 
         assert!(recalled_companies.contains(&company));
     }

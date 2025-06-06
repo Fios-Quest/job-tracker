@@ -39,7 +39,7 @@ where
     T::Storage: RecallByName<O>,
     O: HasName + HasDeleted + Clone,
 {
-    async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<O>> {
+    async fn recall_by_name<N: AsRef<str>>(&self, name: N) -> anyhow::Result<Vec<O>> {
         self.get_store().await.recall_by_name(name).await
     }
 }

@@ -107,7 +107,7 @@ impl<T> RecallByName<T> for JsonStore<T>
 where
     T: HasName + HasDeleted + Clone + Serialize + DeserializeOwned,
 {
-    async fn recall_by_name<N: HasName>(&self, name: N) -> anyhow::Result<Vec<T>> {
+    async fn recall_by_name<N: AsRef<str>>(&self, name: N) -> anyhow::Result<Vec<T>> {
         self.internal_store.recall_by_name(name).await
     }
 }
