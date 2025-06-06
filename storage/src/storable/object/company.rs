@@ -1,4 +1,4 @@
-use crate::storable::{HasDeleted, HasId, HasName, Role};
+use crate::storable::{Flag, HasDeleted, HasId, HasName, Role};
 use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -21,6 +21,14 @@ impl Company {
 
     pub fn create_role(&self, name: String, date_created: Timestamp) -> Role {
         Role::new(self.id, name, date_created)
+    }
+
+    pub fn create_green_flag(&self, name: String) -> Flag {
+        Flag::new_green(self.id, name)
+    }
+
+    pub fn create_red_flag(&self, name: String) -> Flag {
+        Flag::new_red(self.id, name)
     }
 }
 
@@ -51,12 +59,11 @@ impl HasDeleted for Company {
 #[cfg(test)]
 mod test_helper {
     use crate::storable::Company;
-    use crate::test_helper::{TestCounter, TestHelper};
+    use crate::test_helper::TestHelper;
 
     impl TestHelper for Company {
         async fn new_test() -> anyhow::Result<Self> {
-            const TEST_COUNTER: TestCounter = TestCounter::new();
-            Ok(Company::new(format!("Company {}", TEST_COUNTER.next())))
+            Ok(Company::new("Company"))
         }
     }
 }
@@ -64,7 +71,16 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::HasCompany;
+    use crate::storable::{
+        has_deleted::test_helper::test_has_deleted, has_id::test_helper::test_has_id,
+        has_name::test_helper::test_has_name, HasCompany,
+    };
+    use crate::test_helper::TestHelper;
+    use paste::paste;
+
+    test_has_id!(Company);
+    test_has_name!(Company);
+    test_has_deleted!(Company);
 
     #[test]
     fn test_partial_eq_same_company() {
@@ -108,5 +124,19 @@ mod tests {
         let company = Company::new("company".to_string());
         let role = company.create_role("role".to_string(), Timestamp::now());
         assert_eq!(company.get_id(), role.get_company_id());
+    }
+
+    #[test]
+    fn test_create_green_flag() {
+        let company = Company::new("company".to_string());
+        let flag = company.create_green_flag("green flag".to_string());
+        assert_eq!(company.get_id(), flag.get_company_id());
+    }
+
+    #[test]
+    fn test_create_red_flag() {
+        let company = Company::new("company".to_string());
+        let flag = company.create_red_flag("red flag".to_string());
+        assert_eq!(company.get_id(), flag.get_company_id());
     }
 }

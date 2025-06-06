@@ -59,17 +59,27 @@ impl HasDeleted for Role {
 #[cfg(test)]
 mod test_helper {
     use super::*;
-    use crate::test_helper::{TestCounter, TestHelper};
+    use crate::test_helper::TestHelper;
     use uuid::Uuid;
 
     impl TestHelper for Role {
         async fn new_test() -> anyhow::Result<Self> {
-            const TEST_COUNTER: TestCounter = TestCounter::new();
-            Ok(Role::new(
-                Uuid::new_v4(),
-                format!("Role {}", TEST_COUNTER.next()),
-                Timestamp::now(),
-            ))
+            Ok(Role::new(Uuid::new_v4(), "Role", Timestamp::now()))
         }
     }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::storable::{
+        has_company::test_helper::test_has_company, has_deleted::test_helper::test_has_deleted,
+        has_id::test_helper::test_has_id, has_name::test_helper::test_has_name,
+    };
+    use crate::test_helper::TestHelper;
+    use paste::paste;
+
+    test_has_id!(Role);
+    test_has_name!(Role);
+    test_has_company!(Role);
+    test_has_deleted!(Role);
 }
