@@ -1,9 +1,9 @@
-use crate::composite_store::{GeneralStore, HasFutureStoreFor};
+use crate::composite_store::HasFutureStoreFor;
 use crate::storable::{Company, Flag, Role};
 use crate::storage::{CompanyStore, FlagStore, RoleStore};
 use crate::Sealed;
 use std::sync::Arc;
-use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
+use tokio::sync::{Mutex, MutexGuard};
 
 #[derive(Clone)]
 pub struct ThreadSafeGeneralStore<C, F, R>
@@ -12,7 +12,9 @@ where
     F: FlagStore,
     R: RoleStore,
 {
-    general_store: Arc<Mutex<GeneralStore<C, F, R>>>,
+    company_store: Arc<Mutex<C>>,
+    flag_store: Arc<Mutex<F>>,
+    role_store: Arc<Mutex<R>>,
 }
 
 impl<C, F, R> ThreadSafeGeneralStore<C, F, R>
@@ -23,24 +25,22 @@ where
 {
     pub fn new(company_store: C, flag_store: F, role_store: R) -> Self {
         Self {
-            general_store: Arc::new(Mutex::new(GeneralStore::new(
-                company_store,
-                flag_store,
-                role_store,
-            ))),
+            company_store: Arc::new(Mutex::new(company_store)),
+            flag_store: Arc::new(Mutex::new(flag_store)),
+            role_store: Arc::new(Mutex::new(role_store)),
         }
     }
 
-    pub async fn company_store(&self) -> MappedMutexGuard<C> {
-        MutexGuard::map(self.general_store.lock().await, |lock| lock.company_store())
+    pub async fn company_store(&self) -> MutexGuard<C> {
+        self.company_store.lock().await
     }
 
-    pub async fn flag_store(&self) -> MappedMutexGuard<F> {
-        MutexGuard::map(self.general_store.lock().await, |lock| lock.flag_store())
+    pub async fn flag_store(&self) -> MutexGuard<F> {
+        self.flag_store.lock().await
     }
 
-    pub async fn role_store(&self) -> MappedMutexGuard<R> {
-        MutexGuard::map(self.general_store.lock().await, |lock| lock.role_store())
+    pub async fn role_store(&self) -> MutexGuard<R> {
+        self.role_store.lock().await
     }
 }
 
@@ -60,7 +60,7 @@ where
 {
     type Storage = C;
 
-    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
     where
         Self::Storage: 'a,
     {
@@ -76,7 +76,7 @@ where
 {
     type Storage = F;
 
-    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
     where
         Self::Storage: 'a,
     {
@@ -92,7 +92,7 @@ where
 {
     type Storage = R;
 
-    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
     where
         Self::Storage: 'a,
     {

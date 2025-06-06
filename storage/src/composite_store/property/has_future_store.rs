@@ -1,12 +1,12 @@
 use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
 use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName};
 use crate::Sealed;
-use tokio::sync::MappedMutexGuard;
+use tokio::sync::MutexGuard;
 
 pub trait HasFutureStoreFor<O>: Sealed {
     type Storage;
 
-    async fn get_store<'a>(&'a self) -> MappedMutexGuard<'a, Self::Storage>
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
     where
         <Self as HasFutureStoreFor<O>>::Storage: 'a;
 }
