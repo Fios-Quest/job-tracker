@@ -26,7 +26,9 @@ trait Sealed {}
 
 pub mod prelude {
     pub use crate::application_context::{ApplicationContext, ApplicationContextError};
-    pub use crate::composite_store::{HasFutureStoreFor, ThreadSafeGeneralStore};
+    pub use crate::composite_store::{
+        HasFutureStoreFor, JsonThreadSafeGeneralStore, ThreadSafeGeneralStore,
+    };
     pub use crate::error::StorageError;
     pub use crate::storable::{
         Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, Role,

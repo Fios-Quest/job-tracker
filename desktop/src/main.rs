@@ -3,7 +3,6 @@ use dioxus::prelude::*;
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
 use storage::prelude::*;
-use tokio::join;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
@@ -44,18 +43,9 @@ fn get_storage_directory() -> PathBuf {
 
 async fn create_stores() -> StoreType {
     let path = get_storage_directory();
-
-    let (company_store, flag_store, role_store) = join!(
-        JsonStore::<Company>::new_scoped(path.clone()),
-        JsonStore::<Flag>::new_scoped(path.clone()),
-        JsonStore::<Role>::new_scoped(path.clone()),
-    );
-
-    StoreType::new(
-        company_store.expect("Store failed to initialise"),
-        flag_store.expect("Store failed to initialise"),
-        role_store.expect("Store failed to initialise"),
-    )
+    JsonThreadSafeGeneralStore::new_json(path)
+        .await
+        .expect("Could not create store")
 }
 
 fn configure_logging() {

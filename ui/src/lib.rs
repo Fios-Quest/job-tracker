@@ -28,4 +28,4 @@ mod error_message;
 
 use storage::prelude::*;
 #[cfg(feature = "desktop")]
-pub type StoreType = ThreadSafeGeneralStore<JsonStore<Company>, JsonStore<Flag>, JsonStore<Role>>;
+pub type StoreType = JsonThreadSafeGeneralStore;
