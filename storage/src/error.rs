@@ -17,3 +17,22 @@ impl StorageError {
         matches!(self, StorageError::AlreadyExists)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_not_found() {
+        let error = StorageError::NotFound;
+        assert!(error.is_not_found());
+        assert!(!error.is_already_exists());
+    }
+
+    #[test]
+    fn test_already_exists() {
+        let error = StorageError::AlreadyExists;
+        assert!(error.is_already_exists());
+        assert!(!error.is_not_found());
+    }
+}
