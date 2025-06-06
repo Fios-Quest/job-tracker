@@ -84,6 +84,11 @@ fn App() -> Element {
     use_context_provider(move || application_context);
 
     rsx! {
+        // The Stylesheet component inserts a style link into the head of the document
+        document::Stylesheet {
+            // Urls are relative to your Cargo.toml file
+            href: asset!("/assets/tailwind.css"),
+        }
         // Global app resources
         document::Link { rel: "stylesheet", href: MAIN_CSS }
 
