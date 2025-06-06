@@ -124,8 +124,8 @@ mod test_helper {
 mod tests {
     use crate::composite_store::ThreadSafeGeneralStore;
     use crate::prelude::*;
+    use crate::storage::recall_by_id::test_helper::test_recall_by_id;
     use crate::storage::{
-        base_store::test_helper::test_base_store,
         recall_by_company::test_helper::test_recall_by_company,
         recall_by_name::test_helper::test_recall_by_name, StubStore,
     };
@@ -133,9 +133,9 @@ mod tests {
     use crate::Timestamp;
     use paste::paste;
 
-    test_base_store!(ThreadSafeGeneralStore, Company);
-    test_base_store!(ThreadSafeGeneralStore, Flag);
-    test_base_store!(ThreadSafeGeneralStore, Role);
+    test_recall_by_id!(ThreadSafeGeneralStore, Company);
+    test_recall_by_id!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_id!(ThreadSafeGeneralStore, Role);
     test_recall_by_name!(ThreadSafeGeneralStore, Company);
     test_recall_by_name!(ThreadSafeGeneralStore, Flag);
     test_recall_by_name!(ThreadSafeGeneralStore, Role);

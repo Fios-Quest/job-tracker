@@ -146,8 +146,8 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storage::property::recall_by_id::test_helper::test_recall_by_id;
     use crate::storage::{
-        base_store::test_helper::test_base_store,
         recall_by_company::test_helper::test_recall_by_company,
         recall_by_name::test_helper::test_recall_by_name,
     };
@@ -156,9 +156,9 @@ mod tests {
     use std::fs::File;
     use std::io::Write;
 
-    test_base_store!(JsonStore, Company);
-    test_base_store!(JsonStore, Flag);
-    test_base_store!(JsonStore, Role);
+    test_recall_by_id!(JsonStore, Company);
+    test_recall_by_id!(JsonStore, Flag);
+    test_recall_by_id!(JsonStore, Role);
     test_recall_by_name!(JsonStore, Company);
     test_recall_by_name!(JsonStore, Flag);
     test_recall_by_name!(JsonStore, Role);
