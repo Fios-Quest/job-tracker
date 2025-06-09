@@ -12,7 +12,3 @@ body {
 .error-message::before {
     content: '⚠️'
 }
-
-#home {
-    display: flex;
-}

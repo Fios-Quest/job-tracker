@@ -198,8 +198,16 @@
         position: relative;
     }
 
+    .grid {
+        display: grid;
+    }
+
     .transform {
         transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+    }
+
+    .grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
