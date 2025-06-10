@@ -6,7 +6,7 @@ pub trait RecallById<T>
 where
     T: HasId + HasDeleted + Clone,
 {
-    async fn recall_by_id<I: HasId>(&self, id: &I) -> Result<T>;
+    async fn recall_by_id<I: HasId>(&self, id: I) -> Result<T>;
 }
 
 #[cfg(test)]
