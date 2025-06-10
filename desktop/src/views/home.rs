@@ -9,7 +9,7 @@ pub fn Home() -> Element {
     let role = application_context().get_role().cloned();
 
     rsx! {
-        div { id: "home", class: "grid grid-cols-3",
+        div { id: "home", class: "grid grid-cols-2",
 
             section { id: "left-home",
                 CompanyList {}
