@@ -1,12 +1,8 @@
 use dioxus::prelude::*;
 
-const SUPPORT_CSS: Asset = asset!("/assets/support.css");
-
 #[component]
 pub fn Support() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: SUPPORT_CSS }
-
         h1 { "Support" }
 
         p { class: "warning", "Absolutely do not provide monetary support if you are not working!" }

@@ -22,8 +22,6 @@ enum Route {
     Help { }
 }
 
-const MAIN_CSS: Asset = asset!("/assets/main.css");
-
 fn get_project_directory() -> PathBuf {
     directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
         .expect("No valid home directory found!")
@@ -90,8 +88,6 @@ fn App() -> Element {
             href: asset!("/assets/generated/tailwind.css"),
         }
         // Global app resources
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-
         Router::<Route> {}
     }
 }

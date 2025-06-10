@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use storage::ApplicationContext;
-use ui::{CompanyList, FlagList, RoleDescription, RoleList};
+use ui::{CompanyDetails, CompanyList, FlagList, RoleDescription, RoleList};
 
 #[component]
 pub fn Home() -> Element {
@@ -14,7 +14,10 @@ pub fn Home() -> Element {
             section { id: "left-home",
                 CompanyList {}
                 RoleList { company_id }
-                FlagList { company_id }
+            }
+
+            section {
+                CompanyDetails { company_id }
             }
 
             section { id: "role-information",
