@@ -1,18 +1,20 @@
 use crate::editable::Editable;
-use crate::StoreType;
+use crate::{Route, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
-use storage::ApplicationContext;
 
 #[component]
 pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
-    let mut application_context = use_context::<Signal<ApplicationContext>>();
     let stores = use_context::<StoreType>();
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
-    let Role { id, name, .. } = role.clone();
+    let Role {
+        id,
+        name,
+        company_id,
+        ..
+    } = role.clone();
 
-    let current_role = role.clone();
     let display = rsx! {
         input {
             id: id.to_string(),
@@ -20,12 +22,13 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
             name: "role",
             checked: false,
             onchange: move |_| {
-                application_context
-                    .set(
-                        application_context()
-                            .set_role(current_role.clone())
-                            .expect("CompanyId not set"),
-                    )
+                spawn(async move {
+                    navigator()
+                        .push(Route::HomeRole {
+                            company_id,
+                            role_id: id,
+                        });
+                });
             },
         }
         label { r#for: id.to_string(), "{name}" }

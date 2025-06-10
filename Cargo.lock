@@ -2657,6 +2657,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ui",
+ "uuid",
 ]
 
 [[package]]
@@ -5154,6 +5155,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dioxus",
+ "log",
  "pulldown-cmark",
  "server",
  "storage",

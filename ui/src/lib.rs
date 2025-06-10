@@ -1,5 +1,8 @@
 //! This crate contains all shared UI for the workspace.
 
+mod router;
+pub use router::Route;
+
 mod navbar;
 pub use navbar::Navbar;
 
@@ -22,6 +25,7 @@ mod editable;
 pub use editable::*;
 
 mod error_message;
+pub mod views;
 
 use storage::prelude::*;
 #[cfg(feature = "desktop")]

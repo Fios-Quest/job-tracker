@@ -1,10 +1,9 @@
-use crate::{Editable, StoreType};
+use crate::{Editable, Route, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
 
 #[component]
 pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {
-    let mut application_context = use_context::<Signal<ApplicationContext>>();
     let stores = use_context::<StoreType>();
     let Company { id, name, .. } = company.clone();
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
@@ -27,12 +26,19 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
         });
     }
 
+    let company_id = company.id;
+
     let display = rsx! {
         input {
             id: id.to_string(),
             r#type: "radio",
             name: "company",
-            onchange: move |_| application_context.set(application_context().set_company_id(id)),
+            onchange: move |_| {
+                spawn(async move {
+                    let nav = navigator();
+                    nav.push(Route::HomeCompany { company_id });
+                });
+            },
         }
         label { r#for: id.to_string(), "{name}" }
     };

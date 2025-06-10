@@ -76,7 +76,7 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
     rsx! {
         div { id: "roles", class: "{company_id}",
 
-            h3 { "Roles" }
+            h3 { class: "text-2xl", "Roles" }
 
             ul { {roles_list} }
 
@@ -84,13 +84,17 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
                 ErrorMessage { message }
             }
 
-            form { onsubmit: create_role,
+            form { class: "flex flex-col gap-y-2", onsubmit: create_role,
                 input {
                     id: "add_role",
+                    class: "bg-slate-800 text-slate-200 rounded",
                     name: "role_name",
                     value: role_name_value,
                 }
-                input { r#type: "submit" }
+                input {
+                    class: "bg-slate-400 text-slate-900 rounded cursor-pointer m-auto py-1.5 px-4",
+                    r#type: "submit",
+                }
             }
         }
     }

@@ -1,25 +1,27 @@
 use dioxus::prelude::*;
-use storage::ApplicationContext;
+use uuid::Uuid;
 
 mod populated_role_description;
-use crate::{Editable, StoreType};
+use crate::{Editable, Route, StoreType};
 use populated_role_description::PopulatedRoleDescription;
 use storage::prelude::*;
 
 #[component]
-pub fn RoleDescription(role: Option<Role>) -> Element {
+pub fn RoleDescription(role_id: Option<Uuid>) -> Element {
     let stores = use_context::<StoreType>();
-    let mut application_context = use_context::<Signal<ApplicationContext>>();
 
-    let mut role_resource = use_resource(|| async {
-        if let Some(role) = use_context::<Signal<ApplicationContext>>()().get_role() {
-            use_context::<StoreType>().recall_by_id(role).await.ok()
-        } else {
-            None
-        }
-    });
+    let role_resource: Resource<Option<Role>> =
+        use_resource(use_reactive!(|(role_id)| async move {
+            if let Some(role_id) = role_id {
+                let temp: Option<Role> =
+                    use_context::<StoreType>().recall_by_id(&role_id).await.ok();
+                temp
+            } else {
+                None
+            }
+        }));
 
-    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
+    let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let Some(role): Option<Role> = role_resource().unwrap_or_default() else {
         return rsx! {};
@@ -39,10 +41,11 @@ pub fn RoleDescription(role: Option<Role>) -> Element {
                         ..role.clone()
                     };
                     let _result = stores.store(role.clone()).await;
-                    let new_context = application_context().set_role(role.clone()).unwrap(); // ToDo: Fix me
-                    application_context.set(new_context);
-                    role_resource.restart();
-                    form_receiver.set(None);
+                    let nav = navigator();
+                    nav.push(Route::HomeRole {
+                        company_id: role.company_id,
+                        role_id: role.id,
+                    });
                 }
             }
         });

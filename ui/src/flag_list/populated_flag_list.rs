@@ -23,7 +23,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     let mut error_message = use_signal(|| None);
 
     // Get flags for company
-    let mut flags_resource = use_resource(use_reactive!(|(company_id,)| async move {
+    let mut flags_resource = use_resource(use_reactive!(|(company_id)| async move {
         let result = use_context::<StoreType>()
             .recall_by_company(company_id)
             .await;
