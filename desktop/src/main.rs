@@ -1,6 +1,5 @@
-use chrono::Local;
 use dioxus::prelude::*;
-use std::fs::{create_dir_all, File};
+use std::fs::{create_dir_all, OpenOptions};
 use std::path::PathBuf;
 use storage::prelude::*;
 use tracing::Level;
@@ -37,7 +36,7 @@ fn get_logs_directory() -> PathBuf {
 }
 
 fn get_storage_directory() -> PathBuf {
-    get_project_directory().join("logs")
+    get_project_directory().join("storage")
 }
 
 async fn create_stores() -> StoreType {
@@ -52,11 +51,12 @@ fn configure_logging() {
 
     create_dir_all(&log_dir).expect("Could not create log dir");
 
-    let date = Local::now();
+    let log_file = log_dir.join("log.log");
 
-    let log_file = log_dir.join(format!("{}.log", date.to_rfc3339()));
-
-    let log_file = File::create(log_file)
+    let log_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_file)
         .expect("Could not create log file")
         .with_max_level(Level::WARN);
 
