@@ -37,7 +37,7 @@ fn get_logs_directory() -> PathBuf {
 }
 
 fn get_storage_directory() -> PathBuf {
-    get_project_directory().join("logs")
+    get_project_directory().join("storage")
 }
 
 async fn create_stores() -> StoreType {
