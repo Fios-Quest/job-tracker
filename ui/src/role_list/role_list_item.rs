@@ -6,6 +6,7 @@ use storage::prelude::*;
 #[component]
 pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
     let stores = use_context::<StoreType>();
+    let context = use_context::<Signal<ApplicationContext>>();
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let Role {
@@ -15,12 +16,13 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
         ..
     } = role.clone();
 
+    let checked = context().get_role().map(|r| r.id) == Some(role.id);
     let display = rsx! {
         input {
             id: id.to_string(),
             r#type: "radio",
             name: "role",
-            checked: false,
+            checked,
             onchange: move |_| {
                 spawn(async move {
                     navigator()
