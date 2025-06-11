@@ -3,6 +3,7 @@ use crate::error_message::ErrorMessage;
 use crate::StoreType;
 use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
+use std::sync::Arc;
 use storage::prelude::*;
 use uuid::Uuid;
 
@@ -17,7 +18,9 @@ fn handle_storage_error(error: anyhow::Error) -> Option<String> {
 }
 
 #[component]
-pub fn PopulatedFlagList(company_id: Uuid) -> Element {
+pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
+    let company_id = company.id;
+
     let stores = use_context::<StoreType>();
     let mut flag_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
@@ -80,7 +83,7 @@ pub fn PopulatedFlagList(company_id: Uuid) -> Element {
     };
 
     rsx! {
-        div { id: "flags", class: "{company_id}",
+        div { id: "flags",
 
             h3 { "Flags" }
 

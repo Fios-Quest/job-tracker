@@ -1,10 +1,10 @@
 use super::role_list_item::RoleListItem;
-use crate::error_message::ErrorMessage;
+use crate::Route::HomeRole;
 use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
-use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
@@ -17,15 +17,15 @@ fn handle_storage_error(error: anyhow::Error) -> Option<String> {
 }
 
 #[component]
-pub fn PopulatedRoleList(company_id: Uuid) -> Element {
+pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     let stores = use_context::<StoreType>();
-    let mut role_name_value = use_signal(|| "");
+    let role_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
 
     // Get roles for company
-    let mut roles_resource = use_resource(use_reactive!(|(company_id,)| async move {
+    let mut roles_resource = use_resource(use_reactive!(|(company)| async move {
         let result = use_context::<StoreType>()
-            .recall_by_company(company_id)
+            .recall_by_company(company.id)
             .await;
         match result {
             Ok(roles) => roles,
@@ -45,44 +45,39 @@ pub fn PopulatedRoleList(company_id: Uuid) -> Element {
 
     let create_role = move |event: Event<FormData>| {
         let mut stores = stores.clone();
+        let cloned_company = company.clone();
         async move {
             let role_name = event.values().get("role_name").map(|v| v.as_value());
 
             if let Some(role_name) = role_name {
                 if !role_name.is_empty() {
+                    // Create the role (and remember its ids)
+                    let new_role = cloned_company.create_role(role_name, Timestamp::now());
+                    let company_id = new_role.company_id;
+                    let role_id = new_role.id;
+
                     // Store the name
-                    let result = stores
-                        .store(Role::new(company_id, role_name, Timestamp::now()))
-                        .await;
+                    stores
+                        .store(new_role)
+                        .await
+                        .expect("Could not store company");
 
-                    match result {
-                        Ok(_) => {
-                            // Reset the values to empty
-                            role_name_value.set("");
-                            error_message.set(None);
-
-                            // Rerun the resource
-                            roles_resource.restart();
-                        }
-                        Err(e) => {
-                            error_message.set(handle_storage_error(e));
-                        }
-                    }
+                    // Navigate away from the page
+                    navigator().push(HomeRole {
+                        company_id,
+                        role_id,
+                    });
                 }
             }
         }
     };
 
     rsx! {
-        div { id: "roles", class: "{company_id}",
+        div { id: "roles",
 
             h3 { class: "text-2xl", "Roles" }
 
             ul { {roles_list} }
-
-            if let Some(message) = error_message() {
-                ErrorMessage { message }
-            }
 
             form { class: "flex flex-col gap-y-2", onsubmit: create_role,
                 input {

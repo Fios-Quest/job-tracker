@@ -55,16 +55,16 @@ fn main() {
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let stores = rt.block_on(create_stores());
-    let app_context = ApplicationContext::new();
 
     dioxus::LaunchBuilder::new()
         .with_context(stores)
-        .with_context(app_context)
         .launch(App);
 }
 
 #[component]
 fn App() -> Element {
+    use_context_provider(|| Signal::new(ApplicationContext::new()));
+
     rsx! {
         // The Stylesheet component inserts a style link into the head of the document
         document::Stylesheet {

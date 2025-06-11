@@ -9,6 +9,9 @@ pub use navbar::Navbar;
 mod company_list;
 pub use company_list::CompanyList;
 
+mod details;
+pub use details::*;
+
 mod company_details;
 pub use company_details::*;
 
@@ -25,7 +28,12 @@ mod editable;
 pub use editable::*;
 
 mod error_message;
-pub mod views;
+
+mod main_nav;
+pub use main_nav::*;
+
+mod views;
+pub use views::*;
 
 use storage::prelude::*;
 #[cfg(feature = "desktop")]

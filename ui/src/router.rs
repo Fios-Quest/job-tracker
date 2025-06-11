@@ -1,20 +1,7 @@
 use crate::views::{Help, Home, Support};
-use crate::Navbar;
+use crate::MainNavbar;
 use dioxus::prelude::*;
 use uuid::Uuid;
-
-#[component]
-fn GeneralNavbar() -> Element {
-    rsx! {
-        Navbar {
-            Link { class: "hover:underline", to: Route::HomeHome {}, "Home" }
-            Link { class: "hover:underline", to: Route::Support {}, "Support ❤️" }
-            Link { class: "hover:underline", to: Route::Help {}, "Help" }
-        }
-
-        Outlet::<Route> {}
-    }
-}
 
 #[component]
 fn HomeHome() -> Element {
@@ -40,7 +27,7 @@ fn HomeRole(company_id: Uuid, role_id: Uuid) -> Element {
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
-    #[layout(GeneralNavbar)]
+    #[layout(MainNavbar)]
     #[route("/support")]
     Support { },
     #[route("/help")]

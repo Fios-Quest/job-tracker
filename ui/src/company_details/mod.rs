@@ -1,15 +1,12 @@
-use crate::FlagList;
+use crate::PopulatedFlagList;
 use dioxus::prelude::*;
-use uuid::Uuid;
+use std::sync::Arc;
+use storage::prelude::Company;
 
 #[component]
-pub fn CompanyDetails(company_id: Option<Uuid>) -> Element {
+pub fn CompanyDetails(company: Arc<Company>) -> Element {
     rsx! {
         h1 { class: "text-slate-200 text-3xl", "Company Details" }
-        if let Some(company_id) = company_id {
-            FlagList { company_id }
-        } else {
-            p { "Add or select a company to see their details" }
-        }
+        PopulatedFlagList { company }
     }
 }
