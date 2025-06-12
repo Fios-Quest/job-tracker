@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 mod populated_role_description;
+use crate::router::DetailsView;
 use crate::{Editable, Route, StoreType};
 use populated_role_description::PopulatedRoleDescription;
 use storage::prelude::*;
@@ -45,6 +46,7 @@ pub fn RoleDescription(role_id: Option<Uuid>) -> Element {
                     nav.push(Route::HomeRole {
                         company_id: role.company_id,
                         role_id: role.id,
+                        view: DetailsView::Role,
                     });
                 }
             }

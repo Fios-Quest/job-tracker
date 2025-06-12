@@ -1,4 +1,5 @@
 use crate::editable::Editable;
+use crate::router::DetailsView;
 use crate::{Route, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
@@ -29,6 +30,7 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
                         .push(Route::HomeRole {
                             company_id,
                             role_id: id,
+                            view: DetailsView::Role,
                         });
                 });
             },

@@ -5,7 +5,6 @@ use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
 use std::sync::Arc;
 use storage::prelude::*;
-use uuid::Uuid;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);

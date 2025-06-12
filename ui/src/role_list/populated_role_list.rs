@@ -1,4 +1,5 @@
 use super::role_list_item::RoleListItem;
+use crate::router::DetailsView;
 use crate::Route::HomeRole;
 use crate::StoreType;
 use dioxus::logger::tracing;
@@ -66,6 +67,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
                     navigator().push(HomeRole {
                         company_id,
                         role_id,
+                        view: DetailsView::Role,
                     });
                 }
             }

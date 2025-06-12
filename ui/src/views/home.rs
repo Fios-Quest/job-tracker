@@ -1,15 +1,12 @@
-use crate::{CompanyList, Details, Navbar, RoleDescription, RoleList, StoreType};
+use crate::router::DetailsView;
+use crate::{CompanyList, Details, RoleList, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
 use storage::ApplicationContext;
 use uuid::Uuid;
 
 #[component]
-pub fn Home(
-    company_id: Option<Uuid>,
-    role_id: Option<Uuid>,
-    interview_id: Option<Uuid>,
-) -> Element {
+pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<DetailsView>) -> Element {
     let store = use_context::<StoreType>();
     let context = use_context::<Signal<ApplicationContext>>();
     let _resource = use_resource(use_reactive!(|(company_id, role_id)| {
