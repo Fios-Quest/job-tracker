@@ -39,13 +39,6 @@ pub fn Home(
     }));
 
     rsx! {
-        p {
-            "Company ID: "
-            {company_id.map(|id| id.to_string())}
-            " - Role ID: "
-            {role_id.map(|id| id.to_string())}
-        }
-
         div { id: "home", class: "flex",
 
             section { id: "left-home",

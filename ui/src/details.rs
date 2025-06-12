@@ -16,6 +16,8 @@ pub fn Details() -> Element {
 
     rsx! {
         div {
+            class: "flex flex-col",
+
             Navbar {
                 Link { class: "hover:underline", to: Route::Help {}, "Company Details" }
                 if role.is_some() {
@@ -24,10 +26,11 @@ pub fn Details() -> Element {
                     Link { class: "hover:underline", to: Route::Help {}, "Questions" }
                 }
             }
+
+            section {
+                CompanyDetails { company }
+            }
         }
 
-        section {
-            CompanyDetails { company }
-        }
     }
 }
