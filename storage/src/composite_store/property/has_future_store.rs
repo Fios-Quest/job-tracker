@@ -28,7 +28,7 @@ where
     T::Storage: RecallById<O>,
     O: HasId + HasDeleted + Clone,
 {
-    async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
+    async fn recall_by_id<I: HasId>(&self, id: I) -> anyhow::Result<O> {
         self.get_store().await.recall_by_id(id).await
     }
 }

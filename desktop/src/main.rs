@@ -5,24 +5,7 @@ use storage::prelude::*;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
-use ui::{Navbar, StoreType};
-use views::{Help, Home, Support};
-
-mod views;
-
-#[derive(Debug, Clone, Routable, PartialEq)]
-#[rustfmt::skip]
-enum Route {
-    #[layout(DesktopNavbar)]
-    #[route("/")]
-    Home {},
-    #[route("/support")]
-    Support { },
-    #[route("/help")]
-    Help { }
-}
-
-const MAIN_CSS: Asset = asset!("/assets/main.css");
+use ui::{Route, StoreType};
 
 fn get_project_directory() -> PathBuf {
     directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
@@ -80,28 +63,15 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let application_context = Signal::new(ApplicationContext::new());
-    use_context_provider(move || application_context);
+    use_context_provider(|| Signal::new(ApplicationContext::new()));
 
     rsx! {
-        // Global app resources
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-
-        Router::<Route> {}
-    }
-}
-
-/// A desktop-specific Router around the shared `Navbar` component
-/// which allows us to use the desktop-specific `Route` enum.
-#[component]
-fn DesktopNavbar() -> Element {
-    rsx! {
-        Navbar {
-            Link { to: Route::Home {}, "Home" }
-            Link { to: Route::Support {}, "Support ❤️" }
-            Link { to: Route::Help {}, "Help" }
+        // The Stylesheet component inserts a style link into the head of the document
+        document::Stylesheet {
+            // Urls are relative to your Cargo.toml file
+            href: asset!("/assets/generated/tailwind.css"),
         }
-
-        Outlet::<Route> {}
+        // Global app resources
+        Router::<Route> {}
     }
 }

@@ -5,13 +5,15 @@ mod role_list_item;
 use dioxus::prelude::*;
 use empty_role_list::EmptyRoleList;
 use populated_role_list::PopulatedRoleList;
-use uuid::Uuid;
+use storage::ApplicationContext;
 
 #[component]
-pub fn RoleList(company_id: Option<Uuid>) -> Element {
-    match company_id {
-        Some(company_id) => rsx! {
-            PopulatedRoleList { company_id }
+pub fn RoleList() -> Element {
+    let company = use_context::<Signal<ApplicationContext>>()().get_company();
+
+    match company {
+        Some(company) => rsx! {
+            PopulatedRoleList { company }
         },
         None => rsx! {
             EmptyRoleList {}
