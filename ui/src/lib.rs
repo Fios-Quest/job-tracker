@@ -9,12 +9,6 @@ pub use navbar::Navbar;
 mod company_list;
 pub use company_list::CompanyList;
 
-mod details;
-pub use details::*;
-
-mod company_details;
-pub use company_details::*;
-
 mod role_list;
 pub use role_list::*;
 

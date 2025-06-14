@@ -43,7 +43,7 @@ pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<Detail
                 RoleList { }
             }
 
-            Details {}
+            Details { view }
         }
     }
 }

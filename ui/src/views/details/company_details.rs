@@ -6,7 +6,7 @@ use storage::prelude::Company;
 #[component]
 pub fn CompanyDetails(company: Arc<Company>) -> Element {
     rsx! {
-        h1 { class: "text-slate-200 text-3xl", "Company Details" }
+        h2 { class: "text-slate-200 text-3xl", "Company Details" }
         PopulatedFlagList { company }
     }
 }

@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use std::sync::Arc;
 use uuid::Uuid;
 
 mod populated_role_description;
@@ -8,46 +9,34 @@ use populated_role_description::PopulatedRoleDescription;
 use storage::prelude::*;
 
 #[component]
-pub fn RoleDescription(role_id: Option<Uuid>) -> Element {
+pub fn RoleDescription(role: Arc<Role>) -> Element {
     let stores = use_context::<StoreType>();
-
-    let role_resource: Resource<Option<Role>> =
-        use_resource(use_reactive!(|(role_id)| async move {
-            if let Some(role_id) = role_id {
-                let temp: Option<Role> =
-                    use_context::<StoreType>().recall_by_id(&role_id).await.ok();
-                temp
-            } else {
-                None
-            }
-        }));
-
-    let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-
-    let Some(role): Option<Role> = role_resource().unwrap_or_default() else {
-        return rsx! {};
-    };
+    let mut context = use_context::<Signal<ApplicationContext>>();
 
     let input_name = "role_description";
 
+    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(event) = form_receiver() {
         let mut stores = stores.clone();
-        let role = role.clone();
         let role_description = event.values().get(input_name).map(|v| v.as_value());
+        let role = role.clone();
         spawn(async move {
             if let Some(description) = role_description {
                 if !description.is_empty() {
-                    let role = Role {
+                    let edited_role = Role {
                         description,
-                        ..role.clone()
+                        ..role.as_ref().clone()
                     };
-                    let _result = stores.store(role.clone()).await;
+                    let _result = stores.store(edited_role.clone()).await;
                     let nav = navigator();
                     nav.push(Route::HomeRole {
-                        company_id: role.company_id,
-                        role_id: role.id,
+                        company_id: edited_role.company_id,
+                        role_id: edited_role.id,
                         view: DetailsView::Role,
                     });
+                    form_receiver.set(None);
+                    // ToDo: Why isn't this updating the role in context?! 😡
+                    context.set(context().set_role(edited_role).expect("Couldn't set role"));
                 }
             }
         });
