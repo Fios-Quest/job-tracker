@@ -1,63 +1,40 @@
 use dioxus::prelude::*;
 use std::fs::{create_dir_all, OpenOptions};
 use std::path::PathBuf;
+use std::sync::Arc;
 use storage::prelude::*;
+use tokio::join;
 use tracing::Level;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
 use ui::{Route, StoreType};
 
-fn get_project_directory() -> PathBuf {
-    directories::ProjectDirs::from("com", "fios-quest", "job-trackers")
-        .expect("No valid home directory found!")
-        .data_dir()
-        .to_path_buf()
-}
-
-fn get_logs_directory() -> PathBuf {
-    get_project_directory().join("logs")
-}
-
-fn get_storage_directory() -> PathBuf {
-    get_project_directory().join("storage")
-}
+mod dirs;
+mod logs;
 
 async fn create_stores() -> StoreType {
-    let path = get_storage_directory();
+    let path = dirs::get_storage_directory();
     JsonThreadSafeGeneralStore::new_json(path)
         .await
         .expect("Could not create store")
 }
 
-fn configure_logging() {
-    let log_dir = get_logs_directory();
-
-    create_dir_all(&log_dir).expect("Could not create log dir");
-
-    let log_file = log_dir.join("log.log");
-
-    let log_file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(log_file)
-        .expect("Could not create log file")
-        .with_max_level(Level::WARN);
-
-    let file_layer = tracing_subscriber::fmt::layer()
-        .json()
-        .with_writer(log_file);
-
-    Registry::default().with(file_layer).init();
+async fn create_log_fetcher() -> JsonLogFetcher {
+    let path = dirs::get_logs_directory();
+    JsonLogFetcher::new(path)
+        .await
+        .expect("Could not create log fetcher")
 }
 
 fn main() {
-    configure_logging();
+    logs::configure_logging();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let stores = rt.block_on(create_stores());
+    let (stores, log_fetcher) = rt.block_on(async { join!(create_stores(), create_log_fetcher()) });
 
     dioxus::LaunchBuilder::new()
         .with_context(stores)
+        .with_context(log_fetcher)
         .launch(App);
 }
 
