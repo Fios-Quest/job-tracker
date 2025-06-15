@@ -1,13 +1,13 @@
-use crate::{Editable, StoreType};
+use crate::{Editable, Route, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
 
 #[component]
 pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {
-    let mut application_context = use_context::<Signal<ApplicationContext>>();
     let stores = use_context::<StoreType>();
+    let context = use_context::<Signal<ApplicationContext>>();
     let Company { id, name, .. } = company.clone();
-    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
+    let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let input_name = "company_name";
 
@@ -19,20 +19,33 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
             if let Some(name) = company_name {
                 if !name.is_empty() {
                     let company = Company { name, ..company };
-                    let _result = stores.store(company).await;
-                    reload_companies(());
-                    form_receiver.set(None);
+                    let company_id = company.id;
+                    stores
+                        .store(company)
+                        .await
+                        .expect("Could not store company");
+                    navigator().push(Route::HomeCompany { company_id });
                 }
             }
         });
     }
 
+    let company_id = company.id;
+    let checked = context()
+        .get_company()
+        .map(|selected_company| selected_company.id == company_id)
+        .unwrap_or(false);
     let display = rsx! {
         input {
             id: id.to_string(),
             r#type: "radio",
             name: "company",
-            onchange: move |_| application_context.set(application_context().set_company_id(id)),
+            checked,
+            onchange: move |_| {
+                spawn(async move {
+                    navigator().push(Route::HomeCompany { company_id });
+                });
+            },
         }
         label { r#for: id.to_string(), "{name}" }
     };

@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@source "./src/**/*.{rs,html,css}";
+
+@layer base {
+    body {
+        @apply bg-slate-900 text-slate-200 mx-4;
+    }
+}

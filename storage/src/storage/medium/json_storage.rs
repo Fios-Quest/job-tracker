@@ -98,7 +98,7 @@ impl<O> RecallById<O> for JsonStore<O>
 where
     O: HasId + HasDeleted + Clone + Serialize + DeserializeOwned,
 {
-    async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
+    async fn recall_by_id<I: HasId>(&self, id: I) -> anyhow::Result<O> {
         self.internal_store.recall_by_id(id).await
     }
 }

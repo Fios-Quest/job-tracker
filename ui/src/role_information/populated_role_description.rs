@@ -1,8 +1,9 @@
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn PopulatedRoleDescription(role: Role) -> Element {
+pub fn PopulatedRoleDescription(role: Arc<Role>) -> Element {
     // Turn markdown into markup
     let parser = pulldown_cmark::Parser::new(&role.description);
     let mut role_description_html = String::new();

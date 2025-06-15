@@ -11,6 +11,7 @@ server = { workspace = true }
 storage = { workspace = true }
 uuid = { version = "1.17.0", features = ["v4"] }
 tokio = "1.45.1"
+log = "0.4.27"
 
 [features]
 desktop = []

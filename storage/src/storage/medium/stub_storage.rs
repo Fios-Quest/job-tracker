@@ -36,7 +36,7 @@ impl<O> RecallById<O> for StubStore<O>
 where
     O: HasId + HasDeleted + Clone,
 {
-    async fn recall_by_id<I: HasId>(&self, id: &I) -> anyhow::Result<O> {
+    async fn recall_by_id<I: HasId>(&self, id: I) -> anyhow::Result<O> {
         Ok(self
             .store
             .iter()
