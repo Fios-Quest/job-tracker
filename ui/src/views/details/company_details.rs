@@ -1,12 +1,12 @@
 use crate::PopulatedFlagList;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::Company;
+use storage::prelude::*;
 
 #[component]
 pub fn CompanyDetails(company: Arc<Company>) -> Element {
     rsx! {
-        h2 { class: "text-slate-200 text-3xl", "Company Details" }
+        h2 { {company.get_name()} }
         PopulatedFlagList { company }
     }
 }

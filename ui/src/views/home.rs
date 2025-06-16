@@ -38,7 +38,8 @@ pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<Detail
     rsx! {
         div { id: "home", class: "flex",
 
-            section { id: "left-home",
+            section {
+                class: "mr-4 mt-0",
                 CompanyList { }
                 RoleList { }
             }

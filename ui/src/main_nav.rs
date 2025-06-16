@@ -4,10 +4,23 @@ use dioxus::prelude::*;
 #[component]
 pub fn MainNavbar() -> Element {
     rsx! {
-        Navbar {
-            Link { class: "hover:underline", to: Route::HomeHome {}, "Home" }
-            Link { class: "hover:underline", to: Route::Support {}, "Support ❤️" }
-            Link { class: "hover:underline", to: Route::Help {}, "Help" }
+        div {
+            class: "flex mb-4",
+
+            h1 {
+                class: "flex items-center gap-5",
+                img {
+                    class: "object-scale-down m-auto max-h-[100]",
+                    src: asset!("assets/icon.png")
+                }
+                "Fio's Job Tracker"
+            }
+
+            Navbar {
+                Link { to: Route::HomeHome {}, "Home" }
+                Link { to: Route::Support {}, "Support ❤️" }
+                Link { to: Route::Help {}, "Help" }
+            }
         }
 
         Outlet::<Route> {}

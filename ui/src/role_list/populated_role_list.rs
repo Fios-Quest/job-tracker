@@ -77,19 +77,17 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     rsx! {
         div { id: "roles",
 
-            h3 { class: "text-2xl", "Roles" }
+            h3 { "Roles" }
 
             ul { {roles_list} }
 
-            form { class: "flex flex-col gap-y-2", onsubmit: create_role,
+            form { class: "flex flex-col", onsubmit: create_role,
                 input {
                     id: "add_role",
-                    class: "bg-slate-800 text-slate-200 rounded",
                     name: "role_name",
                     value: role_name_value,
                 }
                 input {
-                    class: "bg-slate-400 text-slate-900 rounded cursor-pointer m-auto py-1.5 px-4",
                     r#type: "submit",
                 }
             }

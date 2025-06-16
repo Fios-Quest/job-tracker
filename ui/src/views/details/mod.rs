@@ -44,11 +44,15 @@ pub fn Details(view: Option<DetailsView>) -> Element {
             class: "flex flex-col",
 
             Navbar {
-                Link { class: "hover:underline", to: Route::HomeCompany { company_id: company.id }, "Company Details" }
+                Link { to: Route::HomeCompany { company_id: company.id }, "Company Details" }
                 if let Some(role) = role {
-                    Link { class: "hover:underline", to: Route::HomeRole { company_id: company.id, role_id: role.id, view: DetailsView::Role }, "Role Details" }
-                    Link { class: "hover:underline", to: Route::Help {}, "Interview Details" }
-                    Link { class: "hover:underline", to: Route::Help {}, "Questions" }
+                    Link { to: Route::HomeRole { company_id: company.id, role_id: role.id, view: DetailsView::Role }, "Role Details" }
+                    Link { to: Route::Help {}, "Interview Details" }
+                    Link { to: Route::Help {}, "Questions" }
+                } else {
+                    span { class:"disabled-nav-link", "Role Details" }
+                    span { class:"disabled-nav-link", "Interview Details" }
+                    span { class:"disabled-nav-link", "Questions" }
                 }
             }
 
