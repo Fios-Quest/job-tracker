@@ -1,11 +1,6 @@
-use anyhow::Result;
 use dioxus::prelude::*;
 use log::error;
-use std::ffi::OsStr;
-use std::process::Command;
-use std::sync::Arc;
 use storage::prelude::{JsonLogFetcher, LogFetcher};
-use tokio::fs::{create_dir_all, read, read_dir, remove_file};
 
 #[component]
 pub fn Help() -> Element {

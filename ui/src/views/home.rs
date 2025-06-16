@@ -8,10 +8,9 @@ use uuid::Uuid;
 #[component]
 pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<DetailsView>) -> Element {
     let store = use_context::<StoreType>();
-    let context = use_context::<Signal<ApplicationContext>>();
+    let mut context = use_context::<Signal<ApplicationContext>>();
     let _resource = use_resource(use_reactive!(|(company_id, role_id)| {
         let store = store.clone();
-        let mut context = context.clone();
         async move {
             if let Some(company_id) = company_id {
                 if context().get_company().map(|c| c.id) != Some(company_id) {
@@ -38,10 +37,9 @@ pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<Detail
     rsx! {
         div { id: "home", class: "flex",
 
-            section {
-                class: "mr-4 mt-0",
-                CompanyList { }
-                RoleList { }
+            section { class: "mr-4 mt-0",
+                CompanyList {}
+                RoleList {}
             }
 
             Details { view }

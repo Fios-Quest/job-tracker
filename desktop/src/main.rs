@@ -1,12 +1,6 @@
 use dioxus::prelude::*;
-use std::fs::{create_dir_all, OpenOptions};
-use std::path::PathBuf;
-use std::sync::Arc;
 use storage::prelude::*;
 use tokio::join;
-use tracing::Level;
-use tracing_subscriber::prelude::*;
-use tracing_subscriber::Registry;
 use ui::{Route, StoreType};
 
 mod dirs;

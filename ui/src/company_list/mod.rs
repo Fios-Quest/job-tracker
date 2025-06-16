@@ -95,9 +95,7 @@ pub fn CompanyList() -> Element {
                     value: company_name_search,
                     oninput: company_search,
                 }
-                input {
-                    r#type: "submit",
-                }
+                input { r#type: "submit" }
             }
         }
     }

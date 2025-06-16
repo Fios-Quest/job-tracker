@@ -87,9 +87,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
                     name: "role_name",
                     value: role_name_value,
                 }
-                input {
-                    r#type: "submit",
-                }
+                input { r#type: "submit" }
             }
         }
     }

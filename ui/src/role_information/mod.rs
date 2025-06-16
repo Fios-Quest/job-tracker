@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 use std::sync::Arc;
-use uuid::Uuid;
 
 mod populated_role_description;
 use crate::router::DetailsView;

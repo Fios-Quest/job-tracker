@@ -5,8 +5,7 @@ pub fn Support() -> Element {
     rsx! {
         h2 { "Support" }
 
-        p {
-            class: "bg-red-900 rounded-2xl p-2",
+        p { class: "bg-red-900 rounded-2xl p-2",
             "Absolutely do not provide monetary support if you are not working!"
         }
 
