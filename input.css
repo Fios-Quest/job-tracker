@@ -42,4 +42,12 @@
     input[type=submit] {
         @apply bg-slate-400 text-slate-900 rounded cursor-pointer m-auto py-1.5 px-4;
     }
+
+    p {
+        @apply mb-2;
+    }
+
+    p a {
+        @apply underline;
+    }
 }
