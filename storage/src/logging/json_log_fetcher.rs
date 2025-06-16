@@ -47,4 +47,8 @@ impl LogFetcher for JsonLogFetcher {
         }
         Ok(())
     }
+
+    fn log_location(&self) -> Option<String> {
+        self.dir.to_str().map(|s| s.to_string())
+    }
 }

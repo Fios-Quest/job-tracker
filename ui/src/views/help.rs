@@ -13,7 +13,6 @@ pub fn Help() -> Element {
     let log_cleaner = use_context::<JsonLogFetcher>();
     let mut logs_resource = use_resource(move || {
         let log_getter = log_getter.clone();
-        dbg!("here");
         async move {
             let logs_result = log_getter.get_logs().await;
             logs_result.unwrap_or_else(|e| {
@@ -31,10 +30,13 @@ pub fn Help() -> Element {
 
     rsx! {
         h2 { "Help" }
-        // p {
-        //     "Job Tracker Directory: "
-        //     a { href, {project_directory} }
-        // }
+
+        if let Some(path) = log_cleaner.log_location() {
+            p {
+                "Log Directory: "
+                a { href: "file://{path}", {path.clone()} }
+            }
+        }
 
         h3 { "Logs" }
         if logs.len() > 0 {
