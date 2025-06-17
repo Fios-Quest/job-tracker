@@ -1,11 +1,12 @@
+use crate::LogFetcherType;
 use dioxus::prelude::*;
 use log::error;
-use storage::prelude::{JsonLogFetcher, LogFetcher};
+use storage::prelude::*;
 
 #[component]
 pub fn Help() -> Element {
-    let log_getter = use_context::<JsonLogFetcher>();
-    let log_cleaner = use_context::<JsonLogFetcher>();
+    let log_getter = use_context::<LogFetcherType>();
+    let log_cleaner = use_context::<LogFetcherType>();
     let mut logs_resource = use_resource(move || {
         let log_getter = log_getter.clone();
         async move {
