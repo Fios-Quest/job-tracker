@@ -1,12 +1,42 @@
 use crate::router::DetailsView;
-use crate::{CompanyList, Details, RoleList, StoreType};
+use crate::{CompanyList, Details, RoleList, StoreType, VIEW_SIGNAL};
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
 use storage::ApplicationContext;
 use uuid::Uuid;
 
+fn create_route(
+    company_id: Option<Uuid>,
+    role_id: Option<Uuid>,
+    view: Option<DetailsView>,
+) -> String {
+    let mut route = String::new();
+    if let Some(company_id) = company_id {
+        route.push('/');
+        route.push_str(&company_id.to_string());
+
+        if let Some(role_id) = role_id {
+            route.push('/');
+            route.push_str(&role_id.to_string());
+        }
+    }
+
+    if let Some(view) = view {
+        route.push_str(&format!("?view={view}"))
+    }
+
+    route
+}
+
 #[component]
 pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<DetailsView>) -> Element {
+    if let Some(new_view) = VIEW_SIGNAL() {
+        if view.as_ref() != Some(&new_view) {
+            *VIEW_SIGNAL.write() = None;
+            router().push(create_route(company_id, role_id, Some(new_view)));
+        }
+    }
+
     let store = use_context::<StoreType>();
     let mut context = use_context::<Signal<ApplicationContext>>();
     let _resource = use_resource(use_reactive!(|(company_id, role_id)| {
