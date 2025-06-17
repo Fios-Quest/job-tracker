@@ -23,20 +23,19 @@ pub fn Details(view: Option<DetailsView>) -> Element {
         return rsx! { "Create or choose a company to get started" };
     };
 
-    // ToDo: Not happy with this logic, should be a better way to do it 🤔
-    let rendered_view = {
-        if view == Some(DetailsView::Role) {
-            if let Some(role) = role.clone() {
-                rsx! {
-                    RoleDetails { role }
-                }
-            } else {
-                error!("Role view used with no role selected");
-                rsx! {
-                    CompanyDetails { company: company.clone() }
-                }
+    let rendered_view = match (view, role.clone()) {
+        (Some(DetailsView::Role), Some(role)) => {
+            rsx! {
+                RoleDetails { role }
             }
-        } else {
+        }
+        (Some(DetailsView::Role), None) => {
+            error!("Role view used with no role selected");
+            rsx! {
+                CompanyDetails { company: company.clone() }
+            }
+        }
+        (_, _) => {
             rsx! {
                 CompanyDetails { company: company.clone() }
             }
