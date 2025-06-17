@@ -3,6 +3,7 @@ use storage::prelude::*;
 use tokio::join;
 use ui::{Route, StoreType};
 
+mod config;
 mod dirs;
 mod logs;
 
@@ -26,9 +27,10 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let (stores, log_fetcher) = rt.block_on(async { join!(create_stores(), create_log_fetcher()) });
 
-    dioxus::LaunchBuilder::new()
+    LaunchBuilder::new()
         .with_context(stores)
         .with_context(log_fetcher)
+        .with_cfg(config::desktop_config())
         .launch(App);
 }
 

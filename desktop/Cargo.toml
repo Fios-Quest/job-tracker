@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-dioxus = { workspace = true, features = ["router"] }
+dioxus = { workspace = true, features = ["router", "desktop"] }
 directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
