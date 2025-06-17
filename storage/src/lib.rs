@@ -18,6 +18,8 @@ mod composite_store;
 mod storable;
 mod storage;
 
+mod logging;
+
 #[cfg(test)]
 mod test_helper;
 
@@ -30,6 +32,7 @@ pub mod prelude {
         HasFutureStoreFor, JsonThreadSafeGeneralStore, ThreadSafeGeneralStore,
     };
     pub use crate::error::StorageError;
+    pub use crate::logging::{json_log_fetcher::JsonLogFetcher, LogFetcher};
     pub use crate::storable::{
         Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, Role,
     };

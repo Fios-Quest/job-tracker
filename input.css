@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@source "./src/**/*.{rs,html,css}";
+
+@layer base {
+    body {
+        @apply bg-slate-900 text-slate-200 mx-4;
+    }
+
+    h1 {
+        @apply text-4xl mr-8;
+    }
+
+    h2 {
+        @apply text-3xl mb-4;
+    }
+
+    h3 {
+        @apply text-2xl mb-4;
+    }
+
+    nav a {
+        @apply inline-block min-h-0 hover:underline;
+    }
+
+    nav {
+        @apply flex gap-4 items-center content-center w-fit;
+    }
+
+    section {
+        @apply mt-4;
+    }
+
+    .disabled-nav-link {
+        @apply text-slate-700;
+    }
+
+    input {
+        @apply bg-slate-800 text-slate-200 rounded m-2;
+    }
+
+    input[type=submit] {
+        @apply bg-slate-400 text-slate-900 rounded cursor-pointer m-auto py-1.5 px-4;
+    }
+
+    p {
+        @apply mb-2;
+    }
+
+    p a {
+        @apply underline;
+    }
+}

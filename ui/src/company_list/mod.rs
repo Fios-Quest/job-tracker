@@ -79,15 +79,8 @@ pub fn CompanyList() -> Element {
     };
 
     rsx! {
-        div { id: "companies",
-
+        div {
             h3 { "Companies" }
-
-            input {
-                id: "search_companies",
-                value: company_name_search,
-                oninput: company_search,
-            }
 
             ul { {companies_list} }
 
@@ -95,11 +88,12 @@ pub fn CompanyList() -> Element {
                 ErrorMessage { message }
             }
 
-            form { onsubmit: create_company,
+            form { class: "flex flex-col", onsubmit: create_company,
                 input {
                     id: "add_company",
                     name: "company_name",
-                    value: company_name_value,
+                    value: company_name_search,
+                    oninput: company_search,
                 }
                 input { r#type: "submit" }
             }

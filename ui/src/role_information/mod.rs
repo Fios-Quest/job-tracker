@@ -1,48 +1,41 @@
 use dioxus::prelude::*;
-use storage::ApplicationContext;
+use std::sync::Arc;
 
 mod populated_role_description;
-use crate::{Editable, StoreType};
+use crate::router::DetailsView;
+use crate::{Editable, Route, StoreType};
 use populated_role_description::PopulatedRoleDescription;
 use storage::prelude::*;
 
 #[component]
-pub fn RoleDescription(role: Option<Role>) -> Element {
+pub fn RoleDescription(role: Arc<Role>) -> Element {
     let stores = use_context::<StoreType>();
-    let mut application_context = use_context::<Signal<ApplicationContext>>();
-
-    let mut role_resource = use_resource(|| async {
-        if let Some(role) = use_context::<Signal<ApplicationContext>>()().get_role() {
-            use_context::<StoreType>().recall_by_id(role).await.ok()
-        } else {
-            None
-        }
-    });
-
-    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-
-    let Some(role): Option<Role> = role_resource().unwrap_or_default() else {
-        return rsx! {};
-    };
+    let mut context = use_context::<Signal<ApplicationContext>>();
 
     let input_name = "role_description";
 
+    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(event) = form_receiver() {
         let mut stores = stores.clone();
-        let role = role.clone();
         let role_description = event.values().get(input_name).map(|v| v.as_value());
+        let role = role.clone();
         spawn(async move {
             if let Some(description) = role_description {
                 if !description.is_empty() {
-                    let role = Role {
+                    let edited_role = Role {
                         description,
-                        ..role.clone()
+                        ..role.as_ref().clone()
                     };
-                    let _result = stores.store(role.clone()).await;
-                    let new_context = application_context().set_role(role.clone()).unwrap(); // ToDo: Fix me
-                    application_context.set(new_context);
-                    role_resource.restart();
+                    let _result = stores.store(edited_role.clone()).await;
+                    let nav = navigator();
+                    nav.push(Route::HomeRole {
+                        company_id: edited_role.company_id,
+                        role_id: edited_role.id,
+                        view: DetailsView::Role,
+                    });
                     form_receiver.set(None);
+                    // ToDo: Why isn't this updating the role in context?! 😡
+                    context.set(context().set_role(edited_role).expect("Couldn't set role"));
                 }
             }
         });
