@@ -2649,7 +2649,6 @@ checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 name = "job-tracker"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "dioxus",
  "directories",
  "storage",
@@ -2657,7 +2656,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ui",
- "uuid",
 ]
 
 [[package]]
