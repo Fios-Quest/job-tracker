@@ -10,7 +10,7 @@ pub use role_details::*;
 use crate::router::DetailsView;
 use crate::{Navbar, Route};
 use dioxus::prelude::*;
-use log::error;
+use log::info;
 use storage::ApplicationContext;
 
 #[component]
@@ -30,7 +30,7 @@ pub fn Details(view: Option<DetailsView>) -> Element {
             }
         }
         (Some(DetailsView::Role), None) => {
-            error!("Role view used with no role selected");
+            info!("Role view used with no role selected");
             rsx! {
                 CompanyDetails { company: company.clone() }
             }

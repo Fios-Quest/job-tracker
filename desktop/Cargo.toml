@@ -4,15 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = { workspace = true }
-dioxus = { workspace = true, features = ["router"] }
+dioxus = { workspace = true, features = ["router", "desktop"] }
 directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
 tokio = { version = "1.45.1", features = ["rt", "macros"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "std", "json"] }
-uuid = { version = "1.17.0", features = ["v4"] }
 
 [features]
 default = []

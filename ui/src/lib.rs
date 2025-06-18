@@ -1,7 +1,7 @@
 //! This crate contains all shared UI for the workspace.
 
 mod router;
-pub use router::Route;
+pub use router::{DetailsView, Route};
 
 mod navbar;
 pub use navbar::Navbar;
@@ -29,6 +29,13 @@ pub use main_nav::*;
 mod views;
 pub use views::*;
 
+use dioxus::prelude::*;
 use storage::prelude::*;
+
+#[cfg(feature = "desktop")]
+pub type LogFetcherType = JsonLogFetcher;
+
 #[cfg(feature = "desktop")]
 pub type StoreType = JsonThreadSafeGeneralStore;
+
+pub static VIEW_SIGNAL: GlobalSignal<Option<DetailsView>> = Global::new(|| None);

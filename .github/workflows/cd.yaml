@@ -22,17 +22,16 @@ jobs:
           - msi
     steps:
       - uses: actions/checkout@v4
-
-      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
-
-      - uses: cargo-bins/cargo-binstall@main
-
+      - name: Update rust
+        run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - name: Use carbo binstall
+        uses: cargo-bins/cargo-binstall@main
       - name: Install Dioxus-CLI
         run: cargo binstall dioxus-cli --force
-
-      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
-
-      - uses: actions/upload-artifact@v4
+      - name: Dioxus bundle
+        run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         if: "${{ github.ref == 'refs/heads/main' }}"
         with:
           name: job-tracker-${{ matrix.package-type }}
@@ -49,17 +48,16 @@ jobs:
           - dmg
     steps:
       - uses: actions/checkout@v4
-
-      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
-
-      - uses: cargo-bins/cargo-binstall@main
-
+      - name: Update rust
+        run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - name: Use carbo binstall
+        uses: cargo-bins/cargo-binstall@main
       - name: Install Dioxus-CLI
         run: cargo binstall dioxus-cli --force
-
-      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
-
-      - uses: actions/upload-artifact@v4
+      - name: Dioxus bundle
+        run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         if: "${{ github.ref == 'refs/heads/main' }}"
         with:
           name: job-tracker-${{ matrix.package-type }}
@@ -78,17 +76,16 @@ jobs:
 #          - appimage
 #    steps:
 #      - uses: actions/checkout@v4
-#
-#      - run: rustup update ${{ env.RUST_TOOLCHAIN }} && rustup default ${{ env.RUST_TOOLCHAIN }}
-#
-#      - uses: cargo-bins/cargo-binstall@main
-#
+#      - name: Update rust
+#        run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+#      - name: Use carbo binstall
+#        uses: cargo-bins/cargo-binstall@main
 #      - name: Install Dioxus-CLI
 #        run: cargo binstall dioxus-cli --force
-#
-#      - run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
-#
-#      - uses: actions/upload-artifact@v4
+#      - name: Dioxus bundle
+#        run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
+#      - name: Upload artifact
+#        uses: actions/upload-artifact@v4
 #        if: "${{ github.ref == 'refs/heads/main' }}"
 #        with:
 #          name: job-tracker-${{ matrix.package-type }}
