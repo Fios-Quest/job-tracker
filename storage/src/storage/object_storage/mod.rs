@@ -7,6 +7,9 @@ pub use flag_store::*;
 mod role_store;
 pub use role_store::*;
 
+mod interview_store;
+pub use interview_store::*;
+
 mod question_store;
 pub use question_store::*;
 

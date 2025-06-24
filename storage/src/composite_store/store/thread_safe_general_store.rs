@@ -1,32 +1,37 @@
 use crate::composite_store::HasFutureStoreFor;
-use crate::storable::{Company, Flag, Question, Role, Value};
-use crate::storage::{CompanyStore, FlagStore, QuestionStore, RoleStore, ValueStore};
+use crate::storable::{Company, Flag, Interview, Question, Role, Value};
+use crate::storage::{
+    CompanyStore, FlagStore, InterviewStore, QuestionStore, RoleStore, ValueStore,
+};
 use crate::Sealed;
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
 #[derive(Clone)]
-pub struct ThreadSafeGeneralStore<C, F, V, R, Q>
+pub struct ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     company_store: Arc<Mutex<C>>,
     flag_store: Arc<Mutex<F>>,
     value_store: Arc<Mutex<V>>,
     role_store: Arc<Mutex<R>>,
+    interview_store: Arc<Mutex<I>>,
     question_store: Arc<Mutex<Q>>,
 }
 
-impl<C, F, V, R, Q> ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     pub fn new(
@@ -34,6 +39,7 @@ where
         flag_store: F,
         value_store: V,
         role_store: R,
+        interview_store: I,
         question_store: Q,
     ) -> Self {
         Self {
@@ -41,6 +47,7 @@ where
             flag_store: Arc::new(Mutex::new(flag_store)),
             value_store: Arc::new(Mutex::new(value_store)),
             role_store: Arc::new(Mutex::new(role_store)),
+            interview_store: Arc::new(Mutex::new(interview_store)),
             question_store: Arc::new(Mutex::new(question_store)),
         }
     }
@@ -61,27 +68,33 @@ where
         self.question_store.lock().await
     }
 
+    pub async fn interview_store(&self) -> MutexGuard<I> {
+        self.interview_store.lock().await
+    }
+
     pub async fn value_store(&self) -> MutexGuard<V> {
         self.value_store.lock().await
     }
 }
 
-impl<C, F, V, R, Q> Sealed for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> Sealed for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
 }
 
-impl<C, F, V, R, Q> HasFutureStoreFor<Company> for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Company> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     type Storage = C;
@@ -94,12 +107,13 @@ where
     }
 }
 
-impl<C, F, V, R, Q> HasFutureStoreFor<Flag> for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Flag> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     type Storage = F;
@@ -112,12 +126,13 @@ where
     }
 }
 
-impl<C, F, V, R, Q> HasFutureStoreFor<Role> for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Role> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     type Storage = R;
@@ -130,12 +145,32 @@ where
     }
 }
 
-impl<C, F, V, R, Q> HasFutureStoreFor<Question> for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Interview> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
+    Q: QuestionStore,
+{
+    type Storage = I;
+
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
+    where
+        Self::Storage: 'a,
+    {
+        self.interview_store().await
+    }
+}
+
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Question> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    V: ValueStore,
+    R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     type Storage = Q;
@@ -148,12 +183,13 @@ where
     }
 }
 
-impl<C, F, V, R, Q> HasFutureStoreFor<Value> for ThreadSafeGeneralStore<C, F, V, R, Q>
+impl<C, F, V, R, I, Q> HasFutureStoreFor<Value> for ThreadSafeGeneralStore<C, F, V, R, I, Q>
 where
     C: CompanyStore,
     F: FlagStore,
     V: ValueStore,
     R: RoleStore,
+    I: InterviewStore,
     Q: QuestionStore,
 {
     type Storage = V;
@@ -169,6 +205,7 @@ where
 #[cfg(test)]
 mod test_helper {
     use super::*;
+    use crate::prelude::Interview;
     use crate::storage::StubStore;
     use crate::test_helper::TestHelper;
 
@@ -179,12 +216,14 @@ mod test_helper {
             StubStore<Flag>,
             StubStore<Value>,
             StubStore<Role>,
+            StubStore<Interview>,
             StubStore<Question>,
         >
     {
         #[cfg(test)]
         async fn new_test() -> anyhow::Result<Self> {
             let store = ThreadSafeGeneralStore::new(
+                StubStore::default(),
                 StubStore::default(),
                 StubStore::default(),
                 StubStore::default(),
@@ -215,15 +254,18 @@ mod tests {
     test_recall_by_id!(ThreadSafeGeneralStore, Value);
     test_recall_by_id!(ThreadSafeGeneralStore, Role);
     test_recall_by_id!(ThreadSafeGeneralStore, Question);
+    test_recall_by_id!(ThreadSafeGeneralStore, Interview);
     test_recall_by_name!(ThreadSafeGeneralStore, Company);
     test_recall_by_name!(ThreadSafeGeneralStore, Flag);
     test_recall_by_name!(ThreadSafeGeneralStore, Value);
     test_recall_by_name!(ThreadSafeGeneralStore, Role);
     test_recall_by_name!(ThreadSafeGeneralStore, Question);
+    test_recall_by_name!(ThreadSafeGeneralStore, Interview);
     test_recall_by_company!(ThreadSafeGeneralStore, Flag);
     test_recall_by_company!(ThreadSafeGeneralStore, Value);
     test_recall_by_company!(ThreadSafeGeneralStore, Role);
     test_recall_by_role!(ThreadSafeGeneralStore, Question);
+    test_recall_by_role!(ThreadSafeGeneralStore, Interview);
 
     // ---- The following tests are more to show how the API of ThreadSafeGeneralStore ----
 
@@ -235,6 +277,7 @@ mod tests {
         let question = Question::new(role.id, "question");
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
@@ -268,6 +311,7 @@ mod tests {
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
+            StubStore::default(),
         );
 
         all_store.store(company.clone()).await.unwrap();
@@ -285,6 +329,7 @@ mod tests {
         let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
@@ -309,6 +354,7 @@ mod tests {
         let question = Question::new(role.id, "question");
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),

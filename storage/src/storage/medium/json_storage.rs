@@ -1,9 +1,10 @@
+use crate::prelude::Interview;
 use crate::storable::{
     Company, Flag, HasCompany, HasDeleted, HasId, HasName, HasRole, Question, Role, Value,
 };
 use crate::storage::{
-    BaseStore, CompanyStore, FlagStore, QuestionStore, RecallByCompany, RecallById, RecallByName,
-    RecallByRole, RoleStore, StubStore, ValueStore,
+    BaseStore, CompanyStore, FlagStore, InterviewStore, QuestionStore, RecallByCompany, RecallById,
+    RecallByName, RecallByRole, RoleStore, StubStore, ValueStore,
 };
 use anyhow::Result;
 use serde::de::DeserializeOwned;
@@ -91,6 +92,13 @@ impl ScopedJsonStoreFor for JsonStore<Role> {
     }
 }
 
+impl ScopedJsonStoreFor for JsonStore<Interview> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("interview");
+        Self::new(base_path).await
+    }
+}
+
 impl ScopedJsonStoreFor for JsonStore<Question> {
     async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
         base_path.push("question");
@@ -149,6 +157,8 @@ impl CompanyStore for JsonStore<Company> {}
 impl RoleStore for JsonStore<Role> {}
 impl FlagStore for JsonStore<Flag> {}
 impl QuestionStore for JsonStore<Question> {}
+impl InterviewStore for JsonStore<Interview> {}
+
 impl ValueStore for JsonStore<Value> {}
 
 #[cfg(test)]
@@ -188,15 +198,18 @@ mod tests {
     test_recall_by_id!(JsonStore, Role);
     test_recall_by_id!(JsonStore, Value);
     test_recall_by_id!(JsonStore, Question);
+    test_recall_by_id!(JsonStore, Interview);
     test_recall_by_name!(JsonStore, Company);
     test_recall_by_name!(JsonStore, Flag);
     test_recall_by_name!(JsonStore, Role);
     test_recall_by_name!(JsonStore, Value);
     test_recall_by_name!(JsonStore, Question);
+    test_recall_by_name!(JsonStore, Interview);
     test_recall_by_company!(JsonStore, Flag);
     test_recall_by_company!(JsonStore, Role);
     test_recall_by_company!(JsonStore, Value);
     test_recall_by_role!(JsonStore, Question);
+    test_recall_by_role!(JsonStore, Interview);
 
     #[tokio::test]
     async fn test_load_from_file() {
