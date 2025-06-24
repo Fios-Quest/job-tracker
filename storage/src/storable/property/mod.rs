@@ -1,14 +1,14 @@
 pub mod has_company;
-pub use has_company::HasCompany;
+pub use has_company::*;
 
 pub mod has_role;
-pub use has_role::HasRole;
+pub use has_role::*;
 
 pub mod has_deleted;
-pub use has_deleted::HasDeleted;
+pub use has_deleted::*;
 
 pub mod has_id;
-pub use has_id::HasId;
+pub use has_id::*;
 
 pub mod has_name;
-pub use has_name::HasName;
+pub use has_name::*;

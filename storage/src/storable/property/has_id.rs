@@ -19,7 +19,6 @@ impl HasId for Uuid {
     }
 }
 
-#[macro_export]
 macro_rules! impl_has_id {
     ($storable:ty) => {
         impl HasId for $storable {
@@ -29,10 +28,11 @@ macro_rules! impl_has_id {
         }
     };
 }
+pub(crate) use impl_has_id;
 
 #[cfg(test)]
 pub mod test_helper {
-    #[macro_export]
+
     macro_rules! test_has_id {
         ($storable:ident) => {
             paste! {
@@ -45,4 +45,5 @@ pub mod test_helper {
             }
         };
     }
+    pub(crate) use test_has_id;
 }
