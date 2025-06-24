@@ -20,15 +20,15 @@ impl Company {
     }
 
     pub fn create_role<S: Into<String>>(&self, name: S, date_created: Timestamp) -> Role {
-        Role::new(self.id, name, date_created)
+        Role::new(self, name, date_created)
     }
 
     pub fn create_green_flag<S: Into<String>>(&self, name: S) -> Flag {
-        Flag::new_green(self.id, name)
+        Flag::new_green(self, name)
     }
 
     pub fn create_red_flag<S: Into<String>>(&self, name: S) -> Flag {
-        Flag::new_red(self.id, name)
+        Flag::new_red(self, name)
     }
 }
 

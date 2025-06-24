@@ -1,3 +1,4 @@
+use crate::prelude::Interview;
 use crate::storable::{HasCompany, HasDeleted, HasId, HasName, Question};
 use crate::{impl_has_company, impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
 use serde::{Deserialize, Serialize};
@@ -14,10 +15,10 @@ pub struct Role {
 }
 
 impl Role {
-    pub fn new<S: Into<String>>(company_id: Uuid, name: S, date_applied: Timestamp) -> Role {
+    pub fn new<C: HasId, S: Into<String>>(company: C, name: S, date_applied: Timestamp) -> Role {
         Role {
             id: Uuid::new_v4(),
-            company_id,
+            company_id: company.get_id(),
             name: name.into(),
             description: "".to_string(),
             date_applied,
@@ -26,7 +27,11 @@ impl Role {
     }
 
     pub fn create_question<S: Into<String>>(&self, name: S) -> Question {
-        Question::new(self.id, name)
+        Question::new(self, name)
+    }
+
+    pub fn create_interview<S: Into<String>>(&self, name: S) -> Interview {
+        Interview::new(self, name)
     }
 }
 
@@ -75,5 +80,13 @@ mod tests {
         let question = role.create_question("question");
         assert_eq!(question.role_id, role.id);
         assert_eq!(question.name, "question");
+    }
+
+    #[test]
+    fn test_create_interview() {
+        let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
+        let interview = role.create_interview("interview");
+        assert_eq!(interview.role_id, role.id);
+        assert_eq!(interview.name, "interview");
     }
 }

@@ -15,10 +15,10 @@ pub struct Interview {
 }
 
 impl Interview {
-    pub fn new<S: Into<String>>(role_id: Uuid, name: S) -> Self {
+    pub fn new<R: HasId, S: Into<String>>(role: R, name: S) -> Self {
         Self {
             id: Uuid::new_v4(),
-            role_id,
+            role_id: role.get_id(),
             name: name.into(),
             notes: String::new(),
             host: Vec::with_capacity(0),

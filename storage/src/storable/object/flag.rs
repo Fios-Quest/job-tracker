@@ -33,20 +33,20 @@ pub struct Flag {
 }
 
 impl Flag {
-    pub fn new_green<S: Into<String>>(company_id: Uuid, name: S) -> Self {
+    pub fn new_green<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
-            company_id,
+            company_id: company.get_id(),
             flag_color: FlagColor::Green,
             name: name.into(),
             date_deleted: None,
         }
     }
 
-    pub fn new_red<S: Into<String>>(company_id: Uuid, name: S) -> Self {
+    pub fn new_red<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
-            company_id,
+            company_id: company.get_id(),
             flag_color: FlagColor::Red,
             name: name.into(),
             date_deleted: None,

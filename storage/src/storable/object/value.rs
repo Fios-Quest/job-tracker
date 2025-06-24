@@ -13,10 +13,10 @@ pub struct Value {
 }
 
 impl Value {
-    pub fn new<C: HasId, S: Into<String>>(company_id: C, name: S) -> Self {
+    pub fn new<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
         Self {
             id: Uuid::new_v4(),
-            company_id: company_id.get_id(),
+            company_id: company.get_id(),
             name: name.into(),
             description: "".to_string(),
             date_deleted: None,

@@ -13,10 +13,10 @@ pub struct Question {
 }
 
 impl Question {
-    pub fn new<S: Into<String>>(role_id: Uuid, name: S) -> Self {
+    pub fn new<R: HasId, S: Into<String>>(role: R, name: S) -> Self {
         Self {
             id: Uuid::new_v4(),
-            role_id,
+            role_id: role.get_id(),
             name: name.into(),
             answer: "".to_string(),
             date_deleted: None,
