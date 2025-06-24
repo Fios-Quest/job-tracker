@@ -1,5 +1,5 @@
 use crate::storable::{Flag, HasDeleted, HasId, HasName, Role};
-use crate::Timestamp;
+use crate::{impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -38,23 +38,9 @@ impl PartialEq for Company {
     }
 }
 
-impl HasId for Company {
-    fn get_id(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl HasName for Company {
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-}
-
-impl HasDeleted for Company {
-    fn is_deleted(&self) -> bool {
-        self.date_deleted.is_some()
-    }
-}
+impl_has_id!(Company);
+impl_has_name!(Company);
+impl_has_deleted!(Company);
 
 #[cfg(test)]
 mod test_helper {

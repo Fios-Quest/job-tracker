@@ -1,5 +1,5 @@
 use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
-use crate::Timestamp;
+use crate::{impl_has_company, impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
@@ -60,29 +60,10 @@ impl PartialEq for Flag {
     }
 }
 
-impl HasName for Flag {
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-}
-
-impl HasId for Flag {
-    fn get_id(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl HasDeleted for Flag {
-    fn is_deleted(&self) -> bool {
-        self.date_deleted.is_some()
-    }
-}
-
-impl HasCompany for Flag {
-    fn get_company_id(&self) -> Uuid {
-        self.company_id
-    }
-}
+impl_has_id!(Flag);
+impl_has_name!(Flag);
+impl_has_company!(Flag);
+impl_has_deleted!(Flag);
 
 #[cfg(test)]
 mod test_helper {
