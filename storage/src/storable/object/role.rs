@@ -1,4 +1,4 @@
-use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
+use crate::storable::{HasCompany, HasDeleted, HasId, HasName, Question};
 use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -23,6 +23,10 @@ impl Role {
             date_applied,
             date_deleted: None,
         }
+    }
+
+    pub fn create_question<S: Into<String>>(&self, name: S) -> Question {
+        Question::new(self.id, name)
     }
 }
 
@@ -83,4 +87,12 @@ mod tests {
     test_has_name!(Role);
     test_has_company!(Role);
     test_has_deleted!(Role);
+
+    #[test]
+    fn test_create_question() {
+        let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
+        let question = role.create_question("question");
+        assert_eq!(question.role_id, role.id);
+        assert_eq!(question.name, "question");
+    }
 }
