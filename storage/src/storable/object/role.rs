@@ -37,7 +37,7 @@ impl Role {
 
 impl PartialEq for Role {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.name == other.name && self.company_id == other.company_id
+        self.id == other.id && self.company_id == other.company_id
     }
 }
 

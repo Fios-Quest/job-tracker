@@ -56,7 +56,7 @@ impl Flag {
 
 impl PartialEq for Flag {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+        self.id == other.id && self.company_id == other.company_id
     }
 }
 
