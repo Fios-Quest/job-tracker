@@ -182,13 +182,10 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storage::property::recall_by_id::test_helper::test_recall_by_id;
-    use crate::storage::recall_by_role::test_helper::test_recall_by_role;
-    use crate::storage::{
-        recall_by_company::test_helper::test_recall_by_company,
-        recall_by_name::test_helper::test_recall_by_name,
-    };
     use crate::test_helper::*;
+    use crate::{
+        test_recall_by_company, test_recall_by_id, test_recall_by_name, test_recall_by_role,
+    };
     use paste::paste;
     use std::fs::File;
     use std::io::Write;

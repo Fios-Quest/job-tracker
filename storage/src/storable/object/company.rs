@@ -57,11 +57,9 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::{
-        has_deleted::test_helper::test_has_deleted, has_id::test_helper::test_has_id,
-        has_name::test_helper::test_has_name, HasCompany,
-    };
+    use crate::storable::HasCompany;
     use crate::test_helper::TestHelper;
+    use crate::{test_has_deleted, test_has_id, test_has_name};
     use paste::paste;
 
     test_has_id!(Company);

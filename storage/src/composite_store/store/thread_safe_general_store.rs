@@ -1,8 +1,6 @@
 use crate::composite_store::HasFutureStoreFor;
-use crate::storable::{Company, Flag, Interview, Question, Role, Value};
-use crate::storage::{
-    CompanyStore, FlagStore, InterviewStore, QuestionStore, RoleStore, ValueStore,
-};
+use crate::storable::*;
+use crate::storage::*;
 use crate::Sealed;
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
@@ -237,16 +235,12 @@ mod test_helper {
 
 #[cfg(test)]
 mod tests {
-    use crate::composite_store::ThreadSafeGeneralStore;
-    use crate::storable::*;
-    use crate::storage::{
-        recall_by_company::test_helper::test_recall_by_company,
-        recall_by_id::test_helper::test_recall_by_id,
-        recall_by_name::test_helper::test_recall_by_name,
-        recall_by_role::test_helper::test_recall_by_role, *,
-    };
+    use super::*;
     use crate::test_helper::*;
-    use crate::Timestamp;
+    use crate::{
+        test_recall_by_company, test_recall_by_id, test_recall_by_name, test_recall_by_role,
+        Timestamp,
+    };
     use paste::paste;
 
     test_recall_by_id!(ThreadSafeGeneralStore, Company);

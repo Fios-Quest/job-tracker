@@ -26,6 +26,7 @@ macro_rules! impl_has_company {
 
 #[cfg(test)]
 pub mod test_helper {
+    #[macro_export]
     macro_rules! test_has_company {
         ($storable:ident) => {
             paste! {
@@ -38,6 +39,4 @@ pub mod test_helper {
             }
         };
     }
-
-    pub(crate) use test_has_company;
 }

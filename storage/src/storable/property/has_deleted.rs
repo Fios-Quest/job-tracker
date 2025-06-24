@@ -23,6 +23,7 @@ macro_rules! impl_has_deleted {
 
 #[cfg(test)]
 pub mod test_helper {
+    #[macro_export]
     macro_rules! test_has_deleted {
         ($storable:ident) => {
             paste! {
@@ -37,6 +38,4 @@ pub mod test_helper {
             }
         };
     }
-
-    pub(crate) use test_has_deleted;
 }
