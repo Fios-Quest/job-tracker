@@ -1,5 +1,4 @@
-use crate::prelude::Company;
-use crate::storable::Role;
+use crate::storable::{Company, Role};
 use std::sync::Arc;
 use thiserror::Error;
 

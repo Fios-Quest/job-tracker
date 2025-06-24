@@ -6,3 +6,6 @@ pub use flag_store::*;
 
 mod role_store;
 pub use role_store::*;
+
+mod question_store;
+pub use question_store::*;

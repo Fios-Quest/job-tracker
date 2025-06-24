@@ -1,5 +1,4 @@
-use crate::prelude::{HasDeleted, HasId, HasName};
-use crate::storable::HasRole;
+use crate::storable::*;
 use crate::{impl_has_role, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

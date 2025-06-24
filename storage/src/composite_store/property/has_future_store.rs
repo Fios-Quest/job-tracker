@@ -1,5 +1,5 @@
-use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
-use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName};
+use crate::storable::{HasCompany, HasDeleted, HasId, HasName, HasRole};
+use crate::storage::{BaseStore, RecallByCompany, RecallById, RecallByName, RecallByRole};
 use crate::Sealed;
 use tokio::sync::MutexGuard;
 
@@ -52,5 +52,16 @@ where
 {
     async fn recall_by_company<I: HasId>(&self, company_id: I) -> anyhow::Result<Vec<O>> {
         self.get_store().await.recall_by_company(company_id).await
+    }
+}
+
+impl<T, O> RecallByRole<O> for T
+where
+    T: HasFutureStoreFor<O>,
+    T::Storage: RecallByRole<O>,
+    O: HasRole + HasDeleted + Clone,
+{
+    async fn recall_by_role<I: HasId>(&self, role: I) -> anyhow::Result<Vec<O>> {
+        self.get_store().await.recall_by_role(role).await
     }
 }

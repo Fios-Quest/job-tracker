@@ -1,6 +1,5 @@
-use crate::prelude::RecallById;
 use crate::storable::Role;
-use crate::storage::{BaseStore, RecallByCompany, RecallByName};
+use crate::storage::*;
 
 pub trait RoleStore:
     BaseStore<Role> + RecallById<Role> + RecallByName<Role> + RecallByCompany<Role>

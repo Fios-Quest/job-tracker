@@ -1,5 +1,4 @@
-use crate::prelude::HasDeleted;
-use crate::storable::HasId;
+use crate::storable::*;
 use anyhow::Result;
 
 pub trait RecallById<T>

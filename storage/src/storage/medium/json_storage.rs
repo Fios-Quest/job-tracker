@@ -1,8 +1,9 @@
-use crate::prelude::HasDeleted;
-use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
+use crate::storable::{
+    Company, Flag, HasCompany, HasDeleted, HasId, HasName, HasRole, Question, Role,
+};
 use crate::storage::{
-    BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallById, RecallByName, RoleStore,
-    StubStore,
+    BaseStore, CompanyStore, FlagStore, QuestionStore, RecallByCompany, RecallById, RecallByName,
+    RecallByRole, RoleStore, StubStore,
 };
 use anyhow::Result;
 use serde::de::DeserializeOwned;
@@ -83,6 +84,13 @@ impl ScopedJsonStoreFor for JsonStore<Role> {
     }
 }
 
+impl ScopedJsonStoreFor for JsonStore<Question> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("question");
+        Self::new(base_path).await
+    }
+}
+
 impl<O> BaseStore<O> for JsonStore<O>
 where
     O: HasId + Clone + Serialize + DeserializeOwned,
@@ -121,9 +129,19 @@ where
     }
 }
 
+impl<T> RecallByRole<T> for JsonStore<T>
+where
+    T: HasRole + HasDeleted + Clone + Serialize + DeserializeOwned,
+{
+    async fn recall_by_role<R: HasId>(&self, role: R) -> anyhow::Result<Vec<T>> {
+        self.internal_store.recall_by_role(role).await
+    }
+}
+
 impl CompanyStore for JsonStore<Company> {}
 impl RoleStore for JsonStore<Role> {}
 impl FlagStore for JsonStore<Flag> {}
+impl QuestionStore for JsonStore<Question> {}
 
 #[cfg(test)]
 mod test_helper {
@@ -147,6 +165,7 @@ mod test_helper {
 mod tests {
     use super::*;
     use crate::storage::property::recall_by_id::test_helper::test_recall_by_id;
+    use crate::storage::recall_by_role::test_helper::test_recall_by_role;
     use crate::storage::{
         recall_by_company::test_helper::test_recall_by_company,
         recall_by_name::test_helper::test_recall_by_name,
@@ -159,11 +178,14 @@ mod tests {
     test_recall_by_id!(JsonStore, Company);
     test_recall_by_id!(JsonStore, Flag);
     test_recall_by_id!(JsonStore, Role);
+    test_recall_by_id!(JsonStore, Question);
     test_recall_by_name!(JsonStore, Company);
     test_recall_by_name!(JsonStore, Flag);
     test_recall_by_name!(JsonStore, Role);
+    test_recall_by_name!(JsonStore, Question);
     test_recall_by_company!(JsonStore, Flag);
     test_recall_by_company!(JsonStore, Role);
+    test_recall_by_role!(JsonStore, Question);
 
     #[tokio::test]
     async fn test_load_from_file() {

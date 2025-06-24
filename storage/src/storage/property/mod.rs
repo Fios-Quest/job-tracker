@@ -9,3 +9,6 @@ pub use recall_by_company::RecallByCompany;
 
 pub mod recall_by_name;
 pub use recall_by_name::RecallByName;
+
+pub mod recall_by_role;
+pub use recall_by_role::RecallByRole;
