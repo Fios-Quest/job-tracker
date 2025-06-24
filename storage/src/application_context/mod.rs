@@ -68,16 +68,10 @@ mod tests {
     #[test]
     fn test_new() {
         let context = ApplicationContext::new();
-        assert_eq!(
-            context.get_company(),
-            None,
-            "Initial company value must not be set"
-        );
-        assert_eq!(
-            context.get_role(),
-            None,
-            "Initial role value must not be set"
-        );
+        // Initial company value must not be set
+        assert_eq!(context.get_company(), None,);
+        // Initial role value must not be set
+        assert_eq!(context.get_role(), None,);
     }
     #[tokio::test]
     async fn test_set_get_unset_company_id() {
