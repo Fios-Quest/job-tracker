@@ -19,6 +19,17 @@ impl HasId for Uuid {
     }
 }
 
+#[macro_export]
+macro_rules! impl_has_id {
+    ($storable:ty) => {
+        impl HasId for $storable {
+            fn get_id(&self) -> Uuid {
+                self.id
+            }
+        }
+    };
+}
+
 #[cfg(test)]
 pub mod test_helper {
     macro_rules! test_has_id {

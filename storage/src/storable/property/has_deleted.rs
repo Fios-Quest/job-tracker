@@ -10,6 +10,17 @@ where
     }
 }
 
+#[macro_export]
+macro_rules! impl_has_deleted {
+    ($storable:ty) => {
+        impl HasDeleted for $storable {
+            fn is_deleted(&self) -> bool {
+                self.date_deleted.is_some()
+            }
+        }
+    };
+}
+
 #[cfg(test)]
 pub mod test_helper {
     macro_rules! test_has_deleted {

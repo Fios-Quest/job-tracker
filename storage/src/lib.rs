@@ -35,6 +35,7 @@ pub mod prelude {
     pub use crate::logging::{json_log_fetcher::JsonLogFetcher, LogFetcher};
     pub use crate::storable::{
         Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole, Question, Role,
+        Value,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,

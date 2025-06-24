@@ -9,3 +9,6 @@ pub use role::*;
 
 mod question;
 pub use question::*;
+
+mod value;
+pub use value::*;
