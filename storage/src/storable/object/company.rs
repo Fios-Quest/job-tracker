@@ -1,5 +1,5 @@
 use crate::storable::{Flag, HasDeleted, HasId, HasName, Role};
-use crate::Timestamp;
+use crate::{impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -20,15 +20,15 @@ impl Company {
     }
 
     pub fn create_role<S: Into<String>>(&self, name: S, date_created: Timestamp) -> Role {
-        Role::new(self.id, name, date_created)
+        Role::new(self, name, date_created)
     }
 
     pub fn create_green_flag<S: Into<String>>(&self, name: S) -> Flag {
-        Flag::new_green(self.id, name)
+        Flag::new_green(self, name)
     }
 
     pub fn create_red_flag<S: Into<String>>(&self, name: S) -> Flag {
-        Flag::new_red(self.id, name)
+        Flag::new_red(self, name)
     }
 }
 
@@ -38,23 +38,9 @@ impl PartialEq for Company {
     }
 }
 
-impl HasId for Company {
-    fn get_id(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl HasName for Company {
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-}
-
-impl HasDeleted for Company {
-    fn is_deleted(&self) -> bool {
-        self.date_deleted.is_some()
-    }
-}
+impl_has_id!(Company);
+impl_has_name!(Company);
+impl_has_deleted!(Company);
 
 #[cfg(test)]
 mod test_helper {
@@ -71,11 +57,9 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::{
-        has_deleted::test_helper::test_has_deleted, has_id::test_helper::test_has_id,
-        has_name::test_helper::test_has_name, HasCompany,
-    };
+    use crate::storable::HasCompany;
     use crate::test_helper::TestHelper;
+    use crate::{test_has_deleted, test_has_id, test_has_name};
     use paste::paste;
 
     test_has_id!(Company);

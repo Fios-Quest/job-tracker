@@ -5,9 +5,9 @@ dev:
 		dx serve --package job-tracker
 
 pre-commit:
-	cargo fmt --check
 	cargo check
 	cargo build
-	cargo clippy
 	cargo test
+	cargo fmt --check
+	cargo clippy -- -D warnings
 	dx fmt --check

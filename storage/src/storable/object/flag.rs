@@ -1,5 +1,5 @@
 use crate::storable::{HasCompany, HasDeleted, HasId, HasName};
-use crate::Timestamp;
+use crate::{impl_has_company, impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
@@ -33,20 +33,20 @@ pub struct Flag {
 }
 
 impl Flag {
-    pub fn new_green<S: Into<String>>(company_id: Uuid, name: S) -> Self {
+    pub fn new_green<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
-            company_id,
+            company_id: company.get_id(),
             flag_color: FlagColor::Green,
             name: name.into(),
             date_deleted: None,
         }
     }
 
-    pub fn new_red<S: Into<String>>(company_id: Uuid, name: S) -> Self {
+    pub fn new_red<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
         Flag {
             id: Uuid::new_v4(),
-            company_id,
+            company_id: company.get_id(),
             flag_color: FlagColor::Red,
             name: name.into(),
             date_deleted: None,
@@ -56,33 +56,14 @@ impl Flag {
 
 impl PartialEq for Flag {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+        self.id == other.id && self.company_id == other.company_id
     }
 }
 
-impl HasName for Flag {
-    fn get_name(&self) -> &str {
-        &self.name
-    }
-}
-
-impl HasId for Flag {
-    fn get_id(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl HasDeleted for Flag {
-    fn is_deleted(&self) -> bool {
-        self.date_deleted.is_some()
-    }
-}
-
-impl HasCompany for Flag {
-    fn get_company_id(&self) -> Uuid {
-        self.company_id
-    }
-}
+impl_has_id!(Flag);
+impl_has_name!(Flag);
+impl_has_company!(Flag);
+impl_has_deleted!(Flag);
 
 #[cfg(test)]
 mod test_helper {
@@ -100,11 +81,8 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::{
-        has_company::test_helper::test_has_company, has_deleted::test_helper::test_has_deleted,
-        has_id::test_helper::test_has_id, has_name::test_helper::test_has_name,
-    };
     use crate::test_helper::TestHelper;
+    use crate::{test_has_company, test_has_deleted, test_has_id, test_has_name};
     use paste::paste;
 
     test_has_id!(Flag);

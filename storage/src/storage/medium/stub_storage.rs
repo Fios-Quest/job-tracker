@@ -1,8 +1,5 @@
-use crate::prelude::HasDeleted;
-use crate::storable::{Company, Flag, HasCompany, HasId, HasName, Role};
-use crate::storage::{
-    BaseStore, CompanyStore, FlagStore, RecallByCompany, RecallById, RecallByName, RoleStore,
-};
+use crate::storable::*;
+use crate::storage::*;
 use crate::StorageError;
 
 #[derive(Clone)]
@@ -83,9 +80,27 @@ where
     }
 }
 
+impl<T> RecallByRole<T> for StubStore<T>
+where
+    T: HasRole + HasDeleted + Clone,
+{
+    async fn recall_by_role<I: HasId>(&self, role: I) -> anyhow::Result<Vec<T>> {
+        Ok(self
+            .store
+            .iter()
+            .filter(|stored_item| stored_item.get_role_id() == role.get_id())
+            .filter(|item| !item.is_deleted())
+            .cloned()
+            .collect())
+    }
+}
+
 impl CompanyStore for StubStore<Company> {}
 impl RoleStore for StubStore<Role> {}
 impl FlagStore for StubStore<Flag> {}
+impl QuestionStore for StubStore<Question> {}
+impl InterviewStore for StubStore<Interview> {}
+impl ValueStore for StubStore<Value> {}
 
 #[cfg(test)]
 mod test_helper {
@@ -107,20 +122,27 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storage::property::recall_by_id::test_helper::test_recall_by_id;
-    use crate::storage::{
-        recall_by_company::test_helper::test_recall_by_company,
-        recall_by_name::test_helper::test_recall_by_name,
-    };
     use crate::test_helper::*;
+    use crate::{
+        test_recall_by_company, test_recall_by_id, test_recall_by_name, test_recall_by_role,
+    };
     use paste::paste;
 
     test_recall_by_id!(StubStore, Company);
     test_recall_by_id!(StubStore, Flag);
     test_recall_by_id!(StubStore, Role);
+    test_recall_by_id!(StubStore, Value);
+    test_recall_by_id!(StubStore, Question);
+    test_recall_by_id!(StubStore, Interview);
     test_recall_by_name!(StubStore, Company);
     test_recall_by_name!(StubStore, Flag);
     test_recall_by_name!(StubStore, Role);
+    test_recall_by_name!(StubStore, Value);
+    test_recall_by_name!(StubStore, Question);
+    test_recall_by_name!(StubStore, Interview);
     test_recall_by_company!(StubStore, Flag);
     test_recall_by_company!(StubStore, Role);
+    test_recall_by_company!(StubStore, Value);
+    test_recall_by_role!(StubStore, Question);
+    test_recall_by_role!(StubStore, Interview);
 }
