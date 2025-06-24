@@ -99,6 +99,7 @@ impl CompanyStore for StubStore<Company> {}
 impl RoleStore for StubStore<Role> {}
 impl FlagStore for StubStore<Flag> {}
 impl QuestionStore for StubStore<Question> {}
+impl ValueStore for StubStore<Value> {}
 
 #[cfg(test)]
 mod test_helper {
@@ -132,12 +133,15 @@ mod tests {
     test_recall_by_id!(StubStore, Company);
     test_recall_by_id!(StubStore, Flag);
     test_recall_by_id!(StubStore, Role);
+    test_recall_by_id!(StubStore, Value);
     test_recall_by_id!(StubStore, Question);
     test_recall_by_name!(StubStore, Company);
     test_recall_by_name!(StubStore, Flag);
     test_recall_by_name!(StubStore, Role);
+    test_recall_by_name!(StubStore, Value);
     test_recall_by_name!(StubStore, Question);
     test_recall_by_company!(StubStore, Flag);
     test_recall_by_company!(StubStore, Role);
+    test_recall_by_company!(StubStore, Value);
     test_recall_by_role!(StubStore, Question);
 }

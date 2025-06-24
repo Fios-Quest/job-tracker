@@ -1,9 +1,9 @@
 use crate::storable::{
-    Company, Flag, HasCompany, HasDeleted, HasId, HasName, HasRole, Question, Role,
+    Company, Flag, HasCompany, HasDeleted, HasId, HasName, HasRole, Question, Role, Value,
 };
 use crate::storage::{
     BaseStore, CompanyStore, FlagStore, QuestionStore, RecallByCompany, RecallById, RecallByName,
-    RecallByRole, RoleStore, StubStore,
+    RecallByRole, RoleStore, StubStore, ValueStore,
 };
 use anyhow::Result;
 use serde::de::DeserializeOwned;
@@ -77,6 +77,13 @@ impl ScopedJsonStoreFor for JsonStore<Flag> {
     }
 }
 
+impl ScopedJsonStoreFor for JsonStore<Value> {
+    async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
+        base_path.push("value");
+        Self::new(base_path).await
+    }
+}
+
 impl ScopedJsonStoreFor for JsonStore<Role> {
     async fn new_scoped(mut base_path: PathBuf) -> Result<Self> {
         base_path.push("role");
@@ -142,6 +149,7 @@ impl CompanyStore for JsonStore<Company> {}
 impl RoleStore for JsonStore<Role> {}
 impl FlagStore for JsonStore<Flag> {}
 impl QuestionStore for JsonStore<Question> {}
+impl ValueStore for JsonStore<Value> {}
 
 #[cfg(test)]
 mod test_helper {
@@ -178,13 +186,16 @@ mod tests {
     test_recall_by_id!(JsonStore, Company);
     test_recall_by_id!(JsonStore, Flag);
     test_recall_by_id!(JsonStore, Role);
+    test_recall_by_id!(JsonStore, Value);
     test_recall_by_id!(JsonStore, Question);
     test_recall_by_name!(JsonStore, Company);
     test_recall_by_name!(JsonStore, Flag);
     test_recall_by_name!(JsonStore, Role);
+    test_recall_by_name!(JsonStore, Value);
     test_recall_by_name!(JsonStore, Question);
     test_recall_by_company!(JsonStore, Flag);
     test_recall_by_company!(JsonStore, Role);
+    test_recall_by_company!(JsonStore, Value);
     test_recall_by_role!(JsonStore, Question);
 
     #[tokio::test]

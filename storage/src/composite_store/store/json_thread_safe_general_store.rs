@@ -1,4 +1,5 @@
 use crate::composite_store::ThreadSafeGeneralStore;
+use crate::prelude::Value;
 use crate::storable::{Company, Flag, Question, Role};
 use crate::storage::{JsonStore, ScopedJsonStoreFor};
 use anyhow::Result;
@@ -8,15 +9,17 @@ use tokio::join;
 pub type JsonThreadSafeGeneralStore = ThreadSafeGeneralStore<
     JsonStore<Company>,
     JsonStore<Flag>,
+    JsonStore<Value>,
     JsonStore<Role>,
     JsonStore<Question>,
 >;
 
 impl JsonThreadSafeGeneralStore {
     pub async fn new_json(base_path: PathBuf) -> Result<Self> {
-        let (company_store, flag_store, role_store, question_store) = join!(
+        let (company_store, flag_store, value_store, role_store, question_store) = join!(
             JsonStore::<Company>::new_scoped(base_path.clone()),
             JsonStore::<Flag>::new_scoped(base_path.clone()),
+            JsonStore::<Value>::new_scoped(base_path.clone()),
             JsonStore::<Role>::new_scoped(base_path.clone()),
             JsonStore::<Question>::new_scoped(base_path.clone()),
         );
@@ -24,6 +27,7 @@ impl JsonThreadSafeGeneralStore {
         Ok(Self::new(
             company_store?,
             flag_store?,
+            value_store?,
             role_store?,
             question_store?,
         ))

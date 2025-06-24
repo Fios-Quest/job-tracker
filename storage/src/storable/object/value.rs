@@ -1,7 +1,9 @@
 use crate::storable::*;
 use crate::{impl_has_company, impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Value {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -19,6 +21,12 @@ impl Value {
             description: "".to_string(),
             date_deleted: None,
         }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.company_id == other.company_id
     }
 }
 

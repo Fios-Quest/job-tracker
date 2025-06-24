@@ -9,3 +9,6 @@ pub use role_store::*;
 
 mod question_store;
 pub use question_store::*;
+
+mod value_store;
+pub use value_store::*;

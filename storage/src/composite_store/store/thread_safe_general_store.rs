@@ -1,35 +1,45 @@
 use crate::composite_store::HasFutureStoreFor;
-use crate::storable::{Company, Flag, Question, Role};
-use crate::storage::{CompanyStore, FlagStore, QuestionStore, RoleStore};
+use crate::storable::{Company, Flag, Question, Role, Value};
+use crate::storage::{CompanyStore, FlagStore, QuestionStore, RoleStore, ValueStore};
 use crate::Sealed;
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
 #[derive(Clone)]
-pub struct ThreadSafeGeneralStore<C, F, R, Q>
+pub struct ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
     company_store: Arc<Mutex<C>>,
     flag_store: Arc<Mutex<F>>,
+    value_store: Arc<Mutex<V>>,
     role_store: Arc<Mutex<R>>,
     question_store: Arc<Mutex<Q>>,
 }
 
-impl<C, F, R, Q> ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
-    pub fn new(company_store: C, flag_store: F, role_store: R, question_store: Q) -> Self {
+    pub fn new(
+        company_store: C,
+        flag_store: F,
+        value_store: V,
+        role_store: R,
+        question_store: Q,
+    ) -> Self {
         Self {
             company_store: Arc::new(Mutex::new(company_store)),
             flag_store: Arc::new(Mutex::new(flag_store)),
+            value_store: Arc::new(Mutex::new(value_store)),
             role_store: Arc::new(Mutex::new(role_store)),
             question_store: Arc::new(Mutex::new(question_store)),
         }
@@ -50,21 +60,27 @@ where
     pub async fn question_store(&self) -> MutexGuard<Q> {
         self.question_store.lock().await
     }
+
+    pub async fn value_store(&self) -> MutexGuard<V> {
+        self.value_store.lock().await
+    }
 }
 
-impl<C, F, R, Q> Sealed for ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> Sealed for ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
 }
 
-impl<C, F, R, Q> HasFutureStoreFor<Company> for ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> HasFutureStoreFor<Company> for ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
@@ -78,10 +94,11 @@ where
     }
 }
 
-impl<C, F, R, Q> HasFutureStoreFor<Flag> for ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> HasFutureStoreFor<Flag> for ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
@@ -95,10 +112,11 @@ where
     }
 }
 
-impl<C, F, R, Q> HasFutureStoreFor<Role> for ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> HasFutureStoreFor<Role> for ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
@@ -112,10 +130,11 @@ where
     }
 }
 
-impl<C, F, R, Q> HasFutureStoreFor<Question> for ThreadSafeGeneralStore<C, F, R, Q>
+impl<C, F, V, R, Q> HasFutureStoreFor<Question> for ThreadSafeGeneralStore<C, F, V, R, Q>
 where
     C: CompanyStore,
     F: FlagStore,
+    V: ValueStore,
     R: RoleStore,
     Q: QuestionStore,
 {
@@ -126,6 +145,24 @@ where
         Self::Storage: 'a,
     {
         self.question_store().await
+    }
+}
+
+impl<C, F, V, R, Q> HasFutureStoreFor<Value> for ThreadSafeGeneralStore<C, F, V, R, Q>
+where
+    C: CompanyStore,
+    F: FlagStore,
+    V: ValueStore,
+    R: RoleStore,
+    Q: QuestionStore,
+{
+    type Storage = V;
+
+    async fn get_store<'a>(&'a self) -> MutexGuard<'a, Self::Storage>
+    where
+        Self::Storage: 'a,
+    {
+        self.value_store().await
     }
 }
 
@@ -140,6 +177,7 @@ mod test_helper {
         for ThreadSafeGeneralStore<
             StubStore<Company>,
             StubStore<Flag>,
+            StubStore<Value>,
             StubStore<Role>,
             StubStore<Question>,
         >
@@ -147,6 +185,7 @@ mod test_helper {
         #[cfg(test)]
         async fn new_test() -> anyhow::Result<Self> {
             let store = ThreadSafeGeneralStore::new(
+                StubStore::default(),
                 StubStore::default(),
                 StubStore::default(),
                 StubStore::default(),
@@ -173,13 +212,16 @@ mod tests {
 
     test_recall_by_id!(ThreadSafeGeneralStore, Company);
     test_recall_by_id!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_id!(ThreadSafeGeneralStore, Value);
     test_recall_by_id!(ThreadSafeGeneralStore, Role);
     test_recall_by_id!(ThreadSafeGeneralStore, Question);
     test_recall_by_name!(ThreadSafeGeneralStore, Company);
     test_recall_by_name!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_name!(ThreadSafeGeneralStore, Value);
     test_recall_by_name!(ThreadSafeGeneralStore, Role);
     test_recall_by_name!(ThreadSafeGeneralStore, Question);
     test_recall_by_company!(ThreadSafeGeneralStore, Flag);
+    test_recall_by_company!(ThreadSafeGeneralStore, Value);
     test_recall_by_company!(ThreadSafeGeneralStore, Role);
     test_recall_by_role!(ThreadSafeGeneralStore, Question);
 
@@ -193,6 +235,7 @@ mod tests {
         let question = Question::new(role.id, "question");
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
@@ -224,6 +267,7 @@ mod tests {
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
+            StubStore::default(),
         );
 
         all_store.store(company.clone()).await.unwrap();
@@ -241,6 +285,7 @@ mod tests {
         let role = Role::new(company.id, "role".to_string(), Timestamp::now());
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
@@ -264,6 +309,7 @@ mod tests {
         let question = Question::new(role.id, "question");
 
         let mut all_store = ThreadSafeGeneralStore::new(
+            StubStore::default(),
             StubStore::default(),
             StubStore::default(),
             StubStore::default(),
