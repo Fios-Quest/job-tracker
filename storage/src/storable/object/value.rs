@@ -1,5 +1,5 @@
 use crate::storable::*;
-use crate::{impl_has_company, impl_has_deleted, impl_has_id, impl_has_name, Timestamp};
+use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -51,8 +51,11 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storable::{
+        has_company::test_helper::test_has_company, has_deleted::test_helper::test_has_deleted,
+        has_id::test_helper::test_has_id, has_name::test_helper::test_has_name,
+    };
     use crate::test_helper::TestHelper;
-    use crate::{test_has_company, test_has_deleted, test_has_id, test_has_name};
     use paste::paste;
 
     test_has_id!(Value);

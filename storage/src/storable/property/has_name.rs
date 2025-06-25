@@ -11,7 +11,6 @@ where
     }
 }
 
-#[macro_export]
 macro_rules! impl_has_name {
     ($storable:ty) => {
         impl HasName for $storable {
@@ -21,10 +20,10 @@ macro_rules! impl_has_name {
         }
     };
 }
+pub(crate) use impl_has_name;
 
 #[cfg(test)]
 pub mod test_helper {
-    #[macro_export]
     macro_rules! test_has_name {
         ($storable:ident) => {
             paste! {
@@ -36,4 +35,5 @@ pub mod test_helper {
             }
         };
     }
+    pub(crate) use test_has_name;
 }
