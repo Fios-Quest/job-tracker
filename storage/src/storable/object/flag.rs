@@ -18,7 +18,7 @@ impl FromStr for FlagColor {
         match s.to_lowercase().as_str() {
             "green" => Ok(Self::Green),
             "red" => Ok(Self::Red),
-            _ => Err(format!("Invalid flag_color '{}'", s)),
+            _ => Err(format!("Invalid flag_color '{s}'")),
         }
     }
 }
