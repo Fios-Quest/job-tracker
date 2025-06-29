@@ -57,7 +57,7 @@ impl fmt::Display for DetailsView {
         match self {
             DetailsView::Company => write!(f, "company"),
             DetailsView::Role => write!(f, "role"),
-            DetailsView::Interview(uuid) => write!(f, "{}", uuid),
+            DetailsView::Interview(uuid) => write!(f, "{uuid}"),
             DetailsView::Questions => write!(f, "questions"),
             DetailsView::Invalid => write!(f, "company"),
         }

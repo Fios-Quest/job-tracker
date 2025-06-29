@@ -12,7 +12,7 @@ pub fn Help() -> Element {
         async move {
             let logs_result = log_getter.get_logs().await;
             logs_result.unwrap_or_else(|e| {
-                error!("{}", e);
+                error!("{e}");
                 Vec::with_capacity(0)
             })
         }
@@ -40,7 +40,7 @@ pub fn Help() -> Element {
                 onclick: move |_| {
                     let log_clearer = log_cleaner.clone();
                     spawn(async move {
-                        log_clearer.clear_logs().await.unwrap_or_else(|e| error!("{}", e));
+                        log_clearer.clear_logs().await.unwrap_or_else(|e| error!("{e}"));
                     });
                     logs_resource.restart();
                 },

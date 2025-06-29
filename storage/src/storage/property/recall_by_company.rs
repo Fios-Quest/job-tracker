@@ -11,7 +11,7 @@ where
 #[cfg(test)]
 pub mod test_helper {
     macro_rules! test_recall_by_company {
-        ($storage:ident, $storable:ident) => {
+        ($storage:ty, $storable:ty) => {
             paste! {
                 #[tokio::test]
                 async fn [< test_recall_by_company_ $storage:snake _with_ $storable:snake >] () {

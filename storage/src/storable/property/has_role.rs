@@ -27,7 +27,7 @@ pub(crate) use impl_has_role;
 #[cfg(test)]
 pub mod test_helper {
     macro_rules! test_has_role {
-        ($storable:ident) => {
+        ($storable:ty) => {
             paste! {
                 #[tokio::test]
                 async fn [< test_has_role_ $storable:snake >] () {
