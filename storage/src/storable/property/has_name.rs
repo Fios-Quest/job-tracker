@@ -25,7 +25,7 @@ pub(crate) use impl_has_name;
 #[cfg(test)]
 pub mod test_helper {
     macro_rules! test_has_name {
-        ($storable:ident) => {
+        ($storable:ty) => {
             paste! {
                 #[tokio::test]
                 async fn [< test_has_name_ $storable:snake >] () {
