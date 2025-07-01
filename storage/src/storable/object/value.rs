@@ -13,12 +13,16 @@ pub struct Value {
 }
 
 impl Value {
-    pub fn new<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
+    pub fn new<C: HasId, N: Into<String>, D: Into<String>>(
+        company: C,
+        name: N,
+        description: D,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             company_id: company.get_id(),
             name: name.into(),
-            description: "".to_string(),
+            description: description.into(),
             date_deleted: None,
         }
     }
@@ -43,7 +47,7 @@ mod test_helper {
 
     impl TestHelper for Value {
         async fn new_test() -> anyhow::Result<Self> {
-            Ok(Value::new(Uuid::new_v4(), "Value"))
+            Ok(Value::new(Uuid::new_v4(), "Value", "Description"))
         }
     }
 }
