@@ -18,6 +18,9 @@ pub use role_information::*;
 mod flag_list;
 pub use flag_list::*;
 
+mod value_list;
+pub use value_list::*;
+
 mod editable;
 pub use editable::*;
 
