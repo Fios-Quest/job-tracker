@@ -23,7 +23,7 @@ impl FromStr for FlagColor {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Flag {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -51,12 +51,6 @@ impl Flag {
             name: name.into(),
             date_deleted: None,
         }
-    }
-}
-
-impl PartialEq for Flag {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.company_id == other.company_id
     }
 }
 

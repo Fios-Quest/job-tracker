@@ -3,7 +3,7 @@ use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Company {
     pub id: Uuid,
     pub name: String,
@@ -29,12 +29,6 @@ impl Company {
 
     pub fn create_red_flag<S: Into<String>>(&self, name: S) -> Flag {
         Flag::new_red(self, name)
-    }
-}
-
-impl PartialEq for Company {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
     }
 }
 
@@ -67,43 +61,6 @@ mod tests {
     test_has_id!(Company);
     test_has_name!(Company);
     test_has_deleted!(Company);
-
-    #[test]
-    fn test_partial_eq_same_company() {
-        let company1 = Company::new("name".to_string());
-        let company2 = company1.clone();
-        assert_eq!(company1, company2);
-    }
-
-    #[test]
-    fn test_partial_eq_same_id() {
-        let company1 = Company::new("name".to_string());
-        let company2 = Company {
-            name: "new name".to_string(),
-            ..company1.clone()
-        };
-        assert_ne!(company1.get_name(), company2.get_name());
-        assert_eq!(company1, company2);
-    }
-
-    #[test]
-    fn test_partial_eq_after_delete() {
-        let company1 = Company::new("name".to_string());
-        let company2 = Company {
-            date_deleted: Some(Timestamp::now()),
-            ..company1.clone()
-        };
-        assert!(!company1.is_deleted());
-        assert!(company2.is_deleted());
-        assert_eq!(company1, company2);
-    }
-
-    #[test]
-    fn test_partial_eq_different_id() {
-        let company1 = Company::new("name".to_string());
-        let company2 = Company::new("name".to_string());
-        assert_ne!(company1, company2);
-    }
 
     #[test]
     fn test_create_role() {
