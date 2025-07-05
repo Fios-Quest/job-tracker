@@ -3,7 +3,7 @@ use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Value {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -13,20 +13,18 @@ pub struct Value {
 }
 
 impl Value {
-    pub fn new<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
+    pub fn new<C: HasId, N: Into<String>, D: Into<String>>(
+        company: C,
+        name: N,
+        description: D,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             company_id: company.get_id(),
             name: name.into(),
-            description: "".to_string(),
+            description: description.into(),
             date_deleted: None,
         }
-    }
-}
-
-impl PartialEq for Value {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.company_id == other.company_id
     }
 }
 
@@ -43,7 +41,7 @@ mod test_helper {
 
     impl TestHelper for Value {
         async fn new_test() -> anyhow::Result<Self> {
-            Ok(Value::new(Uuid::new_v4(), "Value"))
+            Ok(Value::new(Uuid::new_v4(), "Value", "Description"))
         }
     }
 }

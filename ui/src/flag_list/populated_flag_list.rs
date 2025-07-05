@@ -21,7 +21,6 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
     let company_id = company.id;
 
     let stores = use_context::<StoreType>();
-    let mut flag_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
 
     // Get flags for company
@@ -66,7 +65,6 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
                     match result {
                         Ok(_) => {
                             // Reset the values to empty
-                            flag_name_value.set("");
                             error_message.set(None);
 
                             // Rerun the resource
@@ -97,11 +95,7 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
                     option { value: "red", "🚩 Red" }
                     option { value: "green", "💚 Green" }
                 }
-                input {
-                    id: "add_flag",
-                    name: "flag_name",
-                    value: flag_name_value,
-                }
+                input { id: "add_flag", name: "flag_name" }
                 input { r#type: "submit" }
             }
         }

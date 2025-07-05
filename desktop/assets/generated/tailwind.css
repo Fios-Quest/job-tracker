@@ -1,5 +1,4 @@
 /*! tailwindcss v4.1.8 | MIT License | https://tailwindcss.com */
-@layer properties;
 @layer theme, base, components, utilities;
 @layer theme {
   :root, :host {
@@ -174,6 +173,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .m-auto {
     margin: auto;
   }
@@ -189,17 +191,8 @@
   .flex {
     display: flex;
   }
-  .table {
-    display: table;
-  }
   .max-h-\[100\] {
     max-height: 100;
-  }
-  .border-collapse {
-    border-collapse: collapse;
-  }
-  .resize {
-    resize: both;
   }
   .flex-col {
     flex-direction: column;
@@ -213,10 +206,6 @@
   .rounded-2xl {
     border-radius: var(--radius-2xl);
   }
-  .border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
   .bg-red-900 {
     background-color: var(--color-red-900);
   }
@@ -229,13 +218,6 @@
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
-  }
-  .underline {
-    text-decoration-line: underline;
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
   }
 }
 @layer base {
@@ -281,7 +263,7 @@
   .disabled-nav-link {
     color: var(--color-slate-700);
   }
-  input {
+  input, textarea {
     margin: calc(var(--spacing) * 2);
     border-radius: 0.25rem;
     background-color: var(--color-slate-800);
@@ -301,23 +283,5 @@
   }
   p a {
     text-decoration-line: underline;
-  }
-}
-@property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@property --tw-outline-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@layer properties {
-  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
-    *, ::before, ::after, ::backdrop {
-      --tw-border-style: solid;
-      --tw-outline-style: solid;
-    }
   }
 }

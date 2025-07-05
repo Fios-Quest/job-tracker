@@ -4,7 +4,7 @@ use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Role {
     pub id: Uuid,
     pub company_id: Uuid,
@@ -32,12 +32,6 @@ impl Role {
 
     pub fn create_interview<S: Into<String>>(&self, name: S) -> Interview {
         Interview::new(self, name)
-    }
-}
-
-impl PartialEq for Role {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.company_id == other.company_id
     }
 }
 

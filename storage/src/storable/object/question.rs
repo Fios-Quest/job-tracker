@@ -3,7 +3,7 @@ use crate::Timestamp;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Question {
     pub id: Uuid,
     pub role_id: Uuid,
@@ -21,12 +21,6 @@ impl Question {
             answer: "".to_string(),
             date_deleted: None,
         }
-    }
-}
-
-impl PartialEq for Question {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.role_id == other.role_id
     }
 }
 
