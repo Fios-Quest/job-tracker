@@ -1,4 +1,4 @@
-use crate::value_list::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use super::{create_value_from_form_data, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
 use crate::{StoreType, ValueListItem};
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
@@ -27,7 +27,7 @@ pub fn ValueList(company: Arc<Company>) -> Element {
             .recall_by_company(company_id)
             .await;
         match result {
-            Ok(values) => values,
+            Ok(values) => values.into_iter().map(Arc::new).collect(),
             Err(e) => {
                 error_message.set(handle_storage_error(e));
                 Vec::with_capacity(0)
@@ -43,19 +43,22 @@ pub fn ValueList(company: Arc<Company>) -> Element {
         }
     });
 
-    let create_value = move |event: Event<FormData>| async move {
-        let value = super::form_date_to_value(company_id, &event);
-        if let Some(value) = value {
-            let mut store = use_context::<StoreType>();
-            let result = store.store(value).await;
-            match result {
-                Ok(_) => {
-                    error_message.set(None);
-                    // Rerun the resource
-                    values_resource.restart();
-                }
-                Err(e) => {
-                    error_message.set(handle_storage_error(e));
+    let create_value = move |event: Event<FormData>| {
+        let company = company.clone();
+        async move {
+            let value = create_value_from_form_data(company, &event);
+            if let Some(value) = value {
+                let mut store = use_context::<StoreType>();
+                let result = store.store(value).await;
+                match result {
+                    Ok(_) => {
+                        error_message.set(None);
+                        // Rerun the resource
+                        values_resource.restart();
+                    }
+                    Err(e) => {
+                        error_message.set(handle_storage_error(e));
+                    }
                 }
             }
         }

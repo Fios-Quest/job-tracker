@@ -1,15 +1,16 @@
-use super::{form_date_to_value, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use super::{edit_value_from_form_data, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn ValueListItem(value: Value, reload_values: Callback) -> Element {
+pub fn ValueListItem(value: Arc<Value>, reload_values: Callback) -> Element {
     let value_id = value.id;
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     if let Some(event) = form_receiver() {
-        let value = form_date_to_value(value.company_id, &event);
+        let value = edit_value_from_form_data(value.clone(), &event);
         if let Some(mut value) = value {
             value.id = value_id;
             spawn(async move {

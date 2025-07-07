@@ -30,6 +30,10 @@ impl Company {
     pub fn create_red_flag<S: Into<String>>(&self, name: S) -> Flag {
         Flag::new_red(self, name)
     }
+
+    pub fn create_value<N: Into<String>, D: Into<String>>(&self, name: N, description: D) -> Value {
+        Value::new(self, name, description)
+    }
 }
 
 impl_has_id!(Company);
@@ -81,5 +85,14 @@ mod tests {
         let company = Company::new("company".to_string());
         let flag = company.create_red_flag("red flag".to_string());
         assert_eq!(company.get_id(), flag.get_company_id());
+    }
+
+    #[test]
+    fn test_create_value() {
+        let company = Company::new("company".to_string());
+        let value = company.create_value("name", "description");
+        assert_eq!(value.get_company_id(), company.get_id());
+        assert_eq!(value.name, "name");
+        assert_eq!(value.description, "description");
     }
 }
