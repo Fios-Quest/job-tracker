@@ -26,8 +26,12 @@ impl Role {
         }
     }
 
-    pub fn create_question<S: Into<String>>(&self, name: S) -> Question {
-        Question::new(self, name)
+    pub fn create_question<N: Into<String>, A: Into<String>>(
+        &self,
+        name: N,
+        answer: A,
+    ) -> Question {
+        Question::new(self, name, answer)
     }
 
     pub fn create_interview<S: Into<String>>(&self, name: S) -> Interview {
@@ -71,9 +75,10 @@ mod tests {
     #[test]
     fn test_create_question() {
         let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
-        let question = role.create_question("question");
+        let question = role.create_question("question", "answer");
         assert_eq!(question.role_id, role.id);
         assert_eq!(question.name, "question");
+        assert_eq!(question.answer, "answer");
     }
 
     #[test]

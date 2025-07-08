@@ -13,12 +13,12 @@ pub struct Question {
 }
 
 impl Question {
-    pub fn new<R: HasId, S: Into<String>>(role: R, name: S) -> Self {
+    pub fn new<R: HasId, N: Into<String>, A: Into<String>>(role: R, name: N, answer: A) -> Self {
         Self {
             id: Uuid::new_v4(),
             role_id: role.get_id(),
             name: name.into(),
-            answer: "".to_string(),
+            answer: answer.into(),
             date_deleted: None,
         }
     }
@@ -37,7 +37,7 @@ mod test_helper {
 
     impl TestHelper for Question {
         async fn new_test() -> anyhow::Result<Self> {
-            Ok(Question::new(Uuid::new_v4(), "Question"))
+            Ok(Question::new(Uuid::new_v4(), "Question", "Answer"))
         }
     }
 }

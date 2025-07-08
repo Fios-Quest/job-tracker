@@ -59,8 +59,15 @@ fn InnerDetailView(view: DetailsView) -> Element {
             }
         }
         DetailsView::Questions => {
-            rsx! {
-                QuestionsDetails {}
+            if let Some(role) = role {
+                rsx! {
+                    QuestionsDetails { role }
+                }
+            } else {
+                info!("Question view used with no role selected");
+                rsx! {
+                    CompanyDetails { company }
+                }
             }
         }
         DetailsView::Invalid => {
