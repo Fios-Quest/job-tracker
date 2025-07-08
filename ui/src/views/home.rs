@@ -1,46 +1,34 @@
 use crate::router::DetailsView;
-use crate::{CompanyList, Details, RoleList, StoreType, VIEW_SIGNAL};
+use crate::{router, CompanyList, Details, RoleList, StoreType, VIEW_SIGNAL};
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
 use storage::ApplicationContext;
 use uuid::Uuid;
 
-fn create_route(
+#[component]
+pub fn Home(
     company_id: Option<Uuid>,
     role_id: Option<Uuid>,
+    interview_id: Option<Uuid>,
     view: Option<DetailsView>,
-) -> String {
-    let mut route = String::new();
-    if let Some(company_id) = company_id {
-        route.push('/');
-        route.push_str(&company_id.to_string());
-
-        if let Some(role_id) = role_id {
-            route.push('/');
-            route.push_str(&role_id.to_string());
-        }
-    }
-
-    if let Some(view) = view {
-        route.push_str(&format!("?view={view}"))
-    }
-
-    route
-}
-
-#[component]
-pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<DetailsView>) -> Element {
+) -> Element {
     if let Some(new_view) = VIEW_SIGNAL() {
         if view.as_ref() != Some(&new_view) {
             *VIEW_SIGNAL.write() = None;
-            router().push(create_route(company_id, role_id, Some(new_view)));
+            router().push(router::create_route(
+                company_id,
+                role_id,
+                interview_id,
+                Some(new_view),
+            ));
         }
     }
 
     let store = use_context::<StoreType>();
     let mut context = use_context::<Signal<ApplicationContext>>();
-    let _resource = use_resource(use_reactive!(|(company_id, role_id)| {
+    let _resource = use_resource(use_reactive!(|(company_id, role_id, interview_id)| {
         let store = store.clone();
+
         async move {
             if let Some(company_id) = company_id {
                 if context().get_company().map(|c| c.id) != Some(company_id) {
@@ -51,7 +39,7 @@ pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<Detail
                     context.set(context().set_company(company));
                 }
             }
-            // Role _must_ be set after company, though could load both at the same time
+            // Role _must_ be set after company
             if let Some(role_id) = role_id {
                 if context().get_role().map(|c| c.id) != Some(role_id) {
                     let role = store
@@ -59,6 +47,16 @@ pub fn Home(company_id: Option<Uuid>, role_id: Option<Uuid>, view: Option<Detail
                         .await
                         .expect("Could not set role");
                     context.set(context().set_role(role).expect("Couldn't set role"));
+                }
+            }
+            // Interview _must_ be set after role
+            if let Some(interview_id) = interview_id {
+                if context().get_interview().map(|c| c.id) != Some(interview_id) {
+                    let role = store
+                        .recall_by_id(interview_id)
+                        .await
+                        .expect("Could not set role");
+                    context.set(context().set_interview(role).expect("Couldn't set role"));
                 }
             }
         }
