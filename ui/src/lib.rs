@@ -6,6 +6,9 @@ pub use router::{DetailsView, Route};
 mod navbar;
 pub use navbar::Navbar;
 
+mod interviews;
+pub use interviews::*;
+
 mod company_list;
 pub use company_list::CompanyList;
 

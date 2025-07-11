@@ -21,7 +21,6 @@ fn InnerDetailView(view: DetailsView) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
     let company = context().get_company();
     let role = context().get_role();
-    let interview = context().get_interview();
 
     // At the very least, Company must exist
     let Some(company) = company else {
@@ -47,9 +46,9 @@ fn InnerDetailView(view: DetailsView) -> Element {
             }
         }
         DetailsView::Interview => {
-            if role.is_some() {
+            if let Some(role) = role {
                 rsx! {
-                    InterviewDetails { interview }
+                    InterviewDetails { role }
                 }
             } else {
                 info!("Interview view used with no role selected");
