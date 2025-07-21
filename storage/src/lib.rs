@@ -34,8 +34,9 @@ pub mod prelude {
     pub use crate::error::StorageError;
     pub use crate::logging::{json_log_fetcher::JsonLogFetcher, LogFetcher};
     pub use crate::storable::{
-        Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole, Interview,
-        Question, Role, Value,
+        ApplyPartial, Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole,
+        Interview, PartialCompany, PartialFlag, PartialInterview, PartialQuestion, PartialRole,
+        PartialValue, Question, Role, Value,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,
