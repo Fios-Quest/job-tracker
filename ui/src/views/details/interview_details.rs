@@ -1,11 +1,12 @@
+use crate::form_data_helper::ModifyWithFormData;
 use crate::{Editable, InterviewNav, StoreType};
 use dioxus::prelude::*;
+use log::warn;
 use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
 fn InterviewDetailsDisplay(interview: Arc<Interview>) -> Element {
-    let hosts = interview.host.join(" - ");
     let when = interview
         .date_time
         .map(|t| t.to_string())
@@ -15,7 +16,7 @@ fn InterviewDetailsDisplay(interview: Arc<Interview>) -> Element {
             dt { "When:" }
             dd { "{when}" }
             dt { "Who:" }
-            dd { "{hosts}" }
+            dd { "{interview.host}" }
             dt { "Interview:" }
             dd { "{interview.name}" }
         }
@@ -25,7 +26,6 @@ fn InterviewDetailsDisplay(interview: Arc<Interview>) -> Element {
 
 #[component]
 fn InterviewDetailsEditable(interview: Arc<Interview>) -> Element {
-    let hosts = interview.host.join("; ");
     let when = interview
         .date_time
         .map(|t| t.to_string())
@@ -34,11 +34,15 @@ fn InterviewDetailsEditable(interview: Arc<Interview>) -> Element {
         dl { class: "interview-details",
             dt { "When:" }
             dd {
-                input { name: "date_time", value: "{when}" }
+                input {
+                    name: "date_time",
+                    r#type: "datetime-local",
+                    value: "{when}",
+                }
             }
             dt { "Who:" }
             dd {
-                input { name: "hosts", value: "{hosts}" }
+                input { name: "hosts", value: "{interview.host}" }
             }
             dt { "Interview:" }
             dd {
@@ -56,7 +60,6 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
     let mut stores = use_context::<StoreType>();
     let interview = context().get_interview();
-    dbg!(&interview);
 
     let Some(interview) = interview else {
         return rsx! {
@@ -67,12 +70,27 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
     };
 
     let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-    if let Some(partial_interview) =
-        form_receiver().and_then(|e| e.parsed_values::<PartialInterview>().ok())
-    {
+    if let Some(form_data) = form_receiver() {
         let mut interview = Arc::unwrap_or_clone(interview.clone());
-        interview.apply(partial_interview);
-        spawn(async move { stores.store(interview).await.expect("Argh") });
+
+        match interview.modify_with_form_data(&form_data) {
+            Ok(()) => {
+                dbg!(&interview);
+                spawn(async move {
+                    let _ = stores
+                        .store(interview.clone())
+                        .await
+                        .inspect_err(|e| warn!("{e}"));
+                    let _ = context()
+                        .set_interview(interview)
+                        .inspect_err(|e| warn!("{e}"));
+                });
+            }
+            Err(e) => {
+                dbg!(&e);
+                warn!("{e}");
+            }
+        }
     }
 
     let display = rsx! {
@@ -87,7 +105,6 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
         InterviewNav { role }
 
         div {
-
             Editable { display, editable, form_receiver }
         }
     }
