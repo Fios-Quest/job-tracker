@@ -74,7 +74,7 @@ mod tests {
         hash_map.insert("company_id".to_string(), Uuid::new_v4().to_string().into());
         hash_map.insert("name".to_string(), "New name".into());
         hash_map.insert("description".to_string(), "New description".into());
-        hash_map.insert("date_deleted".to_string(), 33.into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
 
         let partial_value = PartialValue::deserialize(hash_map.into_deserializer()).unwrap();
         value.apply(partial_value);
@@ -83,6 +83,9 @@ mod tests {
         assert_eq!(value.company_id, original_company);
         assert_eq!(value.name, "New name".to_string());
         assert_eq!(value.description, "New description".to_string());
-        assert_eq!(value.date_deleted, Some(Timestamp::new(33)));
+        assert_eq!(
+            value.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
     }
 }

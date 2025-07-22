@@ -70,7 +70,7 @@ mod tests {
         hash_map.insert("role_id".to_string(), Uuid::new_v4().to_string().into());
         hash_map.insert("name".to_string(), "New Question".into());
         hash_map.insert("answer".to_string(), "New Answer".into());
-        hash_map.insert("date_deleted".to_string(), 33.into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
 
         let partial_question = PartialQuestion::deserialize(hash_map.into_deserializer()).unwrap();
         question.apply(partial_question);
@@ -79,6 +79,9 @@ mod tests {
         assert_eq!(question.role_id, original_role);
         assert_eq!(question.name, "New Question".to_string());
         assert_eq!(question.answer, "New Answer".to_string());
-        assert_eq!(question.date_deleted, Some(Timestamp::new(33)));
+        assert_eq!(
+            question.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
     }
 }

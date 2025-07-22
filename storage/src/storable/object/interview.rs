@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Partial)]
-#[partially(derive(Deserialize, Default))]
+#[partially(derive(Deserialize, Default), attribute(serde(default)))]
 pub struct Interview {
     #[partially(omit)]
     pub id: Uuid,
@@ -13,7 +13,7 @@ pub struct Interview {
     pub role_id: Uuid,
     pub name: String,
     pub notes: String,
-    pub host: Vec<String>,
+    pub host: String,
     pub date_time: Option<Timestamp>,
     pub date_deleted: Option<Timestamp>,
 }
@@ -25,7 +25,7 @@ impl Interview {
             role_id: role.get_id(),
             name: name.into(),
             notes: String::new(),
-            host: Vec::with_capacity(0),
+            host: String::new(),
             date_time: None,
             date_deleted: None,
         }
@@ -74,9 +74,9 @@ mod tests {
         hash_map.insert("role_id".to_string(), Uuid::new_v4().to_string().into());
         hash_map.insert("name".to_string(), "New name".into());
         hash_map.insert("notes".to_string(), "New notes".into());
-        hash_map.insert("host".to_string(), vec!["Host 1", "Host 2"].into()); // This might be a problem with forms 🤔
-        hash_map.insert("date_time".to_string(), 10.into());
-        hash_map.insert("date_deleted".to_string(), 33.into());
+        hash_map.insert("host".to_string(), "Host 1, Host 2".into());
+        hash_map.insert("date_time".to_string(), "2025-07-28T00:00".into());
+        hash_map.insert("date_deleted".to_string(), "2026-07-28T00:00".into());
 
         let partial_interview =
             PartialInterview::deserialize(hash_map.into_deserializer()).unwrap();
@@ -86,8 +86,14 @@ mod tests {
         assert_eq!(interview.role_id, original_role);
         assert_eq!(interview.name, "New name".to_string());
         assert_eq!(interview.notes, "New notes".to_string());
-        assert_eq!(interview.host, vec!["Host 1", "Host 2"]);
-        assert_eq!(interview.date_time, Some(Timestamp::new(10)));
-        assert_eq!(interview.date_deleted, Some(Timestamp::new(33)));
+        assert_eq!(interview.host, "Host 1, Host 2".to_string());
+        assert_eq!(
+            interview.date_time,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
+        assert_eq!(
+            interview.date_deleted,
+            Some(Timestamp::from_string("2026-07-28T00:00"))
+        );
     }
 }

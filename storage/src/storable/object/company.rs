@@ -105,13 +105,16 @@ mod tests {
         let mut hash_map: HashMap<String, serde_json::Value> = HashMap::new();
         hash_map.insert("id".to_string(), Uuid::new_v4().to_string().into()); // This should never change
         hash_map.insert("name".to_string(), "New name".into());
-        hash_map.insert("date_deleted".to_string(), 10.into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
 
         let partial_company = PartialCompany::deserialize(hash_map.into_deserializer()).unwrap();
         company.apply(partial_company);
 
         assert_eq!(company.id, original_id);
         assert_eq!(company.name, "New name".to_string());
-        assert_eq!(company.date_deleted, Some(Timestamp::new(10)));
+        assert_eq!(
+            company.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
     }
 }

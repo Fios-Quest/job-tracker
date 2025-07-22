@@ -133,7 +133,7 @@ mod tests {
         hash_map.insert("company_id".to_string(), Uuid::new_v4().to_string().into());
         hash_map.insert("flag_color".to_string(), "red".into());
         hash_map.insert("name".to_string(), "New name".into());
-        hash_map.insert("date_deleted".to_string(), 10.into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
 
         let partial_flag = PartialFlag::deserialize(hash_map.into_deserializer()).unwrap();
         flag.apply(partial_flag);
@@ -142,6 +142,9 @@ mod tests {
         assert_eq!(flag.company_id, original_company);
         assert_eq!(flag.flag_color, FlagColor::Red);
         assert_eq!(flag.name, "New name".to_string());
-        assert_eq!(flag.date_deleted, Some(Timestamp::new(10)));
+        assert_eq!(
+            flag.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
     }
 }

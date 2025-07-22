@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_modify_with_hashmap() {
-        let mut role = Role::new(Uuid::new_v4(), "Role name", Timestamp::new(1));
+        let mut role = Role::new(Uuid::new_v4(), "Role name", Timestamp::from_timestamp(1));
         let original_id = role.id;
         let original_company = role.company_id;
 
@@ -102,8 +102,8 @@ mod tests {
         hash_map.insert("company_id".to_string(), Uuid::new_v4().to_string().into());
         hash_map.insert("name".to_string(), "New name".into());
         hash_map.insert("description".to_string(), "New description".into());
-        hash_map.insert("date_applied".to_string(), 3.into());
-        hash_map.insert("date_deleted".to_string(), 10.into());
+        hash_map.insert("date_applied".to_string(), "2025-07-28T00:00".into());
+        hash_map.insert("date_deleted".to_string(), "2026-07-28T00:00".into());
 
         let partial_role = PartialRole::deserialize(hash_map.into_deserializer()).unwrap();
         role.apply(partial_role);
@@ -112,7 +112,13 @@ mod tests {
         assert_eq!(role.company_id, original_company);
         assert_eq!(role.name, "New name".to_string());
         assert_eq!(role.description, "New description".to_string());
-        assert_eq!(role.date_applied, Timestamp::new(3));
-        assert_eq!(role.date_deleted, Some(Timestamp::new(10)));
+        assert_eq!(
+            role.date_applied,
+            Timestamp::from_string("2025-07-28T00:00")
+        );
+        assert_eq!(
+            role.date_deleted,
+            Some(Timestamp::from_string("2026-07-28T00:00"))
+        );
     }
 }
