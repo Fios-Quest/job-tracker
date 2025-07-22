@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 pub mod json_log_fetcher;
+pub mod stub_log_fetcher;
 
 pub trait LogFetcher {
     async fn get_logs(&self) -> Result<Vec<String>>;

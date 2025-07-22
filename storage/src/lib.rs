@@ -29,10 +29,13 @@ trait Sealed {}
 pub mod prelude {
     pub use crate::application_context::{ApplicationContext, ApplicationContextError};
     pub use crate::composite_store::{
-        HasFutureStoreFor, JsonThreadSafeGeneralStore, ThreadSafeGeneralStore,
+        HasFutureStoreFor, JsonThreadSafeGeneralStore, StubThreadSafeGeneralStore,
+        ThreadSafeGeneralStore,
     };
     pub use crate::error::StorageError;
-    pub use crate::logging::{json_log_fetcher::JsonLogFetcher, LogFetcher};
+    pub use crate::logging::{
+        json_log_fetcher::JsonLogFetcher, stub_log_fetcher::StubLogFetcher, LogFetcher,
+    };
     pub use crate::storable::{
         ApplyPartial, Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole,
         Interview, PartialCompany, PartialFlag, PartialInterview, PartialQuestion, PartialRole,
