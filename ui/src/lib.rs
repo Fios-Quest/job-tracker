@@ -41,10 +41,18 @@ pub use views::*;
 use dioxus::prelude::*;
 use storage::prelude::*;
 
+mod form_data_helper;
+
 #[cfg(feature = "desktop")]
 pub type LogFetcherType = JsonLogFetcher;
 
+#[cfg(all(test, not(feature = "desktop")))]
+pub type LogFetcherType = StubLogFetcher;
+
 #[cfg(feature = "desktop")]
 pub type StoreType = JsonThreadSafeGeneralStore;
+
+#[cfg(all(test, not(feature = "desktop")))]
+pub type StoreType = StubThreadSafeGeneralStore;
 
 pub static VIEW_SIGNAL: GlobalSignal<Option<DetailsView>> = Global::new(|| None);
