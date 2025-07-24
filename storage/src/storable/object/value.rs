@@ -1,11 +1,15 @@
 use crate::storable::*;
 use crate::Timestamp;
+use partially::Partial;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Partial)]
+#[partially(derive(Deserialize, Default))]
 pub struct Value {
+    #[partially(omit)]
     pub id: Uuid,
+    #[partially(omit)]
     pub company_id: Uuid,
     pub name: String,
     pub description: String,
@@ -13,20 +17,18 @@ pub struct Value {
 }
 
 impl Value {
-    pub fn new<C: HasId, S: Into<String>>(company: C, name: S) -> Self {
+    pub fn new<C: HasId, N: Into<String>, D: Into<String>>(
+        company: C,
+        name: N,
+        description: D,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             company_id: company.get_id(),
             name: name.into(),
-            description: "".to_string(),
+            description: description.into(),
             date_deleted: None,
         }
-    }
-}
-
-impl PartialEq for Value {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.company_id == other.company_id
     }
 }
 
@@ -43,7 +45,7 @@ mod test_helper {
 
     impl TestHelper for Value {
         async fn new_test() -> anyhow::Result<Self> {
-            Ok(Value::new(Uuid::new_v4(), "Value"))
+            Ok(Value::new(Uuid::new_v4(), "Value", "Description"))
         }
     }
 }
@@ -51,15 +53,39 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::{
-        has_company::test_helper::test_has_company, has_deleted::test_helper::test_has_deleted,
-        has_id::test_helper::test_has_id, has_name::test_helper::test_has_name,
-    };
     use crate::test_helper::TestHelper;
     use paste::paste;
+    use serde::de::IntoDeserializer;
+    use std::collections::HashMap;
 
     test_has_id!(Value);
     test_has_name!(Value);
     test_has_company!(Value);
     test_has_deleted!(Value);
+
+    #[test]
+    fn test_modify_with_hashmap() {
+        let mut value = Value::new(Uuid::new_v4(), "Value name", "Value description");
+        let original_id = value.id;
+        let original_company = value.company_id;
+
+        let mut hash_map: HashMap<String, serde_json::Value> = HashMap::new();
+        hash_map.insert("id".to_string(), Uuid::new_v4().to_string().into());
+        hash_map.insert("company_id".to_string(), Uuid::new_v4().to_string().into());
+        hash_map.insert("name".to_string(), "New name".into());
+        hash_map.insert("description".to_string(), "New description".into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
+
+        let partial_value = PartialValue::deserialize(hash_map.into_deserializer()).unwrap();
+        value.apply(partial_value);
+
+        assert_eq!(value.id, original_id);
+        assert_eq!(value.company_id, original_company);
+        assert_eq!(value.name, "New name".to_string());
+        assert_eq!(value.description, "New description".to_string());
+        assert_eq!(
+            value.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
+    }
 }

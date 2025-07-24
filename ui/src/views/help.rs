@@ -41,8 +41,8 @@ pub fn Help() -> Element {
                     let log_clearer = log_cleaner.clone();
                     spawn(async move {
                         log_clearer.clear_logs().await.unwrap_or_else(|e| error!("{e}"));
+                        logs_resource.restart();
                     });
-                    logs_resource.restart();
                 },
                 "Clear logs"
             }

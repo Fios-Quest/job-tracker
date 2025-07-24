@@ -6,6 +6,9 @@ pub use router::{DetailsView, Route};
 mod navbar;
 pub use navbar::Navbar;
 
+mod interviews;
+pub use interviews::*;
+
 mod company_list;
 pub use company_list::CompanyList;
 
@@ -17,6 +20,12 @@ pub use role_information::*;
 
 mod flag_list;
 pub use flag_list::*;
+
+mod value_list;
+pub use value_list::*;
+
+mod questions_list;
+pub use questions_list::*;
 
 mod editable;
 pub use editable::*;
@@ -32,10 +41,18 @@ pub use views::*;
 use dioxus::prelude::*;
 use storage::prelude::*;
 
+mod form_data_helper;
+
 #[cfg(feature = "desktop")]
 pub type LogFetcherType = JsonLogFetcher;
 
+#[cfg(all(test, not(feature = "desktop")))]
+pub type LogFetcherType = StubLogFetcher;
+
 #[cfg(feature = "desktop")]
 pub type StoreType = JsonThreadSafeGeneralStore;
+
+#[cfg(all(test, not(feature = "desktop")))]
+pub type StoreType = StubThreadSafeGeneralStore;
 
 pub static VIEW_SIGNAL: GlobalSignal<Option<DetailsView>> = Global::new(|| None);

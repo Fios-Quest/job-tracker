@@ -1,11 +1,15 @@
 use crate::storable::*;
 use crate::Timestamp;
+use partially::Partial;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Partial)]
+#[partially(derive(Deserialize, Default))]
 pub struct Question {
+    #[partially(omit)]
     pub id: Uuid,
+    #[partially(omit)]
     pub role_id: Uuid,
     pub name: String,
     pub answer: String,
@@ -13,20 +17,14 @@ pub struct Question {
 }
 
 impl Question {
-    pub fn new<R: HasId, S: Into<String>>(role: R, name: S) -> Self {
+    pub fn new<R: HasId, N: Into<String>, A: Into<String>>(role: R, name: N, answer: A) -> Self {
         Self {
             id: Uuid::new_v4(),
             role_id: role.get_id(),
             name: name.into(),
-            answer: "".to_string(),
+            answer: answer.into(),
             date_deleted: None,
         }
-    }
-}
-
-impl PartialEq for Question {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.role_id == other.role_id
     }
 }
 
@@ -43,7 +41,7 @@ mod test_helper {
 
     impl TestHelper for Question {
         async fn new_test() -> anyhow::Result<Self> {
-            Ok(Question::new(Uuid::new_v4(), "Question"))
+            Ok(Question::new(Uuid::new_v4(), "Question", "Answer"))
         }
     }
 }
@@ -51,15 +49,39 @@ mod test_helper {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::storable::{
-        has_deleted::test_helper::test_has_deleted, has_id::test_helper::test_has_id,
-        has_name::test_helper::test_has_name, has_role::test_helper::test_has_role,
-    };
     use crate::test_helper::TestHelper;
     use paste::paste;
+    use serde::de::IntoDeserializer;
+    use std::collections::HashMap;
 
     test_has_id!(Question);
     test_has_name!(Question);
     test_has_role!(Question);
     test_has_deleted!(Question);
+
+    #[test]
+    fn test_modify_with_hashmap() {
+        let mut question = Question::new(Uuid::new_v4(), "Original Question", "Original Answer");
+        let original_id = question.id;
+        let original_role = question.role_id;
+
+        let mut hash_map: HashMap<String, serde_json::Value> = HashMap::new();
+        hash_map.insert("id".to_string(), Uuid::new_v4().to_string().into());
+        hash_map.insert("role_id".to_string(), Uuid::new_v4().to_string().into());
+        hash_map.insert("name".to_string(), "New Question".into());
+        hash_map.insert("answer".to_string(), "New Answer".into());
+        hash_map.insert("date_deleted".to_string(), "2025-07-28T00:00".into());
+
+        let partial_question = PartialQuestion::deserialize(hash_map.into_deserializer()).unwrap();
+        question.apply(partial_question);
+
+        assert_eq!(question.id, original_id);
+        assert_eq!(question.role_id, original_role);
+        assert_eq!(question.name, "New Question".to_string());
+        assert_eq!(question.answer, "New Answer".to_string());
+        assert_eq!(
+            question.date_deleted,
+            Some(Timestamp::from_string("2025-07-28T00:00"))
+        );
+    }
 }

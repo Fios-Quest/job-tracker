@@ -271,7 +271,7 @@ mod tests {
         let company = Company::new("name");
         let flag = Flag::new_green(company.id, "good");
         let role = Role::new(company.id, "role", Timestamp::now());
-        let question = Question::new(role.id, "question");
+        let question = Question::new(role.id, "question", "answer");
 
         let mut all_store = ThreadSafeGeneralStore::new(
             StubStore::default(),
@@ -348,7 +348,7 @@ mod tests {
     async fn test_recall_by_role() {
         let company = Company::new("name");
         let role = Role::new(company.id, "role", Timestamp::now());
-        let question = Question::new(role.id, "question");
+        let question = Question::new(role.id, "question", "answer");
 
         let mut all_store = ThreadSafeGeneralStore::new(
             StubStore::default(),

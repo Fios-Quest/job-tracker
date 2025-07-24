@@ -39,3 +39,6 @@ pub mod test_helper {
     }
     pub(crate) use test_has_deleted;
 }
+
+#[cfg(test)]
+pub(crate) use test_helper::test_has_deleted;

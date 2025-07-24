@@ -35,7 +35,7 @@
         @apply text-slate-700;
     }
 
-    input {
+    input, textarea {
         @apply bg-slate-800 text-slate-200 rounded m-2;
     }
 

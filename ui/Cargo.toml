@@ -6,12 +6,18 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 dioxus = { workspace = true }
+dioxus-html = { version = "0.6.3", features = ["serialize"] }
 pulldown-cmark = "0.13.0"
 server = { workspace = true }
 storage = { workspace = true }
 uuid = { version = "1.17.0", features = ["v4"] }
-tokio = "1.46.1"
 log = "0.4.27"
+serde = "1.0.219"
+serde_json = "1.0.141" # Annoyingly this is only needed for HashMap deserialisation
+
+[dev-dependencies]
+dioxus = { workspace = true, features = ["router"] }
+storage = { workspace = true, features = ["desktop"] }
 
 [features]
 desktop = []
