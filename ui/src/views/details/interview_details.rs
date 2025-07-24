@@ -58,8 +58,31 @@ fn InterviewDetailsEditable(interview: Arc<Interview>) -> Element {
 #[component]
 pub fn InterviewDetails(role: Arc<Role>) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
-    let mut stores = use_context::<StoreType>();
     let interview = context().get_interview();
+    let mut store = use_context::<StoreType>();
+    let resource_store = store.clone();
+
+    // Forcibly load a new version of interview from the DB
+    let mut interview_resource: Resource<Option<Arc<Interview>>> =
+        use_resource(use_reactive!(|interview| {
+            let interview = interview.clone();
+            let store = resource_store.clone();
+            async move {
+                if let Some(interview) = interview {
+                    let id = interview.id;
+                    store
+                        .recall_by_id(id)
+                        .await
+                        .map(Arc::new)
+                        .inspect_err(|e| warn!("{e}"))
+                        .ok()
+                } else {
+                    None
+                }
+            }
+        }));
+
+    let interview = interview_resource().unwrap_or_default();
 
     let Some(interview) = interview else {
         return rsx! {
@@ -75,19 +98,15 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
 
         match interview.modify_with_form_data(&form_data) {
             Ok(()) => {
-                dbg!(&interview);
                 spawn(async move {
-                    let _ = stores
+                    let _ = store
                         .store(interview.clone())
                         .await
                         .inspect_err(|e| warn!("{e}"));
-                    let _ = context()
-                        .set_interview(interview)
-                        .inspect_err(|e| warn!("{e}"));
+                    interview_resource.restart();
                 });
             }
             Err(e) => {
-                dbg!(&e);
                 warn!("{e}");
             }
         }
