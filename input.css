@@ -50,4 +50,8 @@
     p a {
         @apply underline;
     }
+
+    #home.show_modifiers {
+        background-color: hotpink;
+    }
 }

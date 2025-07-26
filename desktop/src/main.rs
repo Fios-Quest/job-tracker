@@ -1,3 +1,4 @@
+use crate::keyboard::create_keyboard_event_loop;
 use dioxus::desktop::window;
 use dioxus::prelude::*;
 use storage::prelude::*;
@@ -6,6 +7,7 @@ use ui::{DetailsView, Route, StoreType, VIEW_SIGNAL};
 
 mod config;
 mod dirs;
+mod keyboard;
 mod logs;
 
 async fn create_stores() -> StoreType {
@@ -44,6 +46,8 @@ fn App() -> Element {
     let goto_role = use_callback(|()| {
         *VIEW_SIGNAL.write() = Some(DetailsView::Role);
     });
+
+    create_keyboard_event_loop();
 
     let _ = window()
         .create_shortcut(

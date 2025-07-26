@@ -284,4 +284,7 @@
   p a {
     text-decoration-line: underline;
   }
+  #home.show_modifiers {
+    background-color: hotpink;
+  }
 }
