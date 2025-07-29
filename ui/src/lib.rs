@@ -30,6 +30,9 @@ pub use questions_list::*;
 mod editable;
 pub use editable::*;
 
+mod shortcut_helper;
+pub use shortcut_helper::*;
+
 mod error_message;
 
 mod main_nav;
