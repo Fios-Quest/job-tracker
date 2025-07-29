@@ -1,9 +1,8 @@
 use crate::keyboard::create_keyboard_event_loop;
-use dioxus::desktop::window;
 use dioxus::prelude::*;
 use storage::prelude::*;
 use tokio::join;
-use ui::{DetailsView, Route, StoreType, VIEW_SIGNAL};
+use ui::{Route, StoreType};
 
 mod config;
 mod dirs;
@@ -40,33 +39,8 @@ fn main() {
 #[component]
 fn App() -> Element {
     use_context_provider(|| Signal::new(ApplicationContext::new()));
-    let goto_company = use_callback(|()| {
-        *VIEW_SIGNAL.write() = Some(DetailsView::Company);
-    });
-    let goto_role = use_callback(|()| {
-        *VIEW_SIGNAL.write() = Some(DetailsView::Role);
-    });
 
     create_keyboard_event_loop();
-
-    let _ = window()
-        .create_shortcut(
-            "alt+c".try_into().expect("Could not make hotkey"),
-            move || {
-                dbg!("Alt+C was pressed");
-                goto_company(());
-            },
-        )
-        .expect("Could not create shortcut");
-    let _ = window()
-        .create_shortcut(
-            "alt+r".try_into().expect("Could not make hotkey"),
-            move || {
-                dbg!("Alt+R was pressed");
-                goto_role(());
-            },
-        )
-        .expect("Could not create shortcut");
 
     rsx! {
         // The Stylesheet component inserts a style link into the head of the document
