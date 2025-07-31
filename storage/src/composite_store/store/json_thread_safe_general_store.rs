@@ -27,12 +27,12 @@ impl JsonThreadSafeGeneralStore {
         );
 
         Ok(Self::new(
-            company_store?,
-            flag_store?,
-            value_store?,
-            role_store?,
-            interview_store?,
-            question_store?,
+            company_store.map_err(|e| e.context("company_store"))?,
+            flag_store.map_err(|e| e.context("flag_store"))?,
+            value_store.map_err(|e| e.context("value_store"))?,
+            role_store.map_err(|e| e.context("role_store"))?,
+            interview_store.map_err(|e| e.context("interview_store"))?,
+            question_store.map_err(|e| e.context("question_store"))?,
         ))
     }
 }
