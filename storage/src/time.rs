@@ -57,6 +57,25 @@ mod timestamp_serde {
         serializer.serialize_str(&s)
     }
 
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum TempDateTimeInfo {
+        TimeStamp(i64),
+        DateTimeString(String),
+    }
+
+    impl TempDateTimeInfo {
+        fn to_datetime(self) -> anyhow::Result<DateTime<Utc>> {
+            match self {
+                Self::TimeStamp(i) => DateTime::<Utc>::from_timestamp(i, 0).ok_or(anyhow::anyhow!("Invalid timestamp")),
+                Self::DateTimeString(s) => {
+                    let dt = NaiveDateTime::parse_from_str(&s, FORMAT)?;
+                    Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
+                },
+            }
+        }
+    }
+
     // The signature of a deserialize_with function must follow the pattern:
     //
     //    fn deserialize<'de, D>(D) -> Result<T, D::Error>
@@ -68,8 +87,7 @@ mod timestamp_serde {
     where
         D: Deserializer<'de>,
     {
-        let s = String::deserialize(deserializer)?;
-        let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
-        Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
+        let info = TempDateTimeInfo::deserialize(deserializer)?;
+        Ok(info.to_datetime().map_err(|e| serde::de::Error::custom(format!("{e}")))?)
     }
 }
