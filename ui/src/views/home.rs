@@ -31,7 +31,7 @@ pub fn Home(
 
         async move {
             if let Some(company_id) = company_id {
-                if context().get_company().map(|c| c.id) != Some(company_id) {
+                if context.peek().get_company().map(|c| c.id) != Some(company_id) {
                     let company = store
                         .recall_by_id(company_id)
                         .await
@@ -41,22 +41,32 @@ pub fn Home(
             }
             // Role _must_ be set after company
             if let Some(role_id) = role_id {
-                if context().get_role().map(|c| c.id) != Some(role_id) {
+                if context.peek().get_role().map(|c| c.id) != Some(role_id) {
                     let role = store
                         .recall_by_id(role_id)
                         .await
                         .expect("Could not set role");
-                    context.set(context().set_role(role).expect("Couldn't set role"));
+                    let new_context = context
+                        .peek()
+                        .clone()
+                        .set_role(role)
+                        .expect("Couldn't set role");
+                    context.set(new_context);
                 }
             }
             // Interview _must_ be set after role
             if let Some(interview_id) = interview_id {
-                if context().get_interview().map(|c| c.id) != Some(interview_id) {
+                if context.peek().get_interview().map(|c| c.id) != Some(interview_id) {
                     let role = store
                         .recall_by_id(interview_id)
                         .await
                         .expect("Could not set role");
-                    context.set(context().set_interview(role).expect("Couldn't set role"));
+                    let new_context = context
+                        .peek()
+                        .clone()
+                        .set_interview(role)
+                        .expect("Couldn't set role");
+                    context.set(new_context);
                 }
             }
         }
