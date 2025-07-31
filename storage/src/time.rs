@@ -65,13 +65,14 @@ mod timestamp_serde {
     }
 
     impl TempDateTimeInfo {
-        fn to_datetime(self) -> anyhow::Result<DateTime<Utc>> {
+        fn to_datetime(&self) -> anyhow::Result<DateTime<Utc>> {
             match self {
-                Self::TimeStamp(i) => DateTime::<Utc>::from_timestamp(i, 0).ok_or(anyhow::anyhow!("Invalid timestamp")),
+                Self::TimeStamp(i) => DateTime::<Utc>::from_timestamp(*i, 0)
+                    .ok_or(anyhow::anyhow!("Invalid timestamp")),
                 Self::DateTimeString(s) => {
-                    let dt = NaiveDateTime::parse_from_str(&s, FORMAT)?;
+                    let dt = NaiveDateTime::parse_from_str(s, FORMAT)?;
                     Ok(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
-                },
+                }
             }
         }
     }
@@ -87,7 +88,8 @@ mod timestamp_serde {
     where
         D: Deserializer<'de>,
     {
-        let info = TempDateTimeInfo::deserialize(deserializer)?;
-        Ok(info.to_datetime().map_err(|e| serde::de::Error::custom(format!("{e}")))?)
+        TempDateTimeInfo::deserialize(deserializer)?
+            .to_datetime()
+            .map_err(|e| serde::de::Error::custom(format!("{e}")))
     }
 }
