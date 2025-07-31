@@ -12,18 +12,10 @@ pub enum ShortcutModifier {
 impl fmt::Display for ShortcutModifier {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ShortcutModifier::Ctrl => {
-                write!(f, "Ctrl")
-            }
-            ShortcutModifier::Alt => {
-                write!(f, "Alt")
-            }
-            ShortcutModifier::Shift => {
-                write!(f, "Shift")
-            }
-            ShortcutModifier::Super => {
-                write!(f, "Super")
-            }
+            ShortcutModifier::Ctrl => write!(f, "Ctrl"),
+            ShortcutModifier::Alt => write!(f, "Alt"),
+            ShortcutModifier::Shift => write!(f, "Shift"),
+            ShortcutModifier::Super => write!(f, "Super"),
         }
     }
 }
@@ -40,18 +32,10 @@ pub enum ShortcutKey {
 impl fmt::Display for ShortcutKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ShortcutKey::C => {
-                write!(f, "C")
-            }
-            ShortcutKey::I => {
-                write!(f, "I")
-            }
-            ShortcutKey::R => {
-                write!(f, "R")
-            }
-            ShortcutKey::Q => {
-                write!(f, "Q")
-            }
+            ShortcutKey::C => write!(f, "C"),
+            ShortcutKey::I => write!(f, "I"),
+            ShortcutKey::R => write!(f, "R"),
+            ShortcutKey::Q => write!(f, "Q"),
         }
     }
 }
