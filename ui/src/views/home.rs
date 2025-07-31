@@ -30,7 +30,8 @@ pub fn Home(
                         .recall_by_id(company_id)
                         .await
                         .expect("Could not set company");
-                    context.set(context().set_company(company));
+                    let new_context = context.peek().clone().set_company(company);
+                    context.set(new_context);
                 }
             }
             // Role _must_ be set after company
