@@ -8,7 +8,7 @@ dioxus = { workspace = true, features = ["router", "desktop"] }
 directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }
 storage = { workspace = true, features = ["desktop"] }
-tokio = { version = "1.46.1", features = ["rt", "macros"] }
+tokio = { version = "1.47.0", features = ["rt", "macros"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "std", "json"] }
 serde = { workspace = true }
