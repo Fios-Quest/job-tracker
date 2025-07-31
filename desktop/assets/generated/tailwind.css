@@ -284,4 +284,21 @@
   p a {
     text-decoration-line: underline;
   }
+  .shortcut-helper {
+    position: relative;
+  }
+  .helper-text {
+    display: none;
+    position: absolute;
+    border: 1px solid;
+    padding: 2px 6px;
+    font-size: 12px;
+    right: -15px;
+    margin-top: -5px;
+    background: pink;
+    color: black;
+  }
+  .show_modifiers .helper-text {
+    display: block;
+  }
 }

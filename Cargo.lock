@@ -2669,6 +2669,8 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "directories",
+ "serde",
+ "serde_json",
  "storage",
  "tokio",
  "tracing",
