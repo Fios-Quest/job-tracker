@@ -30,6 +30,9 @@ pub use questions_list::*;
 mod editable;
 pub use editable::*;
 
+mod shortcuts;
+pub use shortcuts::*;
+
 mod error_message;
 
 mod main_nav;
@@ -55,4 +58,6 @@ pub type StoreType = JsonThreadSafeGeneralStore;
 #[cfg(all(test, not(feature = "desktop")))]
 pub type StoreType = StubThreadSafeGeneralStore;
 
-pub static VIEW_SIGNAL: GlobalSignal<Option<DetailsView>> = Global::new(|| None);
+pub static SHORTCUT_SIGNAL: GlobalSignal<Option<ShortcutEvent>> = Global::new(|| None);
+
+pub static SHOW_MODIFIERS: GlobalSignal<bool> = Global::new(|| false);

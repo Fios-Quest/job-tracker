@@ -11,7 +11,7 @@ mod interview_details;
 pub use interview_details::*;
 
 use crate::router::{create_route, DetailsView};
-use crate::Navbar;
+use crate::{Navbar, ShortcutEvent, ShortcutLink};
 use dioxus::prelude::*;
 use log::info;
 use storage::ApplicationContext;
@@ -93,11 +93,27 @@ pub fn Details(view: Option<DetailsView>) -> Element {
         div { class: "flex flex-col",
 
             Navbar {
-                Link { to: route_to_view(DetailsView::Company), "Company Details" }
+                ShortcutLink {
+                    shortcut_event: ShortcutEvent::company(),
+                    to: route_to_view(DetailsView::Company),
+                    "Company Details"
+                }
                 if context().get_role().is_some() {
-                    Link { to: route_to_view(DetailsView::Role), "Role Details" }
-                    Link { to: route_to_view(DetailsView::Interview), "Interview Details" }
-                    Link { to: route_to_view(DetailsView::Questions), "Questions" }
+                    ShortcutLink {
+                        shortcut_event: ShortcutEvent::role(),
+                        to: route_to_view(DetailsView::Role),
+                        "Role Details"
+                    }
+                    ShortcutLink {
+                        shortcut_event: ShortcutEvent::interview(),
+                        to: route_to_view(DetailsView::Interview),
+                        "Interview Details"
+                    }
+                    ShortcutLink {
+                        shortcut_event: ShortcutEvent::questions(),
+                        to: route_to_view(DetailsView::Questions),
+                        "Questions"
+                    }
                 } else {
                     span { class: "disabled-nav-link", "Role Details" }
                     span { class: "disabled-nav-link", "Interview Details" }

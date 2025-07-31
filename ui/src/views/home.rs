@@ -1,5 +1,5 @@
 use crate::router::DetailsView;
-use crate::{router, CompanyList, Details, RoleList, StoreType, VIEW_SIGNAL};
+use crate::{CompanyList, Details, RoleList, StoreType, SHOW_MODIFIERS};
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
 use storage::ApplicationContext;
@@ -12,17 +12,11 @@ pub fn Home(
     interview_id: Option<Uuid>,
     view: Option<DetailsView>,
 ) -> Element {
-    if let Some(new_view) = VIEW_SIGNAL() {
-        if view.as_ref() != Some(&new_view) {
-            *VIEW_SIGNAL.write() = None;
-            router().push(router::create_route(
-                company_id,
-                role_id,
-                interview_id,
-                Some(new_view),
-            ));
-        }
-    }
+    let show_modifiers = if SHOW_MODIFIERS() {
+        "show_modifiers"
+    } else {
+        ""
+    };
 
     let store = use_context::<StoreType>();
     let mut context = use_context::<Signal<ApplicationContext>>();
@@ -73,7 +67,7 @@ pub fn Home(
     }));
 
     rsx! {
-        div { id: "home", class: "flex",
+        div { id: "home", class: "flex {show_modifiers}",
 
             section { class: "mr-4 mt-0",
                 CompanyList {}
