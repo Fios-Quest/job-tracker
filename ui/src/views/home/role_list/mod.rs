@@ -2,7 +2,7 @@ mod empty_role_list;
 mod populated_role_list;
 mod role_list_item;
 
-use application_context::prelude::*;
+use application_context::prelude::ApplicationContext;
 use dioxus::prelude::*;
 use empty_role_list::EmptyRoleList;
 use populated_role_list::PopulatedRoleList;

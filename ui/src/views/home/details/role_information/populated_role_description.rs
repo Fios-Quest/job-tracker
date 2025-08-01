@@ -4,7 +4,7 @@ use storage::prelude::*;
 
 #[component]
 pub fn PopulatedRoleDescription(role: Arc<Role>) -> Element {
-    // Turn markdown into markup
+    // Turn Markdown into markup
     let parser = pulldown_cmark::Parser::new(&role.description);
     let mut role_description_html = String::new();
     pulldown_cmark::html::push_html(&mut role_description_html, parser);

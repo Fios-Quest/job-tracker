@@ -1,8 +1,8 @@
 mod company_list_item;
 
-use crate::error_message::ErrorMessage;
+use crate::components::ErrorMessage;
+use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
-use company_list_item::CompanyListItem;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use storage::prelude::*;

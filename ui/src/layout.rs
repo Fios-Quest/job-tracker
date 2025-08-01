@@ -2,7 +2,7 @@ use crate::{Navbar, Route};
 use dioxus::prelude::*;
 
 #[component]
-pub fn MainNavbar() -> Element {
+pub fn Layout() -> Element {
     rsx! {
         div { class: "flex mb-4",
 

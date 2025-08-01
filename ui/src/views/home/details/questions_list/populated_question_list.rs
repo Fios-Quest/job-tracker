@@ -1,5 +1,6 @@
 use super::{create_question_from_form_data, QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
-use crate::{QuestionListItem, StoreType};
+use crate::questions_list::QuestionListItem;
+use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::sync::Arc;

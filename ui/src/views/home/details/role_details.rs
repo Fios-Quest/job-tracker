@@ -1,4 +1,4 @@
-use crate::RoleDescription;
+use super::role_information::RoleDescription;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;

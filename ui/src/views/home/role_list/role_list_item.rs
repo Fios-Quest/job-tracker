@@ -1,4 +1,4 @@
-use crate::editable::Editable;
+use crate::components::Editable;
 use crate::router::DetailsView;
 use crate::{Route, StoreType};
 use application_context::prelude::*;

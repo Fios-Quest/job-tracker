@@ -1,5 +1,6 @@
 use super::{create_value_from_form_data, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
-use crate::{StoreType, ValueListItem};
+use crate::value_list::ValueListItem;
+use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::sync::Arc;
