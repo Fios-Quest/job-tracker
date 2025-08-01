@@ -1,9 +1,15 @@
 use crate::router::DetailsView;
-use crate::{CompanyList, Details, RoleList, StoreType, SHOW_MODIFIERS};
+use crate::views::home::company_list::CompanyList;
+use crate::views::home::role_list::RoleList;
+use crate::{Details, StoreType, SHOW_MODIFIERS};
 use application_context::prelude::*;
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
 use uuid::Uuid;
+
+pub mod company_list;
+pub mod details;
+pub mod role_list;
 
 #[component]
 pub fn Home(
@@ -40,27 +46,27 @@ pub fn Home(
                     let role = store
                         .recall_by_id(role_id)
                         .await
-                        .expect("Could not set role");
+                        .expect("Could not set the role");
                     let new_context = context
                         .peek()
                         .clone()
                         .set_role(role)
-                        .expect("Couldn't set role");
+                        .expect("Couldn't set the role");
                     context.set(new_context);
                 }
             }
-            // Interview _must_ be set after role
+            // Interview _must_ be set after the role
             if let Some(interview_id) = interview_id {
                 if context.peek().get_interview().map(|c| c.id) != Some(interview_id) {
                     let role = store
                         .recall_by_id(interview_id)
                         .await
-                        .expect("Could not set role");
+                        .expect("Could not set the role");
                     let new_context = context
                         .peek()
                         .clone()
                         .set_interview(role)
-                        .expect("Couldn't set role");
+                        .expect("Couldn't set the interview");
                     context.set(new_context);
                 }
             }

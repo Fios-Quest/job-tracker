@@ -1,4 +1,5 @@
-use crate::{PopulatedFlagList, ValueList};
+use super::flag_list::PopulatedFlagList;
+use super::value_list::ValueList;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;

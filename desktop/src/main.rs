@@ -3,7 +3,7 @@ use application_context::prelude::*;
 use dioxus::prelude::*;
 use storage::prelude::*;
 use tokio::join;
-use ui::{Route, StoreType};
+use ui::prelude::*;
 
 mod config;
 mod dirs;

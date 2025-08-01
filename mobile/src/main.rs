@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 
-use ui::Navbar;
 use views::Home;
 
 mod views;
@@ -31,7 +30,7 @@ fn App() -> Element {
 #[component]
 fn MobileNavbar() -> Element {
     rsx! {
-        Navbar {
+        div {
             Link { to: Route::Home {}, "Home" }
         }
 

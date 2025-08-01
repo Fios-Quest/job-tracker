@@ -1,5 +1,5 @@
+use crate::layout::Layout;
 use crate::views::{Help, Home, Support};
-use crate::MainNavbar;
 use dioxus::prelude::*;
 use std::fmt;
 use std::str::FromStr;
@@ -82,7 +82,7 @@ impl fmt::Display for DetailsView {
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
-    #[layout(MainNavbar)]
+    #[layout(Layout)]
     #[route("/support")]
     Support { },
     #[route("/help")]

@@ -1,4 +1,4 @@
-use crate::QuestionList;
+use super::questions_list::QuestionList;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;

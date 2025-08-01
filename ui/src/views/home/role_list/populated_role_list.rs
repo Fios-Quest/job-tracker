@@ -23,7 +23,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     let role_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
 
-    // Get roles for company
+    // Get roles for the company
     let mut roles_resource = use_resource(use_reactive!(|(company)| async move {
         let result = use_context::<StoreType>()
             .recall_by_company(company.id)

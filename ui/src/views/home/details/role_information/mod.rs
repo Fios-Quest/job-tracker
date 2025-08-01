@@ -36,7 +36,11 @@ pub fn RoleDescription(role: Arc<Role>) -> Element {
                     });
                     form_receiver.set(None);
                     // ToDo: Why isn't this updating the role in context?! 😡
-                    context.set(context().set_role(edited_role).expect("Couldn't set role"));
+                    context.set(
+                        context()
+                            .set_role(edited_role)
+                            .expect("Couldn't set the role"),
+                    );
                 }
             }
         });

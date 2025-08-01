@@ -1,5 +1,6 @@
+use super::interviews::InterviewNav;
 use crate::form_data_helper::ModifyWithFormData;
-use crate::{Editable, InterviewNav, StoreType};
+use crate::{Editable, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
 use log::warn;
@@ -63,7 +64,7 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
     let mut store = use_context::<StoreType>();
     let resource_store = store.clone();
 
-    // Forcibly load a new version of interview from the DB
+    // Forcibly load a new version of the interview from the DB
     let mut interview_resource: Resource<Option<Arc<Interview>>> =
         use_resource(use_reactive!(|interview| {
             let interview = interview.clone();

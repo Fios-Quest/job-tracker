@@ -15,10 +15,9 @@ pub fn Support() -> Element {
         }
 
         p {
-            "If you are working and would like to support this project, you can either subscribe
-                to my "
+            "If you are working and would like to support this project, you can subscribe to my "
             a { href: "https://www.patreon.com/fios_quest", "Patreon" }
-            " or send a one off thank you via "
+            " or send a one-off thank-you via "
             a { href: "https://ko-fi.com/fios_quest", "Ko-fi" }
             "."
         }

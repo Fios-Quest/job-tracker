@@ -7,7 +7,13 @@ pub use questions_details::*;
 mod role_details;
 pub use role_details::*;
 
+pub mod flag_list;
 mod interview_details;
+pub mod interviews;
+pub mod questions_list;
+pub mod role_information;
+pub mod value_list;
+
 pub use interview_details::*;
 
 use crate::router::{create_route, DetailsView};
@@ -22,7 +28,7 @@ fn InnerDetailView(view: DetailsView) -> Element {
     let company = context().get_company();
     let role = context().get_role();
 
-    // At the very least, Company must exist
+    // At the very least, the Company must exist
     let Some(company) = company else {
         return rsx! { "Create or choose a company to get started" };
     };

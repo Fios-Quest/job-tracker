@@ -1,5 +1,5 @@
 use super::flag_list_item::FlagListItem;
-use crate::error_message::ErrorMessage;
+use crate::components::ErrorMessage;
 use crate::StoreType;
 use dioxus::{logger::tracing, prelude::*};
 use std::str::FromStr;
