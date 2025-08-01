@@ -1,16 +1,16 @@
-use crate::storable::{Company, Interview, Role};
 use std::sync::Arc;
+use storage::prelude::*;
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum ApplicationContextError {
-    #[error("Company not set")]
+    #[error("Company wasn't set")]
     CompanyNotSet,
-    #[error("Role not set")]
+    #[error("Role wasn't set")]
     RoleNotSet,
-    #[error("Role does not belong to company")]
+    #[error("Role does not belong to the company")]
     RoleDoesNotBelongToCompany,
-    #[error("Interview does not belong to role")]
+    #[error("Interview does not belong to the role")]
     InterviewDoesNotBelongToRole,
 }
 
@@ -103,22 +103,30 @@ impl ApplicationContext {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helper::TestHelper;
-    use crate::Timestamp;
+
+    fn now() -> Timestamp {
+        Timestamp::from_timestamp(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards!")
+                .as_secs() as i64,
+        )
+    }
 
     #[test]
     fn test_new() {
         let context = ApplicationContext::new();
-        // Initial company value must not be set
-        assert_eq!(context.get_company(), None,);
-        // Initial role value must not be set
-        assert_eq!(context.get_role(), None,);
+        // Nothing should be set when context is created
+        assert_eq!(context.get_company(), None);
+        assert_eq!(context.get_role(), None);
+        assert_eq!(context.get_interview(), None);
     }
+
     #[tokio::test]
     async fn test_set_get_unset_company() {
         let context = ApplicationContext::new();
-        let company = Company::new_test().await.unwrap();
-        let role = company.create_role("Test role", Timestamp::now());
+        let company = Company::new("Test company");
+        let role = company.create_role("Test role", now());
 
         let context_with_company = context.set_company(company.clone());
         assert_eq!(
@@ -151,8 +159,8 @@ mod tests {
     async fn test_set_get_unset_role() {
         let context = ApplicationContext::new();
 
-        let company = Company::new_test().await.unwrap();
-        let role = company.create_role("Test Role", Timestamp::now());
+        let company = Company::new("Test company");
+        let role = company.create_role("Test Role", now());
         let interview = role.create_interview("Test Interview");
 
         let context_with_details = context
@@ -179,8 +187,8 @@ mod tests {
     #[tokio::test]
     async fn test_can_not_set_role_without_company() {
         let context = ApplicationContext::new();
-        let company = Company::new_test().await.unwrap();
-        let role = company.create_role("Test Role", Timestamp::now());
+        let company = Company::new("Test Company");
+        let role = company.create_role("Test Role", now());
 
         assert_eq!(
             context.set_role(role),
@@ -191,8 +199,9 @@ mod tests {
     #[tokio::test]
     async fn test_can_not_set_role_with_wrong_company() {
         let context = ApplicationContext::new();
-        let company = Company::new_test().await.unwrap();
-        let role = Role::new_test().await.unwrap();
+        let company = Company::new("Test Company");
+        let another_company_not_set = Company::new("Unused Company");
+        let role = another_company_not_set.create_role("Test Role", now());
         let context_with_company = context.set_company(company);
 
         assert_eq!(
@@ -204,7 +213,9 @@ mod tests {
     #[tokio::test]
     async fn test_can_not_set_interview_without_company() {
         let context = ApplicationContext::new();
-        let interview = Interview::new_test().await.unwrap();
+        let unset_company = Company::new("Unused Company");
+        let unused_role = unset_company.create_role("Unused role", now());
+        let interview = unused_role.create_interview("Test Interview");
 
         assert_eq!(
             context.set_interview(interview),
@@ -215,8 +226,9 @@ mod tests {
     #[tokio::test]
     async fn test_can_not_set_interview_without_role() {
         let context = ApplicationContext::new();
-        let company = Company::new_test().await.unwrap();
-        let interview = Interview::new_test().await.unwrap();
+        let company = Company::new("Test Company");
+        let unused_role = company.create_role("Unused role", now());
+        let interview = unused_role.create_interview("Test Interview");
 
         let context = context.set_company(company);
 
@@ -228,12 +240,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_can_not_set_interview_with_wrong_role() {
-        let company = Company::new_test().await.unwrap();
-        let role = company.create_role("Test role", Timestamp::now());
-        let interview = Interview::new_test().await.unwrap();
+        let company = Company::new("Test Company");
+        let used_role = company.create_role("Used role", now());
+        let unused_role = company.create_role("Unused role", now());
+        let interview = unused_role.create_interview("Test Interview");
         let context = ApplicationContext::new()
             .set_company(company)
-            .set_role(role)
+            .set_role(used_role)
             .unwrap();
 
         assert_eq!(
@@ -244,8 +257,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_setting_role_unsets_interview() {
-        let company = Company::new_test().await.unwrap();
-        let role = company.create_role("Test role", Timestamp::now());
+        let company = Company::new("Test Company");
+        let role = company.create_role("Test role", now());
         let interview = role.create_interview("Test interview");
         let context = ApplicationContext::new()
             .set_company(company.clone())
@@ -256,7 +269,7 @@ mod tests {
 
         assert_eq!(context.get_interview().unwrap().as_ref(), &interview);
 
-        let new_role = company.create_role("Test role", Timestamp::now());
+        let new_role = company.create_role("Test role", now());
         let context = context.set_role(new_role).unwrap();
 
         assert!(context.get_interview().is_none());

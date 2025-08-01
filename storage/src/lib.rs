@@ -5,9 +5,6 @@
 //   HasFutureStoreFor
 #![allow(async_fn_in_trait, private_bounds)]
 
-mod application_context;
-pub use application_context::*;
-
 mod time;
 pub use time::*;
 
@@ -27,7 +24,6 @@ mod test_helper;
 trait Sealed {}
 
 pub mod prelude {
-    pub use crate::application_context::{ApplicationContext, ApplicationContextError};
     pub use crate::composite_store::{
         HasFutureStoreFor, JsonThreadSafeGeneralStore, StubThreadSafeGeneralStore,
         ThreadSafeGeneralStore,

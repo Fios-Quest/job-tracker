@@ -1,0 +1,12 @@
+[package]
+name = "application_context"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "2.0.12"
+storage = { workspace = true }
+
+
+[dev-dependencies]
+tokio = { version = "1.47.0", features = ["macros"] }

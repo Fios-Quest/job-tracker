@@ -4,6 +4,7 @@ use std::sync::Arc;
 mod populated_role_description;
 use crate::router::DetailsView;
 use crate::{Editable, Route, StoreType};
+use application_context::prelude::*;
 use populated_role_description::PopulatedRoleDescription;
 use storage::prelude::*;
 
