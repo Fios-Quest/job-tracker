@@ -12,9 +12,9 @@ pub use interview_details::*;
 
 use crate::router::{create_route, DetailsView};
 use crate::{Navbar, ShortcutEvent, ShortcutLink};
+use application_context::prelude::*;
 use dioxus::prelude::*;
 use log::info;
-use storage::ApplicationContext;
 
 #[component]
 fn InnerDetailView(view: DetailsView) -> Element {

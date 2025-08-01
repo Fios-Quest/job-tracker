@@ -7,6 +7,7 @@ members = [
     "mobile",
     "server",
     "storage",
+    "application_context",
 ]
 
 [workspace.dependencies]
@@ -20,6 +21,7 @@ serde_json = "1.0.141"
 ui = { path = "ui" }
 server = { path = "server" }
 storage = { path = "storage" }
+application_context = { path = "application_context" }
 
 [profile]
 

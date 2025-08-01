@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+application_context = { workspace = true }
 dioxus = { workspace = true, features = ["router", "desktop"] }
 directories = "6.0.0"
 ui = { workspace = true, features = ["desktop"] }

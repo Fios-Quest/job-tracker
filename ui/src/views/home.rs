@@ -1,8 +1,8 @@
 use crate::router::DetailsView;
 use crate::{CompanyList, Details, RoleList, StoreType, SHOW_MODIFIERS};
+use application_context::prelude::*;
 use dioxus::prelude::*;
 use storage::prelude::RecallById;
-use storage::ApplicationContext;
 use uuid::Uuid;
 
 #[component]
