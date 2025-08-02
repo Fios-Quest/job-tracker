@@ -17,7 +17,7 @@ pub mod value_list;
 pub use interview_details::*;
 
 use crate::router::{create_route, DetailsView};
-use crate::{Navbar, ShortcutEvent, ShortcutLink};
+use crate::{Navbar, ShortcutEvent, ShortcutHelper};
 use application_context::prelude::*;
 use dioxus::prelude::*;
 use log::info;
@@ -84,40 +84,49 @@ fn InnerDetailView(view: DetailsView) -> Element {
 }
 
 #[component]
+fn DetailsNavigation(event: ShortcutEvent, view: DetailsView, children: Element) -> Element {
+    let context = use_context::<Signal<ApplicationContext>>();
+    let route = create_route(
+        context().get_company().map(|c| c.id),
+        context().get_role().map(|r| r.id),
+        context().get_interview().map(|i| i.id),
+        Some(view),
+    );
+    let route_clone = route.clone();
+    let route_callback = use_callback(move |()| {
+        navigator().push(route_clone.as_str());
+    });
+
+    rsx! {
+        ShortcutHelper { shortcut_event: event, on_shortcut: route_callback,
+            Link { to: route, {children} }
+        }
+    }
+}
+
+#[component]
 pub fn Details(view: Option<DetailsView>) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
-    let route_to_view = |view: DetailsView| {
-        create_route(
-            context().get_company().map(|c| c.id),
-            context().get_role().map(|r| r.id),
-            context().get_interview().map(|i| i.id),
-            Some(view),
-        )
-    };
 
     rsx! {
         div { class: "flex flex-col",
 
             Navbar {
-                ShortcutLink {
-                    shortcut_event: ShortcutEvent::company(),
-                    to: route_to_view(DetailsView::Company),
+                DetailsNavigation {
+                    event: ShortcutEvent::company(),
+                    view: DetailsView::Company,
                     "Company Details"
                 }
                 if context().get_role().is_some() {
-                    ShortcutLink {
-                        shortcut_event: ShortcutEvent::role(),
-                        to: route_to_view(DetailsView::Role),
-                        "Role Details"
-                    }
-                    ShortcutLink {
-                        shortcut_event: ShortcutEvent::interview(),
-                        to: route_to_view(DetailsView::Interview),
+                    DetailsNavigation { event: ShortcutEvent::role(), view: DetailsView::Role, "Role Details" }
+                    DetailsNavigation {
+                        event: ShortcutEvent::interview(),
+                        view: DetailsView::Interview,
                         "Interview Details"
                     }
-                    ShortcutLink {
-                        shortcut_event: ShortcutEvent::questions(),
-                        to: route_to_view(DetailsView::Questions),
+                    DetailsNavigation {
+                        event: ShortcutEvent::questions(),
+                        view: DetailsView::Questions,
                         "Questions"
                     }
                 } else {

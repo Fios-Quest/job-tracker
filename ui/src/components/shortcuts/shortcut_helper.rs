@@ -2,14 +2,17 @@ use crate::{ShortcutEvent, SHORTCUT_SIGNAL};
 use dioxus::prelude::*;
 
 #[component]
-pub fn ShortcutLink(shortcut_event: ShortcutEvent, to: String, children: Element) -> Element {
+pub fn ShortcutHelper(
+    shortcut_event: ShortcutEvent,
+    on_shortcut: Callback,
+    children: Element,
+) -> Element {
     if Some(shortcut_event) == SHORTCUT_SIGNAL() {
-        *SHORTCUT_SIGNAL.write() = None;
-        navigator().push(to.clone());
+        on_shortcut(());
     }
     rsx! {
         div { class: "shortcut-helper",
-            Link { to, {children} }
+            {children}
             div { class: "helper-text", "{shortcut_event}" }
         }
     }
