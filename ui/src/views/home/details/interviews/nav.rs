@@ -1,4 +1,4 @@
-use crate::helpers::create_route;
+use crate::helpers::{create_route, CreatePartialFromFormData};
 use crate::{DetailsView, StoreType};
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
@@ -6,19 +6,7 @@ use std::sync::Arc;
 use storage::prelude::*;
 use uuid::Uuid;
 
-const INTERVIEW_NAME_FIELD: &str = "interview_name";
-
-fn form_data_name(form_data: &FormData) -> Option<String> {
-    form_data
-        .values()
-        .get(INTERVIEW_NAME_FIELD)
-        .map(|fv| fv.as_value())
-}
-
-fn create_interview_from_form_data(role: Arc<Role>, form_data: &FormData) -> Option<Interview> {
-    let name = form_data_name(form_data);
-    name.map(|name| role.create_interview(name))
-}
+const INTERVIEW_NAME_FIELD: &str = "name";
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
     tracing::error!("Storage Error: {:?}", error);
@@ -38,20 +26,22 @@ pub fn NewInterviewForm(role: Arc<Role>, reload_interviews: Callback) -> Element
 
     let create_interview = move |event: Event<FormData>| {
         let role = role.clone();
+        let interview =
+            PartialInterview::from_form_data(&event).expect("Could not parse interview form");
+        let interview = role
+            .create_interview_from_partial(interview)
+            .expect("Invalid form data");
         async move {
-            let value = create_interview_from_form_data(role, &event);
-            if let Some(value) = value {
-                let mut store = use_context::<StoreType>();
-                let result = store.store(value).await;
-                match result {
-                    Ok(_) => {
-                        error_message.set(None);
-                        reload_interviews(());
-                        is_editable.set(false);
-                    }
-                    Err(e) => {
-                        error_message.set(handle_storage_error(e));
-                    }
+            let mut store = use_context::<StoreType>();
+            let result = store.store(interview).await;
+            match result {
+                Ok(_) => {
+                    error_message.set(None);
+                    reload_interviews(());
+                    is_editable.set(false);
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
                 }
             }
         }
