@@ -5,7 +5,6 @@ use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
-use std::sync::Arc;
 use storage::prelude::*;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
@@ -29,7 +28,7 @@ pub fn CompanyList() -> Element {
         let search = company_name_search();
         let companies = use_context::<StoreType>().recall_by_name(search).await;
         match companies {
-            Ok(companies) => companies.into_iter().map(Arc::new).collect(),
+            Ok(companies) => companies,
             Err(e) => {
                 error_message.set(handle_storage_error(e));
                 Vec::with_capacity(0)
