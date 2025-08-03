@@ -1,4 +1,5 @@
-use super::{create_question_from_form_data, QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
+use super::{QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
+use crate::helpers::CreatePartialFromFormData;
 use crate::questions_list::QuestionListItem;
 use crate::StoreType;
 use dioxus::logger::tracing;
@@ -44,20 +45,21 @@ pub fn QuestionList(role: Arc<Role>) -> Element {
 
     let create_question = move |event: Event<FormData>| {
         let role = role.clone();
+        let partial_question = PartialQuestion::from_form_data(&event)
+            .expect("Could not parse form data for question");
+        let question = Question::new_from_partial(role.id, partial_question)
+            .expect("Could not create question from partial");
         async move {
-            let question = create_question_from_form_data(role, &event);
-            if let Some(question) = question {
-                let mut store = use_context::<StoreType>();
-                let result = store.store(question).await;
-                match result {
-                    Ok(_) => {
-                        error_message.set(None);
-                        // Rerun the resource
-                        questions_resource.restart();
-                    }
-                    Err(e) => {
-                        error_message.set(handle_storage_error(e));
-                    }
+            let mut store = use_context::<StoreType>();
+            let result = store.store(question).await;
+            match result {
+                Ok(_) => {
+                    error_message.set(None);
+                    // Rerun the resource
+                    questions_resource.restart();
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
                 }
             }
         }
