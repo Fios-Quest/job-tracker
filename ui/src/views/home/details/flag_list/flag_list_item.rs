@@ -1,6 +1,6 @@
+use crate::helpers::ModifyWithFormData;
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
-use std::str::FromStr;
 use storage::prelude::*;
 
 #[component]
@@ -8,55 +8,36 @@ pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     let stores = use_context::<StoreType>();
 
-    let input_name = "flag_name";
+    let id = flag.id;
+
+    let input_name = "name";
     let input_color = "flag_color";
 
-    if let Some(event) = form_receiver() {
-        let mut stores = stores.clone();
-        let flag = flag.clone();
-        let flag_name = event.values().get(input_name).map(|v| v.as_value());
-        let flag_color = event
-            .values()
-            .get(input_color)
-            .map(|v| v.as_value())
-            .and_then(|v| FlagColor::from_str(&v).ok());
-        spawn(async move {
-            if let (Some(flag_color), Some(name)) = (flag_color, flag_name) {
-                if !name.is_empty() {
-                    let flag = Flag {
-                        name,
-                        flag_color,
-                        ..flag
-                    };
-                    let _result = stores.store(flag).await;
-                    reload_flags(());
-                    form_receiver.set(None);
-                }
-            }
-        });
-    }
-
-    let Flag {
-        id,
-        flag_color,
-        name,
-        ..
-    } = flag;
-    let flag_icon = match flag_color {
+    let flag_icon = match flag.flag_color {
         FlagColor::Green => "💚",
         FlagColor::Red => "🚩",
     };
 
-    let id = id.to_string();
-
-    let display = rsx! { "{flag_icon} {name}" };
+    let display = rsx! { "{flag_icon} {flag.name}" };
     let editable: Element = rsx! {
         select { name: input_color,
-            option { selected: flag_color == FlagColor::Red, value: "red", "🚩 Red" }
-            option { selected: flag_color == FlagColor::Green, value: "green", "💚 Green" }
+            option { selected: flag.flag_color == FlagColor::Red, value: "red", "🚩 Red" }
+            option { selected: flag.flag_color == FlagColor::Green, value: "green", "💚 Green" }
         }
-        input { name: input_name, value: name }
+        input { name: input_name, value: "{flag.name}" }
     };
+
+    if let Some(event) = form_receiver() {
+        let mut stores = stores.clone();
+        let mut flag = flag;
+        if flag.modify_with_form_data(&event).is_ok() && !flag.name.is_empty() {
+            spawn(async move {
+                stores.store(flag).await.expect("Could not save flag");
+                reload_flags(());
+                form_receiver.set(None);
+            });
+        }
+    }
 
     rsx! {
         li { id: "flag-{id}",

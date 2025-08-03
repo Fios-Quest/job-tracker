@@ -1,8 +1,8 @@
 use super::flag_list_item::FlagListItem;
 use crate::components::ErrorMessage;
+use crate::helpers::CreatePartialFromFormData;
 use crate::StoreType;
 use dioxus::{logger::tracing, prelude::*};
-use std::str::FromStr;
 use std::sync::Arc;
 use storage::prelude::*;
 
@@ -46,34 +46,22 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
 
     let create_flag = move |event: Event<FormData>| {
         let mut stores = stores.clone();
+        let flag = PartialFlag::from_form_data(&event)
+            .and_then(|partial| Ok(Flag::new_from_partial(company.id, partial)?))
+            .expect("Something went wrong with the flag");
         async move {
-            let flag_name = event.values().get("flag_name").map(|v| v.as_value());
-            let flag_color = event
-                .values()
-                .get("flag_color")
-                .and_then(|v| FlagColor::from_str(&v.as_value()).ok());
+            let result = stores.store(flag).await;
 
-            if let (Some(flag_name), Some(flag_color)) = (flag_name, flag_color) {
-                if !flag_name.is_empty() {
-                    // Store the name
-                    let flag = match flag_color {
-                        FlagColor::Green => Flag::new_green(company_id, flag_name),
-                        FlagColor::Red => Flag::new_red(company_id, flag_name),
-                    };
-                    let result = stores.store(flag).await;
+            match result {
+                Ok(_) => {
+                    // Reset the values to empty
+                    error_message.set(None);
 
-                    match result {
-                        Ok(_) => {
-                            // Reset the values to empty
-                            error_message.set(None);
-
-                            // Rerun the resource
-                            flags_resource.restart();
-                        }
-                        Err(e) => {
-                            error_message.set(handle_storage_error(e));
-                        }
-                    }
+                    // Rerun the resource
+                    flags_resource.restart();
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
                 }
             }
         }
@@ -95,7 +83,7 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
                     option { value: "red", "🚩 Red" }
                     option { value: "green", "💚 Green" }
                 }
-                input { id: "add_flag", name: "flag_name" }
+                input { id: "add_flag", name: "name" }
                 input { r#type: "submit" }
             }
         }
