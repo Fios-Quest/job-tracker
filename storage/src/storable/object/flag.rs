@@ -56,6 +56,25 @@ impl Flag {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<C: HasId>(
+        company: C,
+        partial: PartialFlag,
+    ) -> Result<Flag, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Flag {
+            id: Uuid::new_v4(),
+            company_id: company.get_id(),
+            flag_color: partial
+                .flag_color
+                .ok_or_else(|| IncompletePartialErrors::field_error("flag_color"))?,
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            date_deleted: partial.date_deleted.flatten(),
+        })
+    }
 }
 
 impl_has_id!(Flag);
@@ -63,9 +82,24 @@ impl_has_name!(Flag);
 impl_has_company!(Flag);
 impl_has_deleted!(Flag);
 
-impl IsPartialComplete for PartialFlag {
-    fn is_complete(&self) -> bool {
-        self.flag_color.is_some() && self.name.as_ref().map(|name| name.is_empty()) == Some(false)
+impl CheckPartialComplete for PartialFlag {
+    fn check_complete(&self) -> Result<(), IncompletePartialErrors> {
+        let mut errors = IncompletePartialErrors::with_capacity(2);
+
+        // Name must be present and not empty
+        match self.name.as_ref().map(|name| !name.is_empty()) {
+            Some(true) => {}
+            Some(false) => errors.push("`name` is empty"),
+            None => errors.push("`name` is missing"),
+        }
+
+        // Flag color must be present
+        match self.flag_color {
+            Some(_) => {}
+            None => errors.push("`flag_color` is missing"),
+        }
+
+        errors.into()
     }
 }
 
@@ -161,7 +195,7 @@ mod tests {
             name: Some("Good flag".to_string()),
             date_deleted: None,
         };
-        assert!(flag.is_complete());
+        assert!(flag.check_complete().is_ok());
     }
 
     #[test]
@@ -171,7 +205,11 @@ mod tests {
             name: None,
             date_deleted: None,
         };
-        assert!(!flag.is_complete());
+
+        let error = flag.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
     }
 
     #[test]
@@ -181,7 +219,11 @@ mod tests {
             name: Some(String::new()),
             date_deleted: None,
         };
-        assert!(!flag.is_complete());
+
+        let error = flag.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
     }
 
     #[test]
@@ -191,6 +233,25 @@ mod tests {
             name: Some("Flag color missing".to_string()),
             date_deleted: None,
         };
-        assert!(!flag.is_complete());
+
+        let error = flag.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`flag_color` is missing".to_string()));
+    }
+
+    #[test]
+    fn test_partial_flag_is_complete_missing_flag_missing_name() {
+        let flag = PartialFlag {
+            flag_color: None,
+            name: None,
+            date_deleted: None,
+        };
+
+        let error = flag.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 2);
+        assert!(errors.contains(&"`name` is missing".to_string()));
+        assert!(errors.contains(&"`flag_color` is missing".to_string()));
     }
 }

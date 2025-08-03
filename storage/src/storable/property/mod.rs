@@ -16,5 +16,5 @@ pub use has_name::*;
 mod apply_partial;
 pub use apply_partial::*;
 
-mod is_partial_complete;
-pub use is_partial_complete::*;
+mod check_partial_complete;
+pub use check_partial_complete::*;

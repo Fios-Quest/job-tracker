@@ -22,8 +22,27 @@ impl Company {
         }
     }
 
+    pub fn new_from_partial(partial: PartialCompany) -> Result<Company, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Company {
+            id: Uuid::new_v4(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
+
     pub fn create_role<S: Into<String>>(&self, name: S, date_created: Timestamp) -> Role {
         Role::new(self, name, date_created)
+    }
+
+    pub fn create_role_from_partial(
+        &self,
+        role: PartialRole,
+    ) -> Result<Role, IncompletePartialErrors> {
+        Role::new_from_partial(self, role)
     }
 
     pub fn create_green_flag<S: Into<String>>(&self, name: S) -> Flag {
@@ -34,8 +53,22 @@ impl Company {
         Flag::new_red(self, name)
     }
 
+    pub fn create_flag_from_partial(
+        &self,
+        flag: PartialFlag,
+    ) -> Result<Flag, IncompletePartialErrors> {
+        Flag::new_from_partial(self, flag)
+    }
+
     pub fn create_value<N: Into<String>, D: Into<String>>(&self, name: N, description: D) -> Value {
         Value::new(self, name, description)
+    }
+
+    pub fn create_value_from_partial(
+        &self,
+        value: PartialValue,
+    ) -> Result<Value, IncompletePartialErrors> {
+        Value::new_from_partial(self, value)
     }
 }
 
@@ -126,7 +159,7 @@ mod tests {
             name: Some("Test Company".to_string()),
             date_deleted: None,
         };
-        assert!(complete_company.is_complete());
+        assert!(complete_company.check_complete().is_ok());
     }
 
     #[test]
@@ -135,7 +168,9 @@ mod tests {
             name: None,
             date_deleted: None,
         };
-        assert!(!missing_name.is_complete());
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is missing")));
     }
 
     #[test]
@@ -144,6 +179,8 @@ mod tests {
             name: Some(String::new()),
             date_deleted: None,
         };
-        assert!(!missing_name.is_complete());
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is empty")));
     }
 }

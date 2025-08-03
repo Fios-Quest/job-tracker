@@ -30,6 +30,25 @@ impl Interview {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<R: HasId>(
+        role: R,
+        partial: PartialInterview,
+    ) -> Result<Interview, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Interview {
+            id: Uuid::new_v4(),
+            role_id: role.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            notes: partial.notes.unwrap_or_default(),
+            host: partial.host.unwrap_or_default(),
+            date_time: partial.date_time.unwrap_or_default(),
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
 }
 
 impl_has_id!(Interview);
@@ -108,7 +127,7 @@ mod tests {
             date_time: None,
             date_deleted: None,
         };
-        assert!(interview.is_complete())
+        assert!(interview.check_complete().is_ok())
     }
 
     #[test]
@@ -120,7 +139,11 @@ mod tests {
             date_time: None,
             date_deleted: None,
         };
-        assert!(!interview.is_complete())
+
+        let error = interview.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
     }
 
     #[test]
@@ -132,6 +155,10 @@ mod tests {
             date_time: None,
             date_deleted: None,
         };
-        assert!(!interview.is_complete())
+
+        let error = interview.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
     }
 }

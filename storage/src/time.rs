@@ -27,6 +27,10 @@ impl Timestamp {
                 .as_secs() as i64,
         )
     }
+
+    pub fn looks_valid(self) -> bool {
+        self.0.timestamp() > 0
+    }
 }
 
 impl Deref for Timestamp {

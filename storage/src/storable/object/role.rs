@@ -30,6 +30,26 @@ impl Role {
         }
     }
 
+    pub fn new_from_partial<C: HasId>(
+        company: C,
+        partial: PartialRole,
+    ) -> Result<Role, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Role {
+            id: Uuid::new_v4(),
+            company_id: company.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            description: partial.description.unwrap_or_default(),
+            date_applied: partial
+                .date_applied
+                .ok_or_else(|| IncompletePartialErrors::field_error("date_applied"))?,
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
+
     pub fn create_question<N: Into<String>, A: Into<String>>(
         &self,
         name: N,
@@ -38,8 +58,22 @@ impl Role {
         Question::new(self, name, answer)
     }
 
+    pub fn create_question_from_partial(
+        &self,
+        question: PartialQuestion,
+    ) -> Result<Question, IncompletePartialErrors> {
+        Question::new_from_partial(self, question)
+    }
+
     pub fn create_interview<S: Into<String>>(&self, name: S) -> Interview {
         Interview::new(self, name)
+    }
+
+    pub fn create_interview_from_partial(
+        &self,
+        interview: PartialInterview,
+    ) -> Result<Interview, IncompletePartialErrors> {
+        Interview::new_from_partial(self, interview)
     }
 }
 
@@ -48,7 +82,28 @@ impl_has_name!(Role);
 impl_has_company!(Role);
 impl_has_deleted!(Role);
 
-impl_is_partial_complete_optional_name_only!(PartialRole);
+impl CheckPartialComplete for PartialRole {
+    fn check_complete(&self) -> Result<(), IncompletePartialErrors> {
+        let mut errors = IncompletePartialErrors::with_capacity(2);
+
+        match self.name.as_ref().map(|name| name.is_empty()) {
+            None => errors.push("`name` is missing".to_string()),
+            Some(true) => errors.push("`name` is empty".to_string()),
+            Some(false) => {}
+        }
+
+        match self.date_applied.map(|t| (t, t.looks_valid())) {
+            None => errors.push("`date_applied` is missing".to_string()),
+            Some((t, false)) => errors.push(format!(
+                "`date_applied` appears to be invalid: {}",
+                t.format("%Y-%m-%d %H:%M:%S")
+            )),
+            Some((_, true)) => {}
+        }
+
+        errors.into()
+    }
+}
 
 #[cfg(test)]
 mod test_helper {
@@ -129,10 +184,10 @@ mod tests {
         let role = PartialRole {
             name: Some("Test role".to_string()),
             description: None,
-            date_applied: None,
+            date_applied: Some(Timestamp::now()),
             date_deleted: None,
         };
-        assert!(role.is_complete())
+        assert!(role.check_complete().is_ok())
     }
 
     #[test]
@@ -140,10 +195,14 @@ mod tests {
         let role = PartialRole {
             name: None,
             description: None,
-            date_applied: None,
+            date_applied: Some(Timestamp::now()),
             date_deleted: None,
         };
-        assert!(!role.is_complete())
+
+        let error = role.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
     }
 
     #[test]
@@ -151,9 +210,49 @@ mod tests {
         let role = PartialRole {
             name: Some(String::new()),
             description: None,
+            date_applied: Some(Timestamp::now()),
+            date_deleted: None,
+        };
+
+        let error = role.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
+    }
+
+    #[test]
+    fn test_partial_role_is_complete_empty_date_applied() {
+        let role = PartialRole {
+            name: Some("Test role".to_string()),
+            description: None,
             date_applied: None,
             date_deleted: None,
         };
-        assert!(!role.is_complete())
+
+        let error = role.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`date_applied` is missing".to_string()));
+    }
+
+    #[test]
+    fn test_partial_role_is_complete_invalid_date_applied() {
+        let role = PartialRole {
+            name: Some("Test role".to_string()),
+            description: None,
+            date_applied: Some(Timestamp::from_timestamp(0)),
+            date_deleted: None,
+        };
+
+        let error = role.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert_eq!(
+            errors,
+            &vec!["`date_applied` appears to be invalid: 1970-01-01 00:00:00".to_string()]
+        );
+
+        assert!(errors
+            .contains(&"`date_applied` appears to be invalid: 1970-01-01 00:00:00".to_string()));
     }
 }

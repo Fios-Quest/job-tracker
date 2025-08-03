@@ -26,6 +26,23 @@ impl Question {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<R: HasId>(
+        role: R,
+        partial: PartialQuestion,
+    ) -> Result<Question, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Question {
+            id: Uuid::new_v4(),
+            role_id: role.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            answer: partial.answer.unwrap_or_default(),
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
 }
 
 impl_has_id!(Question);
@@ -94,7 +111,7 @@ mod tests {
             answer: None,
             date_deleted: None,
         };
-        assert!(question.is_complete())
+        assert!(question.check_complete().is_ok())
     }
 
     #[test]
@@ -104,7 +121,11 @@ mod tests {
             answer: None,
             date_deleted: None,
         };
-        assert!(!question.is_complete())
+
+        let error = question.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
     }
 
     #[test]
@@ -114,6 +135,10 @@ mod tests {
             answer: None,
             date_deleted: None,
         };
-        assert!(!question.is_complete())
+
+        let error = question.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
     }
 }
