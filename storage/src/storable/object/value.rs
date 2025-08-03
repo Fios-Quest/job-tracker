@@ -37,6 +37,8 @@ impl_has_name!(Value);
 impl_has_company!(Value);
 impl_has_deleted!(Value);
 
+impl_is_partial_complete_optional_name_only!(PartialValue);
+
 #[cfg(test)]
 mod test_helper {
     use super::*;
@@ -87,5 +89,35 @@ mod tests {
             value.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_complete_value() {
+        let value = PartialValue {
+            name: Some("Test value".to_string()),
+            description: None,
+            date_deleted: None,
+        };
+        assert!(value.is_complete())
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_missing_name() {
+        let value = PartialValue {
+            name: None,
+            description: None,
+            date_deleted: None,
+        };
+        assert!(!value.is_complete())
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_empty_name() {
+        let value = PartialValue {
+            name: Some(String::new()),
+            description: None,
+            date_deleted: None,
+        };
+        assert!(!value.is_complete())
     }
 }

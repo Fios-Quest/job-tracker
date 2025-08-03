@@ -34,8 +34,8 @@ pub mod prelude {
     };
     pub use crate::storable::{
         ApplyPartial, Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole,
-        Interview, PartialCompany, PartialFlag, PartialInterview, PartialQuestion, PartialRole,
-        PartialValue, Question, Role, Value,
+        Interview, IsPartialComplete, PartialCompany, PartialFlag, PartialInterview,
+        PartialQuestion, PartialRole, PartialValue, Question, Role, Value,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,

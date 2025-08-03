@@ -43,6 +43,8 @@ impl_has_id!(Company);
 impl_has_name!(Company);
 impl_has_deleted!(Company);
 
+impl_is_partial_complete_optional_name_only!(PartialCompany);
+
 #[cfg(test)]
 mod test_helper {
     use crate::storable::Company;
@@ -116,5 +118,32 @@ mod tests {
             company.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_complete_company() {
+        let complete_company = PartialCompany {
+            name: Some("Test Company".to_string()),
+            date_deleted: None,
+        };
+        assert!(complete_company.is_complete());
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_missing_name() {
+        let missing_name = PartialCompany {
+            name: None,
+            date_deleted: None,
+        };
+        assert!(!missing_name.is_complete());
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_empty_name() {
+        let missing_name = PartialCompany {
+            name: Some(String::new()),
+            date_deleted: None,
+        };
+        assert!(!missing_name.is_complete());
     }
 }

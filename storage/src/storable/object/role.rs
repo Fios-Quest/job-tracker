@@ -48,6 +48,8 @@ impl_has_name!(Role);
 impl_has_company!(Role);
 impl_has_deleted!(Role);
 
+impl_is_partial_complete_optional_name_only!(PartialRole);
+
 #[cfg(test)]
 mod test_helper {
     use super::*;
@@ -120,5 +122,38 @@ mod tests {
             role.date_deleted,
             Some(Timestamp::from_string("2026-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_role_is_complete_complete_role() {
+        let role = PartialRole {
+            name: Some("Test role".to_string()),
+            description: None,
+            date_applied: None,
+            date_deleted: None,
+        };
+        assert!(role.is_complete())
+    }
+
+    #[test]
+    fn test_partial_role_is_complete_missing_name() {
+        let role = PartialRole {
+            name: None,
+            description: None,
+            date_applied: None,
+            date_deleted: None,
+        };
+        assert!(!role.is_complete())
+    }
+
+    #[test]
+    fn test_partial_role_is_complete_empty_name() {
+        let role = PartialRole {
+            name: Some(String::new()),
+            description: None,
+            date_applied: None,
+            date_deleted: None,
+        };
+        assert!(!role.is_complete())
     }
 }

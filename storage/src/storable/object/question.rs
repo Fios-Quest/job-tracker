@@ -33,6 +33,8 @@ impl_has_name!(Question);
 impl_has_role!(Question);
 impl_has_deleted!(Question);
 
+impl_is_partial_complete_optional_name_only!(PartialQuestion);
+
 #[cfg(test)]
 mod test_helper {
     use super::*;
@@ -83,5 +85,35 @@ mod tests {
             question.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_complete_question() {
+        let question = PartialQuestion {
+            name: Some("Test question".to_string()),
+            answer: None,
+            date_deleted: None,
+        };
+        assert!(question.is_complete())
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_missing_name() {
+        let question = PartialQuestion {
+            name: None,
+            answer: None,
+            date_deleted: None,
+        };
+        assert!(!question.is_complete())
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_empty_name() {
+        let question = PartialQuestion {
+            name: Some(String::new()),
+            answer: None,
+            date_deleted: None,
+        };
+        assert!(!question.is_complete())
     }
 }

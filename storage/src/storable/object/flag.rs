@@ -63,6 +63,12 @@ impl_has_name!(Flag);
 impl_has_company!(Flag);
 impl_has_deleted!(Flag);
 
+impl IsPartialComplete for PartialFlag {
+    fn is_complete(&self) -> bool {
+        self.flag_color.is_some() && self.name.as_ref().map(|name| name.is_empty()) == Some(false)
+    }
+}
+
 #[cfg(test)]
 mod test_helper {
     use super::*;
@@ -146,5 +152,45 @@ mod tests {
             flag.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_flag_is_complete_complete_flag() {
+        let flag = PartialFlag {
+            flag_color: Some(FlagColor::Green),
+            name: Some("Good flag".to_string()),
+            date_deleted: None,
+        };
+        assert!(flag.is_complete());
+    }
+
+    #[test]
+    fn test_partial_flag_is_complete_missing_name() {
+        let flag = PartialFlag {
+            flag_color: Some(FlagColor::Green),
+            name: None,
+            date_deleted: None,
+        };
+        assert!(!flag.is_complete());
+    }
+
+    #[test]
+    fn test_partial_flag_is_complete_empty_name() {
+        let flag = PartialFlag {
+            flag_color: Some(FlagColor::Green),
+            name: Some(String::new()),
+            date_deleted: None,
+        };
+        assert!(!flag.is_complete());
+    }
+
+    #[test]
+    fn test_partial_flag_is_complete_missing_flag() {
+        let flag = PartialFlag {
+            flag_color: None,
+            name: Some("Flag color missing".to_string()),
+            date_deleted: None,
+        };
+        assert!(!flag.is_complete());
     }
 }

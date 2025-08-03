@@ -37,6 +37,8 @@ impl_has_name!(Interview);
 impl_has_role!(Interview);
 impl_has_deleted!(Interview);
 
+impl_is_partial_complete_optional_name_only!(PartialInterview);
+
 #[cfg(test)]
 mod test_helper {
     use super::*;
@@ -95,5 +97,41 @@ mod tests {
             interview.date_deleted,
             Some(Timestamp::from_string("2026-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_complete_interview() {
+        let interview = PartialInterview {
+            name: Some("Test interview".to_string()),
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+        assert!(interview.is_complete())
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_missing_name() {
+        let interview = PartialInterview {
+            name: None,
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+        assert!(!interview.is_complete())
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_empty_name() {
+        let interview = PartialInterview {
+            name: Some(String::new()),
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+        assert!(!interview.is_complete())
     }
 }
