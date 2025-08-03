@@ -16,7 +16,8 @@ pub mod value_list;
 
 pub use interview_details::*;
 
-use crate::router::{create_route, DetailsView};
+use crate::helpers::create_route;
+use crate::router::DetailsView;
 use crate::{Navbar, ShortcutEvent, ShortcutHelper};
 use application_context::prelude::*;
 use dioxus::prelude::*;
