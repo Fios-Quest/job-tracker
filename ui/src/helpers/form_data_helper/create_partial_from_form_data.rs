@@ -7,7 +7,7 @@ pub trait CreatePartialFromFormData
 where
     Self: DeserializeOwned,
 {
-    fn create_partial_from_form_data(form_data: &FormData) -> anyhow::Result<Self> {
+    fn from_form_data(form_data: &FormData) -> anyhow::Result<Self> {
         let data: HashMap<_, serde_json::Value> = form_data
             .values()
             .into_iter()

@@ -8,7 +8,7 @@ where
     P: CreatePartialFromFormData,
 {
     fn modify_with_form_data(&mut self, form_data: &FormData) -> anyhow::Result<()> {
-        let partial = P::create_partial_from_form_data(form_data)?;
+        let partial = P::from_form_data(form_data)?;
         self.apply(partial);
         Ok(())
     }

@@ -1,6 +1,7 @@
 mod company_list_item;
 
 use crate::components::ErrorMessage;
+use crate::helpers::CreatePartialFromFormData;
 use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
 use dioxus::logger::tracing;
@@ -45,29 +46,30 @@ pub fn CompanyList() -> Element {
 
     let create_company = move |event: Event<FormData>| {
         let mut stores = stores.clone();
+
+        let partial_company =
+            PartialCompany::from_form_data(&event).expect("Could not deserialize company");
+
         error_message.set(None);
-        let company_name = event.values().get("company_name").map(|v| v.as_value());
 
         async move {
-            if let Some(company_name) = company_name {
-                if !company_name.is_empty() {
-                    // Store the name
-                    let store_result = stores.store(Company::new(company_name)).await;
+            let company =
+                Company::new_from_partial(partial_company).expect("Invalid company details");
 
-                    match store_result {
-                        Ok(()) => {
-                            // Reset the values to empty
-                            company_name_value.set("");
-                            company_name_search.set("".to_string());
-                            error_message.set(None);
+            let store_result = stores.store(company).await;
 
-                            // Rerun the resource
-                            companies_resource.restart();
-                        }
-                        Err(e) => {
-                            error_message.set(handle_storage_error(e));
-                        }
-                    }
+            match store_result {
+                Ok(()) => {
+                    // Reset the values to empty
+                    company_name_value.set("");
+                    company_name_search.set("".to_string());
+                    error_message.set(None);
+
+                    // Rerun the resource
+                    companies_resource.restart();
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
                 }
             }
         }
@@ -91,7 +93,7 @@ pub fn CompanyList() -> Element {
             form { class: "flex flex-col", onsubmit: create_company,
                 input {
                     id: "add_company",
-                    name: "company_name",
+                    name: "name",
                     value: company_name_search,
                     oninput: company_search,
                 }
