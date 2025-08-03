@@ -1,43 +1,31 @@
+use super::CreatePartialFromFormData;
 use dioxus::html::FormData;
-use serde::de::IntoDeserializer;
-use serde::Deserialize;
-use std::collections::HashMap;
-use storage::prelude::ApplyPartial;
+use storage::prelude::*;
 
-pub trait ModifyWithFormData<'a, P>
+pub trait ModifyWithFormData<P>
 where
-    Self: ApplyPartial<'a, P>,
-    P: Deserialize<'a>,
+    Self: ApplyPartial<P>,
+    P: CreatePartialFromFormData,
 {
     fn modify_with_form_data(&mut self, form_data: &FormData) -> anyhow::Result<()> {
-        let data: HashMap<_, serde_json::Value> = form_data
-            .values()
-            .into_iter()
-            .map(|(k, v)| (k, v.as_value()))
-            .filter(|(_k, v)| !v.is_empty())
-            .map(|(k, v)| (k, v.into()))
-            .collect();
-
-        let partial = P::deserialize(data.into_deserializer())?;
+        let partial = P::create_partial_from_form_data(form_data)?;
         self.apply(partial);
-
         Ok(())
     }
 }
 
-impl<'a, T, P> ModifyWithFormData<'a, P> for T
+impl<T, P> ModifyWithFormData<P> for T
 where
-    T: ApplyPartial<'a, P>,
-    P: Deserialize<'a>,
+    T: ApplyPartial<P>,
+    P: CreatePartialFromFormData,
 {
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dioxus::html::{FormValue, SerializedFormData};
-    use storage::prelude::Company;
-    use storage::Timestamp;
+    use dioxus_html::{FormValue, SerializedFormData};
+    use std::collections::HashMap;
 
     fn hash_map_to_form_data<K, V>(hash_map: &HashMap<&K, &V>) -> FormData
     where
