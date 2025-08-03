@@ -1,44 +1,42 @@
+use crate::helpers::ModifyWithFormData;
 use crate::{Editable, Route, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {
+pub fn CompanyListItem(company: Arc<Company>, reload_companies: Callback) -> Element {
     let stores = use_context::<StoreType>();
     let context = use_context::<Signal<ApplicationContext>>();
-    let Company { id, name, .. } = company.clone();
     let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
+
+    let company_id = company.id;
+    let company_name = company.name.clone();
 
     let input_name = "company_name";
 
     if let Some(event) = form_receiver() {
         let mut stores = stores.clone();
-        let company = company.clone();
-        let company_name = event.values().get(input_name).map(|v| v.as_value());
-        spawn(async move {
-            if let Some(name) = company_name {
-                if !name.is_empty() {
-                    let company = Company { name, ..company };
-                    let company_id = company.id;
-                    stores
-                        .store(company)
-                        .await
-                        .expect("Could not store company");
-                    navigator().push(Route::HomeCompany { company_id });
-                }
-            }
-        });
+        let mut company = Arc::unwrap_or_clone(company);
+        if company.modify_with_form_data(&event).is_ok() && !company.name.is_empty() {
+            spawn(async move {
+                stores
+                    .store(company)
+                    .await
+                    .expect("Could not store company");
+                navigator().push(Route::HomeCompany { company_id });
+            });
+        }
     }
 
-    let company_id = company.id;
     let checked = context()
         .get_company()
         .map(|selected_company| selected_company.id == company_id)
         .unwrap_or(false);
     let display = rsx! {
         input {
-            id: id.to_string(),
+            id: "{company_id}",
             r#type: "radio",
             name: "company",
             checked,
@@ -48,15 +46,15 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
                 });
             },
         }
-        label { r#for: id.to_string(), "{name}" }
+        label { r#for: "{company_id}", "{company_name}" }
     };
 
     let editable = rsx! {
         input {
-            id: id.to_string(),
+            id: "{company_id}",
             r#type: "text",
             name: input_name,
-            value: name,
+            value: "{company_name}",
         }
     };
 
