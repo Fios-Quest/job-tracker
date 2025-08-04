@@ -29,3 +29,19 @@ impl Default for StubThreadSafeGeneralStore {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+    use crate::test_helper::TestHelper;
+
+    #[tokio::test]
+    async fn test_new_stub() {
+        let mut stub_store = StubThreadSafeGeneralStore::new_stub();
+        let company = Company::new_test().await.unwrap();
+        stub_store.store(company.clone()).await.unwrap();
+        let recalled_company: Company = stub_store.recall_by_id(company.id).await.unwrap();
+        assert_eq!(company, recalled_company);
+    }
+}

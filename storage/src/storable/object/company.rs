@@ -22,8 +22,27 @@ impl Company {
         }
     }
 
+    pub fn new_from_partial(partial: PartialCompany) -> Result<Company, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Company {
+            id: Uuid::new_v4(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
+
     pub fn create_role<S: Into<String>>(&self, name: S, date_created: Timestamp) -> Role {
         Role::new(self, name, date_created)
+    }
+
+    pub fn create_role_from_partial(
+        &self,
+        role: PartialRole,
+    ) -> Result<Role, IncompletePartialErrors> {
+        Role::new_from_partial(self, role)
     }
 
     pub fn create_green_flag<S: Into<String>>(&self, name: S) -> Flag {
@@ -34,14 +53,30 @@ impl Company {
         Flag::new_red(self, name)
     }
 
+    pub fn create_flag_from_partial(
+        &self,
+        flag: PartialFlag,
+    ) -> Result<Flag, IncompletePartialErrors> {
+        Flag::new_from_partial(self, flag)
+    }
+
     pub fn create_value<N: Into<String>, D: Into<String>>(&self, name: N, description: D) -> Value {
         Value::new(self, name, description)
+    }
+
+    pub fn create_value_from_partial(
+        &self,
+        value: PartialValue,
+    ) -> Result<Value, IncompletePartialErrors> {
+        Value::new_from_partial(self, value)
     }
 }
 
 impl_has_id!(Company);
 impl_has_name!(Company);
 impl_has_deleted!(Company);
+
+impl_is_partial_complete_optional_name_only!(PartialCompany);
 
 #[cfg(test)]
 mod test_helper {
@@ -68,10 +103,48 @@ mod tests {
     test_has_deleted!(Company);
 
     #[test]
+    fn test_new_from_partial() {
+        let name = "Test Name".to_string();
+        let partial_company = PartialCompany {
+            name: Some(name.clone()),
+            date_deleted: None,
+        };
+        let company = Company::new_from_partial(partial_company).unwrap();
+        assert_eq!(company.name, name);
+    }
+
+    #[test]
+    fn test_new_from_partial_missing_name() {
+        let partial_company = PartialCompany {
+            name: None,
+            date_deleted: None,
+        };
+        let error = Company::new_from_partial(partial_company).unwrap_err();
+        assert_eq!(
+            format!("{error}"),
+            "Partial was incomplete; `name` is missing"
+        );
+    }
+
+    #[test]
     fn test_create_role() {
         let company = Company::new("company");
         let role = company.create_role("role", Timestamp::now());
         assert_eq!(company.get_id(), role.get_company_id());
+    }
+
+    #[test]
+    fn create_role_from_partial() {
+        let name = "Role name".to_string();
+        let company = Company::new("company");
+        let partial_role = PartialRole {
+            name: Some(name.clone()),
+            description: None,
+            date_applied: Some(Timestamp::now()),
+            date_deleted: None,
+        };
+        let role = company.create_role_from_partial(partial_role).unwrap();
+        assert_eq!(role.name, name);
     }
 
     #[test]
@@ -89,12 +162,38 @@ mod tests {
     }
 
     #[test]
+    fn create_flag_from_partial() {
+        let name = "Flag name".to_string();
+        let company = Company::new("company");
+        let partial_flag = PartialFlag {
+            flag_color: Some(FlagColor::Green),
+            name: Some(name.clone()),
+            date_deleted: None,
+        };
+        let flag = company.create_flag_from_partial(partial_flag).unwrap();
+        assert_eq!(flag.name, name);
+    }
+
+    #[test]
     fn test_create_value() {
         let company = Company::new("company");
         let value = company.create_value("name", "description");
         assert_eq!(value.get_company_id(), company.get_id());
         assert_eq!(value.name, "name");
         assert_eq!(value.description, "description");
+    }
+
+    #[test]
+    fn create_value_from_partial() {
+        let name = "Value name".to_string();
+        let company = Company::new("company");
+        let partial_value = PartialValue {
+            name: Some(name.clone()),
+            description: None,
+            date_deleted: None,
+        };
+        let value = company.create_value_from_partial(partial_value).unwrap();
+        assert_eq!(value.name, name);
     }
 
     #[test]
@@ -116,5 +215,36 @@ mod tests {
             company.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_complete_company() {
+        let complete_company = PartialCompany {
+            name: Some("Test Company".to_string()),
+            date_deleted: None,
+        };
+        assert!(complete_company.check_complete().is_ok());
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_missing_name() {
+        let missing_name = PartialCompany {
+            name: None,
+            date_deleted: None,
+        };
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is missing")));
+    }
+
+    #[test]
+    fn test_partial_company_is_complete_empty_name() {
+        let missing_name = PartialCompany {
+            name: Some(String::new()),
+            date_deleted: None,
+        };
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is empty")));
     }
 }

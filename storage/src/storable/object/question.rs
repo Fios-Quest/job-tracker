@@ -26,12 +26,31 @@ impl Question {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<R: HasId>(
+        role: R,
+        partial: PartialQuestion,
+    ) -> Result<Question, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Question {
+            id: Uuid::new_v4(),
+            role_id: role.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            answer: partial.answer.unwrap_or_default(),
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
 }
 
 impl_has_id!(Question);
 impl_has_name!(Question);
 impl_has_role!(Question);
 impl_has_deleted!(Question);
+
+impl_is_partial_complete_optional_name_only!(PartialQuestion);
 
 #[cfg(test)]
 mod test_helper {
@@ -83,5 +102,43 @@ mod tests {
             question.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_complete_question() {
+        let question = PartialQuestion {
+            name: Some("Test question".to_string()),
+            answer: None,
+            date_deleted: None,
+        };
+        assert!(question.check_complete().is_ok())
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_missing_name() {
+        let question = PartialQuestion {
+            name: None,
+            answer: None,
+            date_deleted: None,
+        };
+
+        let error = question.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
+    }
+
+    #[test]
+    fn test_partial_question_is_complete_empty_name() {
+        let question = PartialQuestion {
+            name: Some(String::new()),
+            answer: None,
+            date_deleted: None,
+        };
+
+        let error = question.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
     }
 }

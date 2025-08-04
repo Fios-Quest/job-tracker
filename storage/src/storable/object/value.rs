@@ -30,12 +30,31 @@ impl Value {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<C: HasId>(
+        company: C,
+        partial: PartialValue,
+    ) -> Result<Value, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Value {
+            id: Uuid::new_v4(),
+            company_id: company.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            description: partial.description.unwrap_or_default(),
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
 }
 
 impl_has_id!(Value);
 impl_has_name!(Value);
 impl_has_company!(Value);
 impl_has_deleted!(Value);
+
+impl_is_partial_complete_optional_name_only!(PartialValue);
 
 #[cfg(test)]
 mod test_helper {
@@ -87,5 +106,39 @@ mod tests {
             value.date_deleted,
             Some(Timestamp::from_string("2025-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_complete_value() {
+        let complete_value = PartialValue {
+            name: Some("Test Value".to_string()),
+            description: None,
+            date_deleted: None,
+        };
+        assert!(complete_value.check_complete().is_ok());
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_missing_name() {
+        let missing_name = PartialValue {
+            name: None,
+            description: None,
+            date_deleted: None,
+        };
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is missing")));
+    }
+
+    #[test]
+    fn test_partial_value_is_complete_empty_name() {
+        let missing_name = PartialValue {
+            name: Some(String::new()),
+            description: None,
+            date_deleted: None,
+        };
+        let error = missing_name.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert!(errors.contains(&String::from("`name` is empty")));
     }
 }

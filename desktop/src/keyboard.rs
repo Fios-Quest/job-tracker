@@ -1,7 +1,7 @@
 use dioxus::document;
 use dioxus::prelude::spawn;
 use serde::Deserialize;
-use ui::{ShortcutEvent, ShortcutKey, ShortcutModifier, SHORTCUT_SIGNAL, SHOW_MODIFIERS};
+use ui::prelude::*;
 
 #[derive(Debug, Deserialize, Eq, PartialEq)]
 enum KeyEvent {

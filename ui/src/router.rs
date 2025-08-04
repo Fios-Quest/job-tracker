@@ -1,5 +1,5 @@
+use crate::layout::Layout;
 use crate::views::{Help, Home, Support};
-use crate::MainNavbar;
 use dioxus::prelude::*;
 use std::fmt;
 use std::str::FromStr;
@@ -82,7 +82,7 @@ impl fmt::Display for DetailsView {
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
-    #[layout(MainNavbar)]
+    #[layout(Layout)]
     #[route("/support")]
     Support { },
     #[route("/help")]
@@ -95,33 +95,4 @@ pub enum Route {
     HomeRole { company_id: Uuid, role_id: Uuid, view: DetailsView },
     #[route("/:company_id/:role_id/:interview_id?:view")]
     HomeInterview { company_id: Uuid, role_id: Uuid, interview_id: Uuid, view: DetailsView },
-}
-
-pub fn create_route(
-    company_id: Option<Uuid>,
-    role_id: Option<Uuid>,
-    interview_id: Option<Uuid>,
-    view: Option<DetailsView>,
-) -> String {
-    let mut route = String::new();
-    if let Some(company_id) = company_id {
-        route.push('/');
-        route.push_str(&company_id.to_string());
-
-        if let Some(role_id) = role_id {
-            route.push('/');
-            route.push_str(&role_id.to_string());
-
-            if let Some(interview_id) = interview_id {
-                route.push('/');
-                route.push_str(&interview_id.to_string());
-            }
-        }
-    }
-
-    if let Some(view) = view {
-        route.push_str(&format!("?view={view}"))
-    }
-
-    route
 }

@@ -1,50 +1,19 @@
 //! This crate contains all shared UI for the workspace.
+use dioxus::prelude::*;
+use storage::prelude::*;
+
+mod helpers;
+
+mod components;
+use components::*;
 
 mod router;
-pub use router::{DetailsView, Route};
-
-mod navbar;
-pub use navbar::Navbar;
-
-mod interviews;
-pub use interviews::*;
-
-mod company_list;
-pub use company_list::CompanyList;
-
-mod role_list;
-pub use role_list::*;
-
-mod role_information;
-pub use role_information::*;
-
-mod flag_list;
-pub use flag_list::*;
-
-mod value_list;
-pub use value_list::*;
-
-mod questions_list;
-pub use questions_list::*;
-
-mod editable;
-pub use editable::*;
-
-mod shortcuts;
-pub use shortcuts::*;
-
-mod error_message;
-
-mod main_nav;
-pub use main_nav::*;
+use router::*;
 
 mod views;
 pub use views::*;
 
-use dioxus::prelude::*;
-use storage::prelude::*;
-
-mod form_data_helper;
+mod layout;
 
 #[cfg(feature = "desktop")]
 pub type LogFetcherType = JsonLogFetcher;
@@ -61,3 +30,14 @@ pub type StoreType = StubThreadSafeGeneralStore;
 pub static SHORTCUT_SIGNAL: GlobalSignal<Option<ShortcutEvent>> = Global::new(|| None);
 
 pub static SHOW_MODIFIERS: GlobalSignal<bool> = Global::new(|| false);
+
+pub mod prelude {
+    pub use super::components::ShortcutEvent;
+    pub use super::components::ShortcutKey;
+    pub use super::components::ShortcutModifier;
+    pub use super::router::Route;
+    pub use super::LogFetcherType;
+    pub use super::StoreType;
+    pub use super::SHORTCUT_SIGNAL;
+    pub use super::SHOW_MODIFIERS;
+}

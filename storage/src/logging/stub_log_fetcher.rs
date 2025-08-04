@@ -26,3 +26,47 @@ impl LogFetcher for StubLogFetcher {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_logs() {
+        // todo!();
+        let logger = StubLogFetcher::new().await.unwrap();
+
+        {
+            let mut editable = logger.logs.lock().await;
+            editable.push("This is a fake log".to_string());
+            drop(editable); // This shouldn't be necessary but GitHub Actions are bugging out
+        }
+
+        let logs = logger.get_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+    }
+
+    #[tokio::test]
+    async fn test_clear_logs() {
+        let logger = StubLogFetcher::new().await.unwrap();
+
+        {
+            let mut editable = logger.logs.lock().await;
+            editable.push("This is a fake log".to_string());
+            drop(editable); // This shouldn't be necessary but GitHub Actions are bugging out
+        }
+
+        let logs = logger.get_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+
+        logger.clear_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+    }
+
+    #[tokio::test]
+    async fn test_log_location() {
+        let logger = StubLogFetcher::new().await.unwrap();
+
+        assert!(logger.log_location().is_none());
+    }
+}

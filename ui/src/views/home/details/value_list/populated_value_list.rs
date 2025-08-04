@@ -1,0 +1,83 @@
+use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use crate::helpers::CreatePartialFromFormData;
+use crate::value_list::ValueListItem;
+use crate::StoreType;
+use dioxus::logger::tracing;
+use dioxus::prelude::*;
+use std::sync::Arc;
+use storage::prelude::{BaseStore, Company, PartialValue, RecallByCompany};
+use storage::StorageError;
+
+fn handle_storage_error(error: anyhow::Error) -> Option<String> {
+    tracing::error!("Storage Error: {:?}", error);
+
+    match error.downcast_ref::<StorageError>() {
+        Some(StorageError::NotFound) => Some("No value found".to_string()),
+        Some(StorageError::AlreadyExists) => Some("Value already exists".to_string()),
+        _ => Some("A database error has occurred".to_string()),
+    }
+}
+
+#[component]
+pub fn ValueList(company: Arc<Company>) -> Element {
+    let company_id = company.id;
+
+    let mut error_message = use_signal(|| None);
+
+    let mut values_resource = use_resource(use_reactive!(|(company_id)| async move {
+        let result = use_context::<StoreType>()
+            .recall_by_company(company_id)
+            .await;
+        match result {
+            Ok(values) => values.into_iter().map(Arc::new).collect(),
+            Err(e) => {
+                error_message.set(handle_storage_error(e));
+                Vec::with_capacity(0)
+            }
+        }
+    }));
+
+    let reload_values = use_callback(move |()| values_resource.restart());
+    let values = values_resource().unwrap_or_default();
+    let values_list = values.iter().cloned().map(move |value| {
+        rsx! {
+            ValueListItem { value, reload_values }
+        }
+    });
+
+    let create_value = move |event: Event<FormData>| {
+        let company = company.clone();
+        let partial_value =
+            PartialValue::from_form_data(&event).expect("Could not create partial value");
+        let value = company
+            .create_value_from_partial(partial_value)
+            .expect("Could not create value from partial");
+        let mut store = use_context::<StoreType>();
+        async move {
+            let result = store.store(value).await;
+            match result {
+                Ok(_) => {
+                    error_message.set(None);
+                    // Rerun the resource
+                    values_resource.restart();
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
+                }
+            }
+        }
+    };
+
+    rsx! {
+        div { id: "flags",
+            h3 { "Values" }
+            ul { {values_list} }
+
+            form { onsubmit: create_value,
+                input { name: VALUE_NAME_FIELD, value: "" }
+                textarea { name: VALUE_DESCRIPTION_FIELD, value: "" }
+                input { r#type: "submit" }
+            }
+        }
+    }
+}

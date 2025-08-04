@@ -33,9 +33,9 @@ pub mod prelude {
         json_log_fetcher::JsonLogFetcher, stub_log_fetcher::StubLogFetcher, LogFetcher,
     };
     pub use crate::storable::{
-        ApplyPartial, Company, Flag, FlagColor, HasCompany, HasDeleted, HasId, HasName, HasRole,
-        Interview, PartialCompany, PartialFlag, PartialInterview, PartialQuestion, PartialRole,
-        PartialValue, Question, Role, Value,
+        ApplyPartial, CheckPartialComplete, Company, Flag, FlagColor, HasCompany, HasDeleted,
+        HasId, HasName, HasRole, Interview, PartialCompany, PartialFlag, PartialInterview,
+        PartialQuestion, PartialRole, PartialValue, Question, Role, Value,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,

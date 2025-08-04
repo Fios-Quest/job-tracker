@@ -30,12 +30,33 @@ impl Interview {
             date_deleted: None,
         }
     }
+
+    pub fn new_from_partial<R: HasId>(
+        role: R,
+        partial: PartialInterview,
+    ) -> Result<Interview, IncompletePartialErrors> {
+        partial.check_complete()?;
+
+        Ok(Interview {
+            id: Uuid::new_v4(),
+            role_id: role.get_id(),
+            name: partial
+                .name
+                .ok_or_else(|| IncompletePartialErrors::field_error("name"))?,
+            notes: partial.notes.unwrap_or_default(),
+            host: partial.host.unwrap_or_default(),
+            date_time: partial.date_time.unwrap_or_default(),
+            date_deleted: partial.date_deleted.unwrap_or_default(),
+        })
+    }
 }
 
 impl_has_id!(Interview);
 impl_has_name!(Interview);
 impl_has_role!(Interview);
 impl_has_deleted!(Interview);
+
+impl_is_partial_complete_optional_name_only!(PartialInterview);
 
 #[cfg(test)]
 mod test_helper {
@@ -95,5 +116,49 @@ mod tests {
             interview.date_deleted,
             Some(Timestamp::from_string("2026-07-28T00:00"))
         );
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_complete_interview() {
+        let interview = PartialInterview {
+            name: Some("Test interview".to_string()),
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+        assert!(interview.check_complete().is_ok())
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_missing_name() {
+        let interview = PartialInterview {
+            name: None,
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+
+        let error = interview.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is missing".to_string()));
+    }
+
+    #[test]
+    fn test_partial_interview_is_complete_empty_name() {
+        let interview = PartialInterview {
+            name: Some(String::new()),
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+
+        let error = interview.check_complete().unwrap_err();
+        let errors = error.get_errors();
+        assert_eq!(errors.len(), 1);
+        assert!(errors.contains(&"`name` is empty".to_string()));
     }
 }
