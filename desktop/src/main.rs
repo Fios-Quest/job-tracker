@@ -49,8 +49,7 @@ fn App() -> Element {
             // Urls are relative to your Cargo.toml file
             href: asset!("/assets/generated/tailwind.css"),
         }
-        div { class: "to-do-when-modifier-works",
-
+        div {
             // Global app resources
             Router::<Route> {}
         }
