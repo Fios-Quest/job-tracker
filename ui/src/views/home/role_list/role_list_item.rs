@@ -1,4 +1,5 @@
 use crate::components::Editable;
+use crate::helpers::ModifyWithFormData;
 use crate::router::DetailsView;
 use crate::{Route, StoreType};
 use application_context::prelude::*;
@@ -41,21 +42,16 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
 
     if let Some(event) = form_receiver() {
         let mut stores = stores.clone();
-        let role_name = event.values().get("role_name").map(|v| v.as_value());
+        let mut role = role;
+        role.modify_with_form_data(&event)
+            .expect("Could not modift role with form data");
         spawn(async move {
-            if let Some(name) = role_name {
-                if !name.is_empty() {
-                    let role = Role {
-                        name,
-                        ..role.clone()
-                    };
-                    let _result = stores // ToDo: Handle errors
-                        .store(role)
-                        .await;
-                    reload_roles(());
-                    form_receiver.set(None);
-                }
-            }
+            stores // ToDo: Handle errors
+                .store(role)
+                .await
+                .expect("Could not store role");
+            reload_roles(());
+            form_receiver.set(None);
         });
     }
 
@@ -63,7 +59,7 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
         input {
             id: id.to_string(),
             r#type: "text",
-            name: "role_name",
+            name: "name",
             value: name,
         }
     };

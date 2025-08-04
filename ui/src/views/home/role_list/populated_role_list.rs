@@ -1,4 +1,5 @@
 use super::role_list_item::RoleListItem;
+use crate::helpers::CreatePartialFromFormData;
 use crate::router::DetailsView;
 use crate::Route::HomeRole;
 use crate::StoreType;
@@ -46,31 +47,26 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
 
     let create_role = move |event: Event<FormData>| {
         let mut stores = stores.clone();
-        let cloned_company = company.clone();
+        let mut partial_role = PartialRole::from_form_data(&event)
+            .expect("Could not create partial role from form data");
+        partial_role.date_applied = Some(Timestamp::now());
+        let role = company
+            .create_role_from_partial(partial_role)
+            .expect("Could not create role from partial");
+
+        let company_id = company.id;
+        let role_id = role.id;
+
         async move {
-            let role_name = event.values().get("role_name").map(|v| v.as_value());
+            // Store the name
+            stores.store(role).await.expect("Could not store company");
 
-            if let Some(role_name) = role_name {
-                if !role_name.is_empty() {
-                    // Create the role (and remember its ids)
-                    let new_role = cloned_company.create_role(role_name, Timestamp::now());
-                    let company_id = new_role.company_id;
-                    let role_id = new_role.id;
-
-                    // Store the name
-                    stores
-                        .store(new_role)
-                        .await
-                        .expect("Could not store company");
-
-                    // Navigate away from the page
-                    navigator().push(HomeRole {
-                        company_id,
-                        role_id,
-                        view: DetailsView::Role,
-                    });
-                }
-            }
+            // Navigate away from the page
+            navigator().push(HomeRole {
+                company_id,
+                role_id,
+                view: DetailsView::Role,
+            });
         }
     };
 
@@ -82,11 +78,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
             ul { {roles_list} }
 
             form { class: "flex flex-col", onsubmit: create_role,
-                input {
-                    id: "add_role",
-                    name: "role_name",
-                    value: role_name_value,
-                }
+                input { id: "add_role", name: "name", value: role_name_value }
                 input { r#type: "submit" }
             }
         }
