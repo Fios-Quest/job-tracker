@@ -39,6 +39,7 @@ mod tests {
         {
             let mut editable = logger.logs.lock().await;
             editable.push("This is a fake log".to_string());
+            drop(editable); // This shouldn't be necessary but GitHub Actions are bugging out
         }
 
         let logs = logger.get_logs().await.unwrap();
@@ -52,6 +53,7 @@ mod tests {
         {
             let mut editable = logger.logs.lock().await;
             editable.push("This is a fake log".to_string());
+            drop(editable); // This shouldn't be necessary but GitHub Actions are bugging out
         }
 
         let logs = logger.get_logs().await.unwrap();
