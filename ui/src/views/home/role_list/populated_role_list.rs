@@ -23,6 +23,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     let stores = use_context::<StoreType>();
     let role_name_value = use_signal(|| "");
     let mut error_message = use_signal(|| None);
+    let company_name = company.name.clone();
 
     // Get roles for the company
     let mut roles_resource = use_resource(use_reactive!(|(company)| async move {
@@ -73,7 +74,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     rsx! {
         div { id: "roles",
 
-            h3 { "Roles" }
+            h3 { "Roles for {company_name}" }
 
             ul { {roles_list} }
 
