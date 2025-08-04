@@ -141,11 +141,41 @@ mod tests {
     }
 
     #[test]
+    fn test_create_question_from_partial() {
+        let name = "Test question".to_string();
+        let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
+        let partial_question = PartialQuestion {
+            name: Some(name.clone()),
+            answer: None,
+            date_deleted: None,
+        };
+        let question = role.create_question_from_partial(partial_question).unwrap();
+        assert_eq!(question.name, name);
+    }
+
+    #[test]
     fn test_create_interview() {
         let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
         let interview = role.create_interview("interview");
         assert_eq!(interview.role_id, role.id);
         assert_eq!(interview.name, "interview");
+    }
+
+    #[test]
+    fn test_create_interview_from_partial() {
+        let name = "Test interview".to_string();
+        let role = Role::new(Uuid::new_v4(), "role", Timestamp::now());
+        let partial_interview = PartialInterview {
+            name: Some(name.clone()),
+            notes: None,
+            host: None,
+            date_time: None,
+            date_deleted: None,
+        };
+        let interview = role
+            .create_interview_from_partial(partial_interview)
+            .unwrap();
+        assert_eq!(interview.name, name);
     }
 
     #[test]

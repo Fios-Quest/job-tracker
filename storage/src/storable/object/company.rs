@@ -103,10 +103,48 @@ mod tests {
     test_has_deleted!(Company);
 
     #[test]
+    fn test_new_from_partial() {
+        let name = "Test Name".to_string();
+        let partial_company = PartialCompany {
+            name: Some(name.clone()),
+            date_deleted: None,
+        };
+        let company = Company::new_from_partial(partial_company).unwrap();
+        assert_eq!(company.name, name);
+    }
+
+    #[test]
+    fn test_new_from_partial_missing_name() {
+        let partial_company = PartialCompany {
+            name: None,
+            date_deleted: None,
+        };
+        let error = Company::new_from_partial(partial_company).unwrap_err();
+        assert_eq!(
+            format!("{error}"),
+            "Partial was incomplete; `name` is missing"
+        );
+    }
+
+    #[test]
     fn test_create_role() {
         let company = Company::new("company");
         let role = company.create_role("role", Timestamp::now());
         assert_eq!(company.get_id(), role.get_company_id());
+    }
+
+    #[test]
+    fn create_role_from_partial() {
+        let name = "Role name".to_string();
+        let company = Company::new("company");
+        let partial_role = PartialRole {
+            name: Some(name.clone()),
+            description: None,
+            date_applied: Some(Timestamp::now()),
+            date_deleted: None,
+        };
+        let role = company.create_role_from_partial(partial_role).unwrap();
+        assert_eq!(role.name, name);
     }
 
     #[test]
@@ -124,12 +162,38 @@ mod tests {
     }
 
     #[test]
+    fn create_flag_from_partial() {
+        let name = "Flag name".to_string();
+        let company = Company::new("company");
+        let partial_flag = PartialFlag {
+            flag_color: Some(FlagColor::Green),
+            name: Some(name.clone()),
+            date_deleted: None,
+        };
+        let flag = company.create_flag_from_partial(partial_flag).unwrap();
+        assert_eq!(flag.name, name);
+    }
+
+    #[test]
     fn test_create_value() {
         let company = Company::new("company");
         let value = company.create_value("name", "description");
         assert_eq!(value.get_company_id(), company.get_id());
         assert_eq!(value.name, "name");
         assert_eq!(value.description, "description");
+    }
+
+    #[test]
+    fn create_value_from_partial() {
+        let name = "Value name".to_string();
+        let company = Company::new("company");
+        let partial_value = PartialValue {
+            name: Some(name.clone()),
+            description: None,
+            date_deleted: None,
+        };
+        let value = company.create_value_from_partial(partial_value).unwrap();
+        assert_eq!(value.name, name);
     }
 
     #[test]

@@ -17,7 +17,7 @@ impl IncompletePartialErrors {
 
     pub fn field_error<S: Display>(field: S) -> Self {
         let mut errors = IncompletePartialErrors::with_capacity(1);
-        errors.push(format!("Partial Check failed on field `{field}"));
+        errors.push(format!("Partial Check failed on field `{field}`"));
         errors
     }
 
@@ -138,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn test_incomplete_partial_error_tripple() {
+    fn test_incomplete_partial_error_triple() {
         let error = IncompletePartialErrors {
             errors: vec![
                 "First error".to_string(),
@@ -150,5 +150,49 @@ mod tests {
             format!("{error}"),
             "Partial was incomplete; First error, Second error, and Third error"
         );
+    }
+
+    #[test]
+    fn test_field_error() {
+        let error = IncompletePartialErrors::field_error("name");
+        assert_eq!(
+            format!("{error}"),
+            "Partial was incomplete; Partial Check failed on field `name`"
+        );
+    }
+
+    #[test]
+    fn test_get_errors() {
+        let errors = vec![
+            "First error".to_string(),
+            "Second error".to_string(),
+            "Third error".to_string(),
+        ];
+        let error = IncompletePartialErrors {
+            errors: errors.clone(),
+        };
+        assert_eq!(error.get_errors(), &errors);
+    }
+
+    #[test]
+    fn test_push() {
+        let mut error = IncompletePartialErrors::with_capacity(2);
+        error.push("First error");
+        error.push("Second error");
+        assert_eq!(
+            error.get_errors(),
+            &vec!["First error".to_string(), "Second error".to_string()]
+        );
+    }
+
+    #[test]
+    fn test_from_errors() {
+        let errors = vec![
+            "First error".to_string(),
+            "Second error".to_string(),
+            "Third error".to_string(),
+        ];
+        let error = IncompletePartialErrors::from(errors.clone());
+        assert_eq!(error.get_errors(), &errors);
     }
 }
