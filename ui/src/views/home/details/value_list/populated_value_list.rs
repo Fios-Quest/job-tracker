@@ -1,10 +1,11 @@
-use super::{create_value_from_form_data, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use crate::helpers::CreatePartialFromFormData;
 use crate::value_list::ValueListItem;
 use crate::StoreType;
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, RecallByCompany};
+use storage::prelude::{BaseStore, Company, PartialValue, RecallByCompany};
 use storage::StorageError;
 
 fn handle_storage_error(error: anyhow::Error) -> Option<String> {
@@ -46,20 +47,22 @@ pub fn ValueList(company: Arc<Company>) -> Element {
 
     let create_value = move |event: Event<FormData>| {
         let company = company.clone();
+        let partial_value =
+            PartialValue::from_form_data(&event).expect("Could not create partial value");
+        let value = company
+            .create_value_from_partial(partial_value)
+            .expect("Could not create value from partial");
+        let mut store = use_context::<StoreType>();
         async move {
-            let value = create_value_from_form_data(company, &event);
-            if let Some(value) = value {
-                let mut store = use_context::<StoreType>();
-                let result = store.store(value).await;
-                match result {
-                    Ok(_) => {
-                        error_message.set(None);
-                        // Rerun the resource
-                        values_resource.restart();
-                    }
-                    Err(e) => {
-                        error_message.set(handle_storage_error(e));
-                    }
+            let result = store.store(value).await;
+            match result {
+                Ok(_) => {
+                    error_message.set(None);
+                    // Rerun the resource
+                    values_resource.restart();
+                }
+                Err(e) => {
+                    error_message.set(handle_storage_error(e));
                 }
             }
         }

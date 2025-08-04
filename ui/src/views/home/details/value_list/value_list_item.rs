@@ -1,4 +1,5 @@
-use super::{edit_value_from_form_data, VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
+use crate::helpers::ModifyWithFormData;
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use std::sync::Arc;
@@ -6,22 +7,19 @@ use storage::prelude::*;
 
 #[component]
 pub fn ValueListItem(value: Arc<Value>, reload_values: Callback) -> Element {
-    let value_id = value.id;
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     if let Some(event) = form_receiver() {
-        let value = edit_value_from_form_data(value.clone(), &event);
-        if let Some(mut value) = value {
-            value.id = value_id;
-            spawn(async move {
-                let mut store = use_context::<StoreType>();
-                let _result = store.store(value).await;
-                reload_values(());
-                form_receiver.set(None);
-            });
-        } else {
+        let mut value = Arc::unwrap_or_clone(value.clone());
+        value
+            .modify_with_form_data(&event)
+            .expect("Could not modify value");
+        let mut store = use_context::<StoreType>();
+        spawn(async move {
+            let _result = store.store(value).await;
+            reload_values(());
             form_receiver.set(None);
-        }
+        });
     }
 
     let display = rsx! {
