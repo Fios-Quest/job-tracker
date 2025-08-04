@@ -14,6 +14,7 @@ impl Timestamp {
     }
 
     pub fn from_string<S: AsRef<str>>(time: S) -> Self {
+        // ToDo: We should accept a series of possible formats here
         let dt = NaiveDateTime::parse_from_str(time.as_ref(), FORMAT).expect("Invalid format");
         Timestamp(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))
     }
@@ -95,5 +96,54 @@ mod timestamp_serde {
         TempDateTimeInfo::deserialize(deserializer)?
             .to_datetime()
             .map_err(|e| serde::de::Error::custom(format!("{e}")))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_timestamp() {
+        let timestamp = Timestamp::from_timestamp(-14182980);
+        let as_string = format!("{}", timestamp.format("%Y-%m-%d %H:%M:%S"));
+        assert_eq!(as_string, "1969-07-20 20:17:00");
+    }
+
+    #[test]
+    fn test_from_string() {
+        let timestamp = Timestamp::from_string("1969-07-20T20:17");
+        assert_eq!(timestamp.timestamp(), -14182980);
+    }
+
+    #[test]
+    fn test_now() {
+        let timestamp = Timestamp::now();
+        assert!(timestamp.timestamp() > 1754300623); // Time when test was written
+    }
+
+    #[test]
+    fn test_looks_valid() {
+        assert!(!Timestamp::from_string("1969-07-20T20:17").looks_valid());
+        assert!(Timestamp::now().looks_valid());
+    }
+
+    #[test]
+    fn test_serialize() {
+        let timestamp = Timestamp::from_timestamp(-14182980);
+        let serialized = serde_json::to_string(&timestamp).unwrap();
+        assert_eq!(serialized, "\"1969-07-20T20:17\"");
+    }
+
+    #[test]
+    fn test_deserialize() {
+        let string = "\"1969-07-20T20:17\"";
+        let timestamp_from_string: Timestamp = serde_json::from_str(string).unwrap();
+        assert_eq!(timestamp_from_string.timestamp(), -14182980);
+
+        let number = "-14182980";
+        let timestamp_from_number: Timestamp = serde_json::from_str(number).unwrap();
+        let as_string = format!("{}", timestamp_from_number.format("%Y-%m-%d %H:%M:%S"));
+        assert_eq!(as_string, "1969-07-20 20:17:00");
     }
 }
