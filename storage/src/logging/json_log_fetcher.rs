@@ -52,3 +52,57 @@ impl LogFetcher for JsonLogFetcher {
         self.dir.to_str().map(|s| s.to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    async fn prepare_log() -> PathBuf {
+        let dir = tempdir::TempDir::new("log_store_path").unwrap().into_path();
+        let log_file = dir.join("log.log");
+        let non_log_file = dir.join("log.json");
+
+        // Write a log:
+        tokio::fs::write(&log_file, "This is a fake log")
+            .await
+            .unwrap();
+        // Write a file that's not a log:
+        tokio::fs::write(&non_log_file, "This should not show in tests")
+            .await
+            .unwrap();
+
+        dir
+    }
+
+    #[tokio::test]
+    async fn test_get_logs() {
+        let base_path = prepare_log().await;
+
+        let logger = JsonLogFetcher::new(base_path).await.unwrap();
+
+        let logs = logger.get_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+    }
+
+    #[tokio::test]
+    async fn test_clear_logs() {
+        let base_path = prepare_log().await;
+
+        let logger = JsonLogFetcher::new(base_path).await.unwrap();
+
+        let logs = logger.get_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+
+        logger.clear_logs().await.unwrap();
+        assert_eq!(logs, vec!["This is a fake log".to_string()]);
+    }
+
+    #[tokio::test]
+    async fn test_log_location() {
+        let base_path = prepare_log().await;
+
+        let logger = JsonLogFetcher::new(base_path).await.unwrap();
+
+        assert!(logger.log_location().is_some());
+    }
+}
