@@ -9,6 +9,7 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
     let stores = use_context::<StoreType>();
     let context = use_context::<Signal<ApplicationContext>>();
     let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
+    let id = company.id;
 
     let input_name = "name";
 
@@ -18,7 +19,7 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
         .unwrap_or(false);
     let display = rsx! {
         input {
-            id: "{company.id}",
+            id: "{id}",
             r#type: "radio",
             name: "company",
             checked,
