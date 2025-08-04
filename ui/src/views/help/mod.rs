@@ -1,7 +1,26 @@
 use crate::LogFetcherType;
 use dioxus::prelude::*;
 use log::error;
+use std::process::Command;
 use storage::prelude::*;
+
+#[cfg(all(target_os = "windows", feature = "desktop"))]
+fn open_dir(path: &str) -> anyhow::Result<()> {
+    Command::new("explorer").arg(path).spawn()?.wait()?;
+    Ok(())
+}
+
+#[cfg(all(target_os = "macos", feature = "desktop"))]
+fn open_dir(path: &str) -> anyhow::Result<()> {
+    Command::new("open").arg(path).spawn()?.wait()?;
+    Ok(())
+}
+
+#[cfg(all(target_os = "linux", feature = "desktop"))]
+fn open_dir(path: &str) -> anyhow::Result<()> {
+    Command::new("xdg-open").arg(path).spawn()?.wait()?;
+    Ok(())
+}
 
 #[component]
 pub fn Help() -> Element {
@@ -30,7 +49,11 @@ pub fn Help() -> Element {
         if let Some(path) = log_cleaner.log_location() {
             p {
                 "Log Directory: "
-                a { href: "file://{path}", {path.clone()} }
+                a {
+                    href: "#",
+                    onclick: move |_| { open_dir(&path).expect("Could not open dir") },
+                    {path.clone()}
+                }
             }
         }
 
