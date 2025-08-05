@@ -31,6 +31,8 @@ pub static SHORTCUT_SIGNAL: GlobalSignal<Option<ShortcutEvent>> = Global::new(||
 
 pub static SHOW_MODIFIERS: GlobalSignal<bool> = Global::new(|| false);
 
+pub static EMIT_ERROR: GlobalSignal<Option<anyhow::Error>> = Global::new(|| None);
+
 pub mod prelude {
     pub use super::components::ShortcutEvent;
     pub use super::components::ShortcutKey;
