@@ -85,7 +85,12 @@ fn InnerDetailView(view: DetailsView) -> Element {
 }
 
 #[component]
-fn DetailsNavigation(event: ShortcutEvent, view: DetailsView, children: Element) -> Element {
+fn DetailsNavigation(
+    event: ShortcutEvent,
+    view: DetailsView,
+    children: Element,
+    active: bool,
+) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
     let route = create_route(
         context().get_company().map(|c| c.id),
@@ -98,9 +103,11 @@ fn DetailsNavigation(event: ShortcutEvent, view: DetailsView, children: Element)
         navigator().push(route_clone.as_str());
     });
 
+    let class = if active { "active-nav-link" } else { "" };
+
     rsx! {
         ShortcutHelper { shortcut_event: event, on_shortcut: route_callback,
-            Link { to: route, {children} }
+            Link { class, to: route, {children} }
         }
     }
 }
@@ -110,24 +117,33 @@ pub fn Details(view: Option<DetailsView>) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
 
     rsx! {
-        div { class: "flex flex-col",
+        div { class: "details",
 
             Navbar {
                 DetailsNavigation {
                     event: ShortcutEvent::company(),
                     view: DetailsView::Company,
+                    active: view == Some(DetailsView::Company) || view.is_none(),
                     "Company Details"
                 }
                 if context().get_role().is_some() {
-                    DetailsNavigation { event: ShortcutEvent::role(), view: DetailsView::Role, "Role Details" }
+                    DetailsNavigation {
+                        event: ShortcutEvent::role(),
+                        view: DetailsView::Role,
+                        active: view == Some(DetailsView::Role),
+                        "Role Details"
+                    }
                     DetailsNavigation {
                         event: ShortcutEvent::interview(),
                         view: DetailsView::Interview,
+                        active: view == Some(DetailsView::Interview),
+
                         "Interview Details"
                     }
                     DetailsNavigation {
                         event: ShortcutEvent::questions(),
                         view: DetailsView::Questions,
+                        active: view == Some(DetailsView::Questions),
                         "Questions"
                     }
                 } else {

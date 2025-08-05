@@ -6,7 +6,7 @@ pub fn Layout() -> Element {
     rsx! {
         div { class: "flex mb-4",
 
-            h1 { class: "flex items-center gap-5",
+            h1 {
                 img {
                     class: "object-scale-down m-auto max-h-[100]",
                     src: asset!("assets/icon.png"),

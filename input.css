@@ -4,11 +4,11 @@
 
 @layer base {
     body {
-        @apply bg-slate-900 text-slate-200 mx-4;
+        @apply bg-slate-900 text-slate-200 ;
     }
 
     h1 {
-        @apply text-4xl mr-8;
+        @apply text-4xl mr-8 flex items-center gap-5 ;
     }
 
     h2 {
@@ -27,16 +27,28 @@
         @apply flex gap-4 items-center content-center w-fit;
     }
 
+    .main-nav {
+        @apply bg-slate-900;
+    }
+
+    .main-nav a, .main-nav span {
+        @apply py-2 px-4;
+    }
+
+    .main-nav .active-nav-link {
+        @apply bg-slate-800;
+    }
+
     section {
         @apply mt-4;
     }
 
     .disabled-nav-link {
-        @apply text-slate-700;
+        @apply text-slate-700 bg-slate-900;
     }
 
     input, textarea {
-        @apply bg-slate-800 text-slate-200 rounded m-2;
+        @apply bg-slate-900 text-slate-200 rounded m-2 border-2 border-slate-950;
     }
 
     input[type=submit] {
@@ -49,6 +61,18 @@
 
     p a {
         @apply underline;
+    }
+
+    .details {
+        @apply flex flex-col grow bg-slate-800;
+    }
+
+    .details .main-nav {
+        @apply w-full;
+    }
+
+    .details section {
+        @apply px-4;
     }
 
     .shortcut-helper {
