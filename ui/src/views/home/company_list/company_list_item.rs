@@ -1,4 +1,4 @@
-use crate::helpers::{report_if_error, ModifyWithFormData};
+use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
 use crate::{Editable, Route, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
@@ -45,15 +45,17 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
     };
 
     if let Some(event) = form_receiver() {
-        let mut stores = stores.clone();
-        let mut company = company;
-        let result = company.modify_with_form_data(&event);
-        if result.is_ok() && !company.name.is_empty() {
-            spawn(async move {
-                let company_id = company.id;
-                report_if_error!(stores.store(company).await);
-                navigator().push(Route::HomeCompany { company_id });
-            });
+        wrap_in_thunk! {
+            let mut stores = stores.clone();
+            let mut company = company;
+            let result = company.modify_with_form_data(&event);
+            if result.is_ok() && !company.name.is_empty() {
+                spawn(async move {
+                    let company_id = company.id;
+                    unwrap_or_report_and_return!(stores.store(company).await);
+                    navigator().push(Route::HomeCompany { company_id });
+                });
+            }
         }
     }
 
