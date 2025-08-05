@@ -1,4 +1,4 @@
-use crate::helpers::ModifyWithFormData;
+use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
@@ -28,14 +28,16 @@ pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
     };
 
     if let Some(event) = form_receiver() {
-        let mut stores = stores.clone();
-        let mut flag = flag;
-        if flag.modify_with_form_data(&event).is_ok() && !flag.name.is_empty() {
-            spawn(async move {
-                stores.store(flag).await.expect("Could not save flag");
-                reload_flags(());
-                form_receiver.set(None);
-            });
+        wrap_in_thunk! {
+            let mut stores = stores.clone();
+            let mut flag = flag;
+            if flag.modify_with_form_data(&event).is_ok() && !flag.name.is_empty() {
+                spawn(async move {
+                    unwrap_or_report_and_return!(stores.store(flag).await);
+                    reload_flags(());
+                    form_receiver.set(None);
+                });
+            }
         }
     }
 

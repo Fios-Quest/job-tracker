@@ -1,40 +1,20 @@
 mod company_list_item;
 
-use crate::components::ErrorMessage;
-use crate::helpers::{unwrap_error_or_report_and_return, CreatePartialFromFormData};
+use crate::helpers::{unwrap_or_report_and_return, CreatePartialFromFormData};
 use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
-use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use storage::prelude::*;
-
-fn handle_storage_error(error: anyhow::Error) -> Option<String> {
-    tracing::error!("Storage Error: {:?}", error);
-
-    match error.downcast_ref::<StorageError>() {
-        Some(StorageError::NotFound) => Some("No company found".to_string()),
-        Some(StorageError::AlreadyExists) => Some("Company already exists".to_string()),
-        _ => Some("A database error has occurred".to_string()),
-    }
-}
 
 #[component]
 pub fn CompanyList() -> Element {
     let stores = use_context::<StoreType>();
     let mut company_name_value = use_signal(|| "");
     let mut company_name_search = use_signal(|| "".to_string());
-    let mut error_message = use_signal(|| None);
 
     let mut companies_resource = use_resource(move || async move {
         let search = company_name_search();
-        let companies = use_context::<StoreType>().recall_by_name(search).await;
-        match companies {
-            Ok(companies) => companies,
-            Err(e) => {
-                error_message.set(handle_storage_error(e));
-                Vec::with_capacity(0)
-            }
-        }
+        unwrap_or_report_and_return!(use_context::<StoreType>().recall_by_name(search).await)
     });
     let reload_companies = use_callback(move |()| companies_resource.restart());
     let companies = companies_resource().unwrap_or_default();
@@ -47,31 +27,19 @@ pub fn CompanyList() -> Element {
     let create_company = move |event: Event<FormData>| {
         let mut stores = stores.clone();
 
-        let partial_company =
-            PartialCompany::from_form_data(&event).expect("Could not deserialize company");
-
-        error_message.set(None);
-
         async move {
-            let company =
-                unwrap_error_or_report_and_return!(Company::new_from_partial(partial_company));
+            let partial_company =
+                unwrap_or_report_and_return!(PartialCompany::from_form_data(&event));
+            let company = unwrap_or_report_and_return!(Company::new_from_partial(partial_company));
 
-            let store_result = stores.store(company).await;
+            unwrap_or_report_and_return!(stores.store(company).await);
 
-            match store_result {
-                Ok(()) => {
-                    // Reset the values to empty
-                    company_name_value.set("");
-                    company_name_search.set("".to_string());
-                    error_message.set(None);
+            // Reset the values to empty
+            company_name_value.set("");
+            company_name_search.set("".to_string());
 
-                    // Rerun the resource
-                    companies_resource.restart();
-                }
-                Err(e) => {
-                    error_message.set(handle_storage_error(e));
-                }
-            }
+            // Rerun the resource
+            companies_resource.restart();
         }
     };
 
@@ -85,10 +53,6 @@ pub fn CompanyList() -> Element {
             h3 { "Companies" }
 
             ul { {companies_list} }
-
-            if let Some(message) = error_message() {
-                ErrorMessage { message }
-            }
 
             form { class: "flex flex-col", onsubmit: create_company,
                 input {

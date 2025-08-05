@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use std::sync::Arc;
 
 mod populated_role_description;
-use crate::helpers::ModifyWithFormData;
+use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
 use crate::router::DetailsView;
 use crate::{Editable, Route, StoreType};
 use populated_role_description::PopulatedRoleDescription;
@@ -24,28 +24,24 @@ pub fn RoleDescription(role: Arc<Role>) -> Element {
 
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(event) = form_receiver() {
-        let mut stores = stores.clone();
-        let mut role = Arc::unwrap_or_clone(role);
-        role.modify_with_form_data(&event)
-            .expect("Could not modify role with form data");
-        let role_id = role.id;
-        let company_id = role.company_id;
-        spawn(async move {
-            stores
-                .store(role.clone())
-                .await
-                .expect("Could not store role");
-            let new_context = context()
-                .set_role(role)
-                .expect("Could not set role in app context");
-            context.set(new_context);
-            navigator().push(Route::HomeRole {
-                company_id,
-                role_id,
-                view: DetailsView::Role,
+        wrap_in_thunk! {
+            let mut stores = stores.clone();
+            let mut role = Arc::unwrap_or_clone(role);
+            unwrap_or_report_and_return!(role.modify_with_form_data(&event));
+            let role_id = role.id;
+            let company_id = role.company_id;
+            spawn(async move {
+                unwrap_or_report_and_return!(stores.store(role.clone()).await);
+                let new_context = unwrap_or_report_and_return!(context().set_role(role));
+                context.set(new_context);
+                navigator().push(Route::HomeRole {
+                    company_id,
+                    role_id,
+                    view: DetailsView::Role,
+                });
+                form_receiver.set(None);
             });
-            form_receiver.set(None);
-        });
+        }
     }
 
     rsx! {

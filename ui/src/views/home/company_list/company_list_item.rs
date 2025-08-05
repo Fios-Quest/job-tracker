@@ -1,4 +1,4 @@
-use crate::helpers::ModifyWithFormData;
+use crate::helpers::{report_if_error, ModifyWithFormData};
 use crate::{Editable, Route, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
@@ -51,10 +51,7 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
         if result.is_ok() && !company.name.is_empty() {
             spawn(async move {
                 let company_id = company.id;
-                stores
-                    .store(company)
-                    .await
-                    .expect("Could not store company");
+                report_if_error!(stores.store(company).await);
                 navigator().push(Route::HomeCompany { company_id });
             });
         }
