@@ -51,7 +51,10 @@ pub fn Help() -> Element {
                 "Log Directory: "
                 a {
                     href: "#",
-                    onclick: move |_| { open_dir(&path).expect("Could not open dir") },
+                    onclick: move |e| {
+                        e.prevent_default();
+                        open_dir(&path).expect("Could not open dir");
+                    },
                     {path.clone()}
                 }
             }
