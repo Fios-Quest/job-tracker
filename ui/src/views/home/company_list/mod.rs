@@ -1,7 +1,7 @@
 mod company_list_item;
 
 use crate::components::ErrorMessage;
-use crate::helpers::CreatePartialFromFormData;
+use crate::helpers::{unwrap_error_or_report_and_return, CreatePartialFromFormData};
 use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
 use dioxus::logger::tracing;
@@ -54,7 +54,7 @@ pub fn CompanyList() -> Element {
 
         async move {
             let company =
-                Company::new_from_partial(partial_company).expect("Invalid company details");
+                unwrap_error_or_report_and_return!(Company::new_from_partial(partial_company));
 
             let store_result = stores.store(company).await;
 
