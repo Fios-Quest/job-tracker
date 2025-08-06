@@ -70,4 +70,22 @@
     .show_modifiers .helper-text {
         display: block;
     }
+
+    .error-container {
+        display: flex;
+    }
+
+    .error-display {
+        display: none;
+        min-height: 10px;
+        @apply bg-red-950;
+    }
+
+    .show-errors-button {
+        @apply bg-red-950
+    }
+
+    .show-errors .error-display {
+        display: block;
+    }
 }
