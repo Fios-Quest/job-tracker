@@ -1,4 +1,4 @@
-use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use storage::prelude::*;
@@ -28,7 +28,7 @@ pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
     };
 
     if let Some(event) = form_receiver() {
-        wrap_in_thunk! {
+        iife! {
             let mut stores = stores.clone();
             let mut flag = flag;
             if flag.modify_with_form_data(&event).is_ok() && !flag.name.is_empty() {

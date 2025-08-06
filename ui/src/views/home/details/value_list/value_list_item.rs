@@ -1,5 +1,5 @@
 use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
-use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use std::sync::Arc;
@@ -10,7 +10,7 @@ pub fn ValueListItem(value: Arc<Value>, reload_values: Callback) -> Element {
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     if let Some(event) = form_receiver() {
-        wrap_in_thunk! {
+        iife! {
             let mut value = Arc::unwrap_or_clone(value.clone());
             unwrap_or_report_and_return!(value.modify_with_form_data(&event));
             let mut store = use_context::<StoreType>();
@@ -19,7 +19,7 @@ pub fn ValueListItem(value: Arc<Value>, reload_values: Callback) -> Element {
                 reload_values(());
                 form_receiver.set(None);
             });
-        };
+        }
     };
 
     let display = rsx! {

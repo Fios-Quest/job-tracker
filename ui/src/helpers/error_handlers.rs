@@ -25,13 +25,14 @@ macro_rules! report_if_error {
 }
 pub(crate) use report_if_error;
 
-macro_rules! wrap_in_thunk {
+macro_rules! iife {
     // tt is a _little_ bit loose, but it'll do
     ($($code_block:tt)+) => {
-        let thunk = || {
+        // Cheekily turning off clippy as in this case we need to do this for returns to work
+        #[allow(clippy::redundant_closure_call)]
+        (|| {
             $($code_block)+
-        };
-        thunk()
+        })()
     };
 }
-pub(crate) use wrap_in_thunk;
+pub(crate) use iife;

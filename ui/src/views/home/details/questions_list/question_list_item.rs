@@ -1,5 +1,5 @@
 use super::{QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
-use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use std::sync::Arc;
@@ -22,7 +22,7 @@ pub fn QuestionListItem(question: Arc<Question>, reload_questions: Callback) -> 
     };
 
     if let Some(event) = form_receiver() {
-        wrap_in_thunk! {
+        iife! {
            let mut question = Arc::unwrap_or_clone(question);
            unwrap_or_report_and_return!(question.modify_with_form_data(&event));
            spawn(async move {

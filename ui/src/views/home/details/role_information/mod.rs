@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use std::sync::Arc;
 
 mod populated_role_description;
-use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::router::DetailsView;
 use crate::{Editable, Route, StoreType};
 use populated_role_description::PopulatedRoleDescription;
@@ -24,7 +24,7 @@ pub fn RoleDescription(role: Arc<Role>) -> Element {
 
     let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(event) = form_receiver() {
-        wrap_in_thunk! {
+        iife! {
             let mut stores = stores.clone();
             let mut role = Arc::unwrap_or_clone(role);
             unwrap_or_report_and_return!(role.modify_with_form_data(&event));

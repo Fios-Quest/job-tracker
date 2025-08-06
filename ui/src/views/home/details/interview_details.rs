@@ -1,5 +1,5 @@
 use super::interviews::InterviewNav;
-use crate::helpers::{unwrap_or_report_and_return, wrap_in_thunk, ModifyWithFormData};
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
@@ -93,7 +93,7 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
 
     let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(form_data) = form_receiver() {
-        wrap_in_thunk! {
+        iife! {
             let mut interview = Arc::unwrap_or_clone(interview.clone());
             unwrap_or_report_and_return!(interview.modify_with_form_data(&form_data));
             spawn(async move {
