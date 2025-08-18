@@ -9,7 +9,7 @@ chrono = { version = "0.4.41", features = ["serde"] }
 partially = { version = "0.2.1", features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-thiserror = "2.0.12"
+thiserror = "2.0.15"
 tokio = { version = "1.47.1", features = ["fs", "sync", "rt-multi-thread", "macros"] }
 uuid = { version = "1.17.0", features = ["v4", "serde"] }
 
