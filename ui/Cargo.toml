@@ -11,7 +11,7 @@ dioxus-html = { version = "0.6.3", features = ["serialize"] }
 pulldown-cmark = "0.13.0"
 server = { workspace = true }
 storage = { workspace = true }
-uuid = { version = "1.17.0", features = ["v4"] }
+uuid = { version = "1.18.1", features = ["v4"] }
 log = "0.4.27"
 serde = { workspace = true }
 serde_json = { workspace = true } # Annoyingly this is only needed for HashMap deserialisation
