@@ -50,27 +50,27 @@ where
         }
     }
 
-    pub async fn company_store(&self) -> MutexGuard<C> {
+    pub async fn company_store<'a>(&'a self) -> MutexGuard<'a, C> {
         self.company_store.lock().await
     }
 
-    pub async fn flag_store(&self) -> MutexGuard<F> {
+    pub async fn flag_store<'a>(&'a self) -> MutexGuard<'a, F> {
         self.flag_store.lock().await
     }
 
-    pub async fn role_store(&self) -> MutexGuard<R> {
+    pub async fn role_store<'a>(&'a self) -> MutexGuard<'a, R> {
         self.role_store.lock().await
     }
 
-    pub async fn question_store(&self) -> MutexGuard<Q> {
+    pub async fn question_store<'a>(&'a self) -> MutexGuard<'a, Q> {
         self.question_store.lock().await
     }
 
-    pub async fn interview_store(&self) -> MutexGuard<I> {
+    pub async fn interview_store<'a>(&'a self) -> MutexGuard<'a, I> {
         self.interview_store.lock().await
     }
 
-    pub async fn value_store(&self) -> MutexGuard<V> {
+    pub async fn value_store<'a>(&'a self) -> MutexGuard<'a, V> {
         self.value_store.lock().await
     }
 }
