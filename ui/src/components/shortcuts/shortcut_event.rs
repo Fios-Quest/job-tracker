@@ -24,6 +24,7 @@ impl fmt::Display for ShortcutModifier {
 #[non_exhaustive]
 pub enum ShortcutKey {
     C,
+    E,
     I,
     R,
     Q,
@@ -33,6 +34,7 @@ impl fmt::Display for ShortcutKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ShortcutKey::C => write!(f, "C"),
+            ShortcutKey::E => write!(f, "E"),
             ShortcutKey::I => write!(f, "I"),
             ShortcutKey::R => write!(f, "R"),
             ShortcutKey::Q => write!(f, "Q"),

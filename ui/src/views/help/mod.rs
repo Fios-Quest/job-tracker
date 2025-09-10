@@ -1,3 +1,4 @@
+use crate::helpers::{report_if_error, unwrap_or_report_and_return};
 use crate::LogFetcherType;
 use dioxus::prelude::*;
 use log::error;
@@ -28,13 +29,7 @@ pub fn Help() -> Element {
     let log_cleaner = use_context::<LogFetcherType>();
     let mut logs_resource = use_resource(move || {
         let log_getter = log_getter.clone();
-        async move {
-            let logs_result = log_getter.get_logs().await;
-            logs_result.unwrap_or_else(|e| {
-                error!("{e}");
-                Vec::with_capacity(0)
-            })
-        }
+        async move { unwrap_or_report_and_return!(log_getter.get_logs().await) }
     });
 
     let logs = logs_resource().unwrap_or_default().into_iter().map(|log| {
@@ -53,7 +48,7 @@ pub fn Help() -> Element {
                     href: "#",
                     onclick: move |e| {
                         e.prevent_default();
-                        open_dir(&path).expect("Could not open dir");
+                        report_if_error!(open_dir(& path));
                     },
                     {path.clone()}
                 }

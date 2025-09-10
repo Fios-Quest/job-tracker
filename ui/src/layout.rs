@@ -1,3 +1,4 @@
+use crate::components::ErrorDisplay;
 use crate::{Navbar, Route};
 use dioxus::prelude::*;
 
@@ -22,5 +23,7 @@ pub fn Layout() -> Element {
         }
 
         Outlet::<Route> {}
+
+        ErrorDisplay {}
     }
 }

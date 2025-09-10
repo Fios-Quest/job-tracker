@@ -1,3 +1,4 @@
+use crate::helpers::unwrap_or_report_and_return;
 use crate::router::DetailsView;
 use crate::views::home::company_list::CompanyList;
 use crate::views::home::role_list::RoleList;
@@ -32,10 +33,8 @@ pub fn Home(
         async move {
             if let Some(company_id) = company_id {
                 if context.peek().get_company().map(|c| c.id) != Some(company_id) {
-                    let company = store
-                        .recall_by_id(company_id)
-                        .await
-                        .expect("Could not set company");
+                    let company =
+                        unwrap_or_report_and_return!(store.recall_by_id(company_id).await);
                     let new_context = context.peek().clone().set_company(company);
                     context.set(new_context);
                 }
@@ -43,30 +42,18 @@ pub fn Home(
             // Role _must_ be set after company
             if let Some(role_id) = role_id {
                 if context.peek().get_role().map(|c| c.id) != Some(role_id) {
-                    let role = store
-                        .recall_by_id(role_id)
-                        .await
-                        .expect("Could not set the role");
-                    let new_context = context
-                        .peek()
-                        .clone()
-                        .set_role(role)
-                        .expect("Couldn't set the role");
+                    let role = unwrap_or_report_and_return!(store.recall_by_id(role_id).await);
+                    let new_context =
+                        unwrap_or_report_and_return!(context.peek().clone().set_role(role));
                     context.set(new_context);
                 }
             }
             // Interview _must_ be set after the role
             if let Some(interview_id) = interview_id {
                 if context.peek().get_interview().map(|c| c.id) != Some(interview_id) {
-                    let role = store
-                        .recall_by_id(interview_id)
-                        .await
-                        .expect("Could not set the role");
-                    let new_context = context
-                        .peek()
-                        .clone()
-                        .set_interview(role)
-                        .expect("Couldn't set the interview");
+                    let role = unwrap_or_report_and_return!(store.recall_by_id(interview_id).await);
+                    let new_context =
+                        unwrap_or_report_and_return!(context.peek().clone().set_interview(role));
                     context.set(new_context);
                 }
             }
