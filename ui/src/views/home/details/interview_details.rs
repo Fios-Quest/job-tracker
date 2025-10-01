@@ -1,9 +1,8 @@
 use super::interviews::InterviewNav;
-use crate::helpers::ModifyWithFormData;
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use application_context::prelude::*;
 use dioxus::prelude::*;
-use log::warn;
 use std::sync::Arc;
 use storage::prelude::*;
 
@@ -72,12 +71,10 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
             async move {
                 if let Some(interview) = interview {
                     let id = interview.id;
-                    store
+                    Some(unwrap_or_report_and_return!(store
                         .recall_by_id(id)
                         .await
-                        .map(Arc::new)
-                        .inspect_err(|e| warn!("{e}"))
-                        .ok()
+                        .map(Arc::new)))
                 } else {
                     None
                 }
@@ -96,21 +93,15 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
 
     let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
     if let Some(form_data) = form_receiver() {
-        let mut interview = Arc::unwrap_or_clone(interview.clone());
-
-        match interview.modify_with_form_data(&form_data) {
-            Ok(()) => {
-                spawn(async move {
-                    let _ = store
-                        .store(interview.clone())
-                        .await
-                        .inspect_err(|e| warn!("{e}"));
-                    interview_resource.restart();
-                });
-            }
-            Err(e) => {
-                warn!("{e}");
-            }
+        iife! {
+            let mut interview = Arc::unwrap_or_clone(interview.clone());
+            unwrap_or_report_and_return!(interview.modify_with_form_data(&form_data));
+            spawn(async move {
+                unwrap_or_report_and_return!(store
+                    .store(interview.clone())
+                    .await);
+                interview_resource.restart();
+            });
         }
     }
 

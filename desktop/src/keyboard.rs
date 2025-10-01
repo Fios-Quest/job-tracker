@@ -48,9 +48,10 @@ impl TryFrom<KeyboardEvent> for ShortcutEvent {
         };
         let shortcut_key = match value.code.as_str() {
             "KeyC" => ShortcutKey::C,
-            "KeyR" => ShortcutKey::R,
+            "KeyE" => ShortcutKey::E,
             "KeyI" => ShortcutKey::I,
             "KeyQ" => ShortcutKey::Q,
+            "KeyR" => ShortcutKey::R,
             _ => return Err(()),
         };
 

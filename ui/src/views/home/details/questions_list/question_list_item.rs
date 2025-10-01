@@ -1,5 +1,5 @@
 use super::{QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
-use crate::helpers::ModifyWithFormData;
+use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
 use crate::{Editable, StoreType};
 use dioxus::prelude::*;
 use std::sync::Arc;
@@ -22,17 +22,17 @@ pub fn QuestionListItem(question: Arc<Question>, reload_questions: Callback) -> 
     };
 
     if let Some(event) = form_receiver() {
-        let mut question = Arc::unwrap_or_clone(question);
-        question
-            .modify_with_form_data(&event)
-            .expect("Could not modify question with form data");
-        spawn(async move {
-            let mut store = use_context::<StoreType>();
-            let _result = store.store(question).await;
-            reload_questions(());
-            form_receiver.set(None);
-        });
-    }
+        iife! {
+           let mut question = Arc::unwrap_or_clone(question);
+           unwrap_or_report_and_return!(question.modify_with_form_data(&event));
+           spawn(async move {
+               let mut store = use_context::<StoreType>();
+               unwrap_or_report_and_return!(store.store(question).await);
+               reload_questions(());
+               form_receiver.set(None);
+           });
+        }
+    };
 
     rsx! {
         li { id: "question-{id}",

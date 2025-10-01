@@ -1,40 +1,23 @@
 use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
-use crate::helpers::CreatePartialFromFormData;
+use crate::helpers::{unwrap_or_report_and_return, CreatePartialFromFormData};
 use crate::value_list::ValueListItem;
 use crate::StoreType;
-use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::{BaseStore, Company, PartialValue, RecallByCompany};
-use storage::StorageError;
-
-fn handle_storage_error(error: anyhow::Error) -> Option<String> {
-    tracing::error!("Storage Error: {:?}", error);
-
-    match error.downcast_ref::<StorageError>() {
-        Some(StorageError::NotFound) => Some("No value found".to_string()),
-        Some(StorageError::AlreadyExists) => Some("Value already exists".to_string()),
-        _ => Some("A database error has occurred".to_string()),
-    }
-}
 
 #[component]
 pub fn ValueList(company: Arc<Company>) -> Element {
     let company_id = company.id;
 
-    let mut error_message = use_signal(|| None);
-
     let mut values_resource = use_resource(use_reactive!(|(company_id)| async move {
-        let result = use_context::<StoreType>()
-            .recall_by_company(company_id)
-            .await;
-        match result {
-            Ok(values) => values.into_iter().map(Arc::new).collect(),
-            Err(e) => {
-                error_message.set(handle_storage_error(e));
-                Vec::with_capacity(0)
-            }
-        }
+        let values = unwrap_or_report_and_return!(
+            use_context::<StoreType>()
+                .recall_by_company(company_id)
+                .await
+        );
+
+        values.into_iter().map(Arc::new).collect::<Vec<_>>()
     }));
 
     let reload_values = use_callback(move |()| values_resource.restart());
@@ -47,24 +30,14 @@ pub fn ValueList(company: Arc<Company>) -> Element {
 
     let create_value = move |event: Event<FormData>| {
         let company = company.clone();
-        let partial_value =
-            PartialValue::from_form_data(&event).expect("Could not create partial value");
-        let value = company
-            .create_value_from_partial(partial_value)
-            .expect("Could not create value from partial");
         let mut store = use_context::<StoreType>();
         async move {
-            let result = store.store(value).await;
-            match result {
-                Ok(_) => {
-                    error_message.set(None);
-                    // Rerun the resource
-                    values_resource.restart();
-                }
-                Err(e) => {
-                    error_message.set(handle_storage_error(e));
-                }
-            }
+            let partial_value = unwrap_or_report_and_return!(PartialValue::from_form_data(&event));
+            let value =
+                unwrap_or_report_and_return!(company.create_value_from_partial(partial_value));
+            unwrap_or_report_and_return!(store.store(value).await);
+            // Rerun the resource
+            values_resource.restart();
         }
     };
 
