@@ -84,6 +84,8 @@ jobs:
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags gdk-3.0
       - name: Update rust
         run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - name: Install rustfmt
+        run: rustup component add rustfmt
       - name: Cargo fmt
         run: cargo fmt --check
 
@@ -104,6 +106,8 @@ jobs:
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags gdk-3.0
       - name: Update rust
         run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - name: Install clippy
+        run: rustup component add clippy
       - name: Cargo clippy
         run: cargo clippy -- -D warnings
 
