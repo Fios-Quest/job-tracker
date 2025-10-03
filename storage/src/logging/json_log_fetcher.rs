@@ -58,7 +58,7 @@ mod tests {
     use super::*;
 
     async fn prepare_log() -> PathBuf {
-        let dir = tempdir::TempDir::new("log_store_path").unwrap().into_path();
+        let dir = tempfile::tempdir().unwrap().keep();
         let log_file = dir.join("log.log");
         let non_log_file = dir.join("log.json");
 
