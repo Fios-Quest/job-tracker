@@ -173,8 +173,8 @@ mod test_helper {
     {
         #[cfg(test)]
         async fn new_test() -> Result<Self> {
-            let base_path = tempdir::TempDir::new("json_store_test")?;
-            Self::new(base_path.into_path()).await
+            let base_path = tempfile::tempdir()?;
+            Self::new(base_path.keep()).await
         }
     }
 }
@@ -213,9 +213,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_load_from_file() {
-        let base_path = tempdir::TempDir::new("json_store_test")
-            .unwrap()
-            .into_path();
+        let base_path = tempfile::tempdir().unwrap().keep();
 
         let company = Company::new("company");
 
@@ -239,9 +237,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_company_scoped() {
-        let base_path = tempdir::TempDir::new("json_store_test")
-            .unwrap()
-            .into_path();
+        let base_path = tempfile::tempdir().unwrap().keep();
 
         let company_store = JsonStore::<Company>::new_scoped(base_path).await.unwrap();
         assert!(company_store.base_path.ends_with("company"));
@@ -249,9 +245,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_flag_scoped() {
-        let base_path = tempdir::TempDir::new("json_store_test")
-            .unwrap()
-            .into_path();
+        let base_path = tempfile::tempdir().unwrap().keep();
 
         let flag_store = JsonStore::<Flag>::new_scoped(base_path).await.unwrap();
         assert!(flag_store.base_path.ends_with("flag"));
@@ -259,9 +253,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_role_scoped() {
-        let base_path = tempdir::TempDir::new("json_store_test")
-            .unwrap()
-            .into_path();
+        let base_path = tempfile::tempdir().unwrap().keep();
 
         let role_store = JsonStore::<Role>::new_scoped(base_path).await.unwrap();
         assert!(role_store.base_path.ends_with("role"));

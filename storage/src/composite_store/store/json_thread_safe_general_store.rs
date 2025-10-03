@@ -43,9 +43,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_new_json() {
-        let base_path = tempdir::TempDir::new("json_store_test")
-            .unwrap()
-            .into_path();
+        let base_path = tempfile::tempdir().unwrap().keep();
 
         assert!(JsonThreadSafeGeneralStore::new_json(base_path)
             .await
