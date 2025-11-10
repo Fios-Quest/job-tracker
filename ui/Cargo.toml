@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = { workspace = true }
 application_context = { workspace = true }
 dioxus = { workspace = true }
-dioxus-html = { version = "0.6.3", features = ["serialize"] }
+dioxus-html = { version = "0.7.1", features = ["serialize"] }
 pulldown-cmark = "0.13.0"
 server = { workspace = true }
 storage = { workspace = true }
