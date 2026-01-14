@@ -5,7 +5,6 @@ members = [
     "web",
     "desktop",
     "mobile",
-    "server",
     "storage",
     "application_context",
 ]
