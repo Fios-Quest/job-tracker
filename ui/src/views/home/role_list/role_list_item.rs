@@ -33,7 +33,7 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
                 });
             },
         }
-        label { r#for: id.to_string(), "{name}" }
+        label { r#for: "{id}", "{name}" }
     };
 
     let editable = rsx! {
