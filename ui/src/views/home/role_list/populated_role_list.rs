@@ -1,22 +1,23 @@
 use super::role_list_item::RoleListItem;
-use crate::helpers::{unwrap_or_report_and_return, CreatePartialFromFormData};
+use crate::helpers::unwrap_or_report_and_return;
 use crate::router::DetailsView;
+use crate::views::home::role_list::forms::create_role::CreateRole;
 use crate::Route::HomeRole;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;
+use uuid::Uuid;
 
 #[component]
 pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
-    let stores = use_context::<StoreType>();
-    let role_name_value = use_signal(|| "");
+    let company_id = company.id;
 
     // Get roles for the company
-    let mut roles_resource = use_resource(use_reactive!(|(company)| async move {
+    let mut roles_resource = use_resource(use_reactive!(|(company_id)| async move {
         unwrap_or_report_and_return!(
             use_context::<StoreType>()
-                .recall_by_company(company.id)
+                .recall_by_company(company_id)
                 .await
         )
     }));
@@ -28,30 +29,14 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
         }
     });
 
-    let create_role = move |event: Event<FormData>| {
-        let mut stores = stores.clone();
-        let company = company.clone();
-        async move {
-            let mut partial_role =
-                unwrap_or_report_and_return!(PartialRole::from_form_data(&event));
-            partial_role.date_applied = Some(Timestamp::now());
-
-            let role = unwrap_or_report_and_return!(company.create_role_from_partial(partial_role));
-
-            let company_id = company.id;
-            let role_id = role.id;
-
-            // Store the name
-            unwrap_or_report_and_return!(stores.store(role).await);
-
-            // Navigate away from the page
-            navigator().push(HomeRole {
-                company_id,
-                role_id,
-                view: DetailsView::Role,
-            });
-        }
-    };
+    let on_create_role = use_callback(move |role_id: Uuid| {
+        // Navigate away from the page
+        navigator().push(HomeRole {
+            company_id,
+            role_id,
+            view: DetailsView::Role,
+        });
+    });
 
     rsx! {
         div { id: "roles",
@@ -60,10 +45,7 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
 
             ul { {roles_list} }
 
-            form { class: "flex flex-col", onsubmit: create_role,
-                input { id: "add_role", name: "name", value: role_name_value }
-                input { r#type: "submit" }
-            }
+            CreateRole { company, callback: on_create_role }
         }
     }
 }

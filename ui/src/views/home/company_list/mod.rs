@@ -1,6 +1,6 @@
 mod company_list_item;
 
-use crate::helpers::{unwrap_or_report_and_return, CreatePartialFromFormData};
+use crate::helpers::unwrap_or_report_and_return;
 use crate::views::home::company_list::company_list_item::CompanyListItem;
 use crate::StoreType;
 use dioxus::prelude::*;
@@ -28,8 +28,8 @@ pub fn CompanyList() -> Element {
         let mut stores = stores.clone();
 
         async move {
-            let partial_company =
-                unwrap_or_report_and_return!(PartialCompany::from_form_data(&event));
+            let partial_company: PartialCompany =
+                unwrap_or_report_and_return!(event.parsed_values());
             let company = unwrap_or_report_and_return!(Company::new_from_partial(partial_company));
 
             unwrap_or_report_and_return!(stores.store(company).await);

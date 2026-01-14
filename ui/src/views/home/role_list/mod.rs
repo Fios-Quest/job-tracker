@@ -1,3 +1,5 @@
+mod forms;
+
 mod empty_role_list;
 mod populated_role_list;
 mod role_list_item;
