@@ -2,7 +2,7 @@ use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{ApplyPartial, BaseStore, Interview, PartialInterview};
+use storage::prelude::{ApplyPartial, BaseStore, Interview, InterviewFieldName, PartialInterview};
 
 fn create_on_submit(
     interview: Arc<Interview>,
@@ -34,22 +34,31 @@ pub fn EditInterview(interview: Arc<Interview>, callback: Callback<Interview>) -
                 dt { "When:" }
                 dd {
                     input {
-                        name: "date_time",
+                        name: InterviewFieldName::DateTime.name(),
                         r#type: "datetime-local",
                         value: "{when}",
                     }
                 }
                 dt { "Who:" }
                 dd {
-                    input { name: "hosts", value: "{interview.host}" }
+                    input {
+                        name: InterviewFieldName::Host.name(),
+                        value: "{interview.host}",
+                    }
                 }
                 dt { "Interview:" }
                 dd {
-                    input { name: "name", value: "{interview.name}" }
+                    input {
+                        name: InterviewFieldName::Name.name(),
+                        value: "{interview.name}",
+                    }
                 }
             }
             section {
-                textarea { name: "notes", value: "{interview.notes}" }
+                textarea {
+                    name: InterviewFieldName::Notes.name(),
+                    value: "{interview.notes}",
+                }
             }
         }
     }

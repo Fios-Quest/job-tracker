@@ -2,7 +2,7 @@ use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role};
+use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role, RoleFieldName};
 
 fn create_on_submit(role: Arc<Role>, callback: Callback<Role>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
@@ -23,7 +23,7 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Role>) -> impl FnMut(For
 pub fn EditRoleDescription(role: Arc<Role>, callback: Callback<Role>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(role.clone(), callback),
-            textarea { name: "description", "{role.description}" }
+            textarea { name: RoleFieldName::Description.name(), "{role.description}" }
         }
     }
 }

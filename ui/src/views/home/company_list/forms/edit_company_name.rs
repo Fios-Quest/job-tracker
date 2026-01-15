@@ -1,7 +1,7 @@
 use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, Company, PartialCompany};
+use storage::prelude::{ApplyPartial, BaseStore, Company, CompanyFieldName, PartialCompany};
 use uuid::Uuid;
 
 // ToDo: Names are so common, this feels like it could be made generic
@@ -30,7 +30,7 @@ pub fn EditCompanyName(company: Company, callback: Callback<Uuid>) -> Element {
             input {
                 id: "{id}",
                 r#type: "text",
-                name: "name",
+                name: CompanyFieldName::Name.name(),
                 value: name,
             }
             input { r#type: "submit" }

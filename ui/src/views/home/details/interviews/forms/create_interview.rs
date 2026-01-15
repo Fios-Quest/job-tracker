@@ -2,7 +2,7 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, PartialInterview, Role};
+use storage::prelude::{BaseStore, InterviewFieldName, PartialInterview, Role};
 use uuid::Uuid;
 
 fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -33,7 +33,7 @@ pub fn CreateInterview(role: Arc<Role>, callback: Callback<Uuid>) -> Element {
     if is_editable() {
         rsx! {
             form { onsubmit: create_on_submit(role, callback),
-                input { name: "name" }
+                input { name: InterviewFieldName::Name.name() }
                 button { "✅" }
             }
             a { href: "#", onclick: move |_| is_editable.set(false), "❌" }

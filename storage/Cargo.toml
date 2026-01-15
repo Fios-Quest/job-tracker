@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 chrono = { version = "0.4.41", features = ["serde"] }
+field_types = { version = "1.1.0", optional = true }
 partially = { version = "0.2.1", features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -20,3 +21,6 @@ tokio = { version = "1.47.1", features = ["rt"] }
 
 [features]
 desktop = []
+field_names = [
+    "dep:field_types"
+]

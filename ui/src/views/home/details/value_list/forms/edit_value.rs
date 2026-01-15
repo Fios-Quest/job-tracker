@@ -2,7 +2,7 @@ use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{ApplyPartial, BaseStore, PartialValue, Value};
+use storage::prelude::{ApplyPartial, BaseStore, PartialValue, Value, ValueFieldName};
 
 fn create_on_submit(value: Arc<Value>, callback: Callback<Value>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
@@ -24,8 +24,11 @@ fn create_on_submit(value: Arc<Value>, callback: Callback<Value>) -> impl FnMut(
 pub fn EditValue(value: Arc<Value>, callback: Callback<Value>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(value.clone(), callback),
-            input { name: "name", value: "{value.name}" }
-            textarea { name: "description", value: "{value.description}" }
+            input { name: ValueFieldName::Name.name(), value: "{value.name}" }
+            textarea {
+                name: ValueFieldName::Description.name(),
+                value: "{value.description}",
+            }
             input { r#type: "submit" }
         }
     }

@@ -2,7 +2,7 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, PartialRole};
+use storage::prelude::{BaseStore, Company, PartialRole, RoleFieldName};
 use uuid::Uuid;
 
 fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -35,7 +35,7 @@ pub fn CreateRole(company: Arc<Company>, callback: Callback<Uuid>) -> Element {
         form {
             class: "flex flex-col",
             onsubmit: create_on_submit(company, callback),
-            input { id: "add_role", name: "name", value: "" }
+            input { name: RoleFieldName::Name.name(), value: "" }
             input { r#type: "submit" }
         }
     }

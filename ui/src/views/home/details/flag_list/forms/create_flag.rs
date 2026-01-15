@@ -2,7 +2,7 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, PartialFlag};
+use storage::prelude::{BaseStore, Company, FlagFieldName, PartialFlag};
 use uuid::Uuid;
 
 fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -32,11 +32,11 @@ fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnM
 pub fn CreateFlag(company: Arc<Company>, callback: Callback<Uuid>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(company, callback),
-            select { id: "flag_color", name: "flag_color",
+            select { id: "flag_color", name: FlagFieldName::FlagColor.name(),
                 option { value: "red", "🚩 Red" }
                 option { value: "green", "💚 Green" }
             }
-            input { id: "add_flag", name: "name" }
+            input { id: "add_flag", name: FlagFieldName::Name.name() }
             input { r#type: "submit" }
         }
     }

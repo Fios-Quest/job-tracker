@@ -1,7 +1,7 @@
 use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{BaseStore, Company, PartialCompany};
+use storage::prelude::{BaseStore, Company, CompanyFieldName, PartialCompany};
 use uuid::Uuid;
 
 fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -32,8 +32,7 @@ pub fn CreateCompany(
     rsx! {
         form { class: "flex flex-col", onsubmit: create_on_submit(callback),
             input {
-                id: "add_role",
-                name: "name",
+                name: CompanyFieldName::Name.name(),
                 value: company_name_search,
                 oninput: company_search,
             }

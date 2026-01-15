@@ -1,7 +1,7 @@
 use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, PartialQuestion, Question};
+use storage::prelude::{ApplyPartial, BaseStore, PartialQuestion, Question, QuestionFieldName};
 use uuid::Uuid;
 
 fn create_on_submit(question: Question, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -26,8 +26,8 @@ pub fn EditQuestion(question: Question, callback: Callback<Uuid>) -> Element {
     let answer = question.answer.clone();
     rsx! {
         form { onsubmit: create_on_submit(question, callback),
-            input { name: "question", value: "{name}" }
-            textarea { name: "answer", value: "{answer}" }
+            input { name: QuestionFieldName::Name.name(), value: name }
+            textarea { name: QuestionFieldName::Answer.name(), value: answer }
             input { r#type: "submit" }
         }
     }

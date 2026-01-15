@@ -1,7 +1,7 @@
 use crate::helpers::{log_error, report_if_error};
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role};
+use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role, RoleFieldName};
 
 fn create_on_submit(role: Role, callback: Callback) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
@@ -23,7 +23,7 @@ pub fn EditRoleName(role: Role, callback: Callback) -> Element {
     let name = role.name.clone();
     rsx! {
         form { onsubmit: create_on_submit(role, callback),
-            input { r#type: "text", name: "name", value: name }
+            input { name: RoleFieldName::Name.name(), value: name }
             input { r#type: "submit" }
         }
     }

@@ -2,7 +2,7 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, PartialQuestion, Role};
+use storage::prelude::{BaseStore, PartialQuestion, QuestionFieldName, Role};
 use uuid::Uuid;
 
 fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
@@ -31,8 +31,8 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(For
 pub fn CreateQuestion(role: Arc<Role>, callback: Callback<Uuid>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(role, callback),
-            input { name: "question", value: "" }
-            textarea { name: "answer", value: "" }
+            input { name: QuestionFieldName::Name.name(), value: "" }
+            textarea { name: QuestionFieldName::Answer.name(), value: "" }
             input { r#type: "submit" }
         }
     }
