@@ -5,7 +5,7 @@ use storage::prelude::*;
 
 #[component]
 pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
-    let is_editable = use_signal::<bool>(|| false);
+    let is_editable = use_signal(|| false);
 
     let id = flag.id;
 
