@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use storage::prelude::{ApplyPartial, BaseStore, PartialQuestion, Question};
 use uuid::Uuid;
 
-fn create_on_submit(question: Question, callback: Callback<Uuid>) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(question: Question, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(form_data) = e.parsed_values::<PartialQuestion>().map_err(log_error) {
@@ -25,8 +25,7 @@ pub fn EditQuestion(question: Question, callback: Callback<Uuid>) -> Element {
     let name = question.name.clone();
     let answer = question.answer.clone();
     rsx! {
-        form {
-            onsubmit: create_on_submit(question, callback),
+        form { onsubmit: create_on_submit(question, callback),
             input { name: "question", value: "{name}" }
             textarea { name: "answer", value: "{answer}" }
             input { r#type: "submit" }

@@ -5,10 +5,7 @@ use std::sync::Arc;
 use storage::prelude::{BaseStore, Company, PartialRole};
 use uuid::Uuid;
 
-fn create_on_submit(
-    company: Arc<Company>,
-    callback: Callback<Uuid>,
-) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         // Get the partial from the form data, then create the role from the partial

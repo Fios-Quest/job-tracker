@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role};
 
-fn create_on_submit(role: Arc<Role>, callback: Callback<Role>) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(role: Arc<Role>, callback: Callback<Role>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(form_data) = e.parsed_values::<PartialRole>().map_err(log_error) {
@@ -22,8 +22,7 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Role>) -> impl FnMut(For
 #[component]
 pub fn EditRoleDescription(role: Arc<Role>, callback: Callback<Role>) -> Element {
     rsx! {
-        form {
-            onsubmit: create_on_submit(role.clone(), callback),
+        form { onsubmit: create_on_submit(role.clone(), callback),
             textarea { name: "description", "{role.description}" }
         }
     }

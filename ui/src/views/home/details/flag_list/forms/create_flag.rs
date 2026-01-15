@@ -5,10 +5,7 @@ use std::sync::Arc;
 use storage::prelude::{BaseStore, Company, PartialFlag};
 use uuid::Uuid;
 
-fn create_on_submit(
-    company: Arc<Company>,
-    callback: Callback<Uuid>,
-) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(role) = e
@@ -34,8 +31,7 @@ fn create_on_submit(
 #[component]
 pub fn CreateFlag(company: Arc<Company>, callback: Callback<Uuid>) -> Element {
     rsx! {
-        form {
-            onsubmit: create_on_submit(company, callback),
+        form { onsubmit: create_on_submit(company, callback),
             select { id: "flag_color", name: "flag_color",
                 option { value: "red", "🚩 Red" }
                 option { value: "green", "💚 Green" }

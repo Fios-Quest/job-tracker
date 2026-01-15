@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use storage::prelude::{BaseStore, Company, PartialCompany};
 use uuid::Uuid;
 
-fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(company) = e
@@ -30,12 +30,13 @@ pub fn CreateCompany(
     company_name_search: Signal<String>,
 ) -> Element {
     rsx! {
-        form {
-            class: "flex flex-col",
-            onsubmit: create_on_submit(callback),
-            input { id: "add_role", name: "name",
-                    value: company_name_search,
-                    oninput: company_search,}
+        form { class: "flex flex-col", onsubmit: create_on_submit(callback),
+            input {
+                id: "add_role",
+                name: "name",
+                value: company_name_search,
+                oninput: company_search,
+            }
             input { r#type: "submit" }
         }
     }

@@ -3,7 +3,7 @@ use crate::StoreType;
 use dioxus::prelude::*;
 use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role};
 
-fn create_on_submit(role: Role, callback: Callback) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(role: Role, callback: Callback) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(form_data) = e.parsed_values::<PartialRole>().map_err(log_error) {
@@ -22,16 +22,9 @@ fn create_on_submit(role: Role, callback: Callback) -> impl FnMut(FormEvent) -> 
 pub fn EditRoleName(role: Role, callback: Callback) -> Element {
     let name = role.name.clone();
     rsx! {
-        form {
-            onsubmit: create_on_submit(role, callback),
-            input {
-                r#type: "text",
-                name: "name",
-                value: name,
-            }
-            input {
-                r#type: "submit",
-            }
+        form { onsubmit: create_on_submit(role, callback),
+            input { r#type: "text", name: "name", value: name }
+            input { r#type: "submit" }
         }
     }
 }

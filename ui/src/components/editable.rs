@@ -3,9 +3,7 @@ use dioxus::prelude::*;
 #[component]
 fn EditableEdit(editable: Element, is_editable: Signal<bool>) -> Element {
     rsx! {
-        div { class: "editable edit",
-            {editable}
-        }
+        div { class: "editable edit", {editable} }
     }
 }
 

@@ -1,4 +1,4 @@
 mod nav;
 pub use nav::*;
 
-mod forms;
+pub mod forms;

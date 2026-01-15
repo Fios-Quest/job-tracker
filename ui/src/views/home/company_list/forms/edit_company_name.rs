@@ -5,7 +5,7 @@ use storage::prelude::{ApplyPartial, BaseStore, Company, PartialCompany};
 use uuid::Uuid;
 
 // ToDo: Names are so common, this feels like it could be made generic
-fn create_on_submit(company: Company, callback: Callback<Uuid>) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(company: Company, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(form_data) = e.parsed_values::<PartialCompany>().map_err(log_error) {
@@ -26,17 +26,14 @@ pub fn EditCompanyName(company: Company, callback: Callback<Uuid>) -> Element {
     let name = company.name.clone();
     let id = company.id;
     rsx! {
-        form {
-            onsubmit: create_on_submit(company, callback),
+        form { onsubmit: create_on_submit(company, callback),
             input {
                 id: "{id}",
                 r#type: "text",
                 name: "name",
                 value: name,
             }
-            input {
-                r#type: "submit",
-            }
+            input { r#type: "submit" }
         }
     }
 }

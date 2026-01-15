@@ -5,7 +5,7 @@ use std::sync::Arc;
 use storage::prelude::{BaseStore, PartialInterview, Role};
 use uuid::Uuid;
 
-fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) -> () {
+fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(interview) = e
