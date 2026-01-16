@@ -2,10 +2,9 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, InterviewFieldName, PartialInterview, Role};
-use uuid::Uuid;
+use storage::prelude::{BaseStore, Interview, InterviewFieldName, PartialInterview, Role};
 
-fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
+fn create_on_submit(role: Arc<Role>, callback: Callback<Interview>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(interview) = e
@@ -18,17 +17,19 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(For
         {
             // If the role was successfully created, save it
             spawn(async move {
-                let id = interview.id;
                 let mut stores = use_context::<StoreType>();
-                stores.store(interview).await.unwrap_or_else(log_error);
-                callback(id);
+                stores
+                    .store(interview.clone())
+                    .await
+                    .unwrap_or_else(log_error);
+                callback(interview);
             });
         }
     }
 }
 
 #[component]
-pub fn CreateInterview(role: Arc<Role>, callback: Callback<Uuid>) -> Element {
+pub fn CreateInterview(role: Arc<Role>, callback: Callback<Interview>) -> Element {
     let mut is_editable = use_signal(|| false);
     if is_editable() {
         rsx! {

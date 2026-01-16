@@ -1,33 +1,21 @@
-use crate::helpers::{log_error, report_if_error};
+use crate::helpers::edit_with_form;
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, PartialQuestion, Question, QuestionFieldName};
-use uuid::Uuid;
-
-fn create_on_submit(question: Question, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
-    move |e: FormEvent| {
-        e.prevent_default();
-        if let Ok(form_data) = e.parsed_values::<PartialQuestion>().map_err(log_error) {
-            let mut question = question.clone();
-            spawn(async move {
-                let id = question.id;
-                question.apply(form_data);
-                let mut stores = use_context::<StoreType>();
-                report_if_error!(stores.store(question).await);
-                callback(id);
-            });
-        }
-    }
-}
+use std::sync::Arc;
+use storage::prelude::{Question, QuestionFieldName};
 
 #[component]
-pub fn EditQuestion(question: Question, callback: Callback<Uuid>) -> Element {
-    let name = question.name.clone();
-    let answer = question.answer.clone();
+pub fn EditQuestion(question: Arc<Question>, callback: Callback<Question>) -> Element {
     rsx! {
-        form { onsubmit: create_on_submit(question, callback),
-            input { name: QuestionFieldName::Name.name(), value: name }
-            textarea { name: QuestionFieldName::Answer.name(), value: answer }
+        form { onsubmit: edit_with_form(use_context::<StoreType>(), question.clone(), callback),
+            input {
+                name: QuestionFieldName::Name.name(),
+                value: "{question.name}",
+            }
+            textarea {
+                name: QuestionFieldName::Answer.name(),
+                value: "{question.answer}",
+            }
             input { r#type: "submit" }
         }
     }

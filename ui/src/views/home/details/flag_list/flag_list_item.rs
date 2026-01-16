@@ -1,10 +1,11 @@
 use crate::flag_list::forms::edit_flag::EditFlag;
 use crate::Editable;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
+pub fn FlagListItem(flag: Arc<Flag>, reload_flags: Callback) -> Element {
     let is_editable = use_signal(|| false);
 
     let id = flag.id;
@@ -14,9 +15,11 @@ pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
         FlagColor::Red => "🚩",
     };
 
+    let callback = use_callback(move |_flag| reload_flags(()));
+
     let display = rsx! { "{flag_icon} {flag.name}" };
     let editable: Element = rsx! {
-        EditFlag { flag, callback: reload_flags }
+        EditFlag { flag, callback }
     };
 
     rsx! {

@@ -1,29 +1,14 @@
-use crate::helpers::{log_error, report_if_error};
+use crate::helpers::edit_with_form;
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, PartialRole, Role, RoleFieldName};
-
-fn create_on_submit(role: Role, callback: Callback) -> impl FnMut(FormEvent) {
-    move |e: FormEvent| {
-        e.prevent_default();
-        if let Ok(form_data) = e.parsed_values::<PartialRole>().map_err(log_error) {
-            let mut role = Role::clone(&role);
-            spawn(async move {
-                role.apply(form_data);
-                let mut stores = use_context::<StoreType>();
-                report_if_error!(stores.store(role).await);
-                callback(());
-            });
-        }
-    }
-}
+use std::sync::Arc;
+use storage::prelude::{Role, RoleFieldName};
 
 #[component]
-pub fn EditRoleName(role: Role, callback: Callback) -> Element {
-    let name = role.name.clone();
+pub fn EditRoleName(role: Arc<Role>, callback: Callback<Role>) -> Element {
     rsx! {
-        form { onsubmit: create_on_submit(role, callback),
-            input { name: RoleFieldName::Name.name(), value: name }
+        form { onsubmit: edit_with_form(use_context::<StoreType>(), role.clone(), callback),
+            input { name: RoleFieldName::Name.name(), value: "{role.name}" }
             input { r#type: "submit" }
         }
     }

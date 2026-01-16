@@ -2,9 +2,8 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use storage::prelude::{BaseStore, Company, CompanyFieldName, PartialCompany};
-use uuid::Uuid;
 
-fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
+fn create_on_submit(callback: Callback<Company>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(company) = e
@@ -14,10 +13,12 @@ fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
         {
             // If the company was successfully created, save it
             spawn(async move {
-                let company_id = company.id;
                 let mut stores = use_context::<StoreType>();
-                stores.store(company).await.unwrap_or_else(log_error);
-                callback(company_id);
+                stores
+                    .store(company.clone())
+                    .await
+                    .unwrap_or_else(log_error);
+                callback(company);
             });
         }
     }
@@ -25,7 +26,7 @@ fn create_on_submit(callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
 
 #[component]
 pub fn CreateCompany(
-    callback: Callback<Uuid>,
+    callback: Callback<Company>,
     company_search: Callback<Event<FormData>>,
     company_name_search: Signal<String>,
 ) -> Element {

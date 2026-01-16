@@ -2,13 +2,12 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, FlagFieldName, PartialFlag};
-use uuid::Uuid;
+use storage::prelude::{BaseStore, Company, Flag, FlagFieldName, PartialFlag};
 
-fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
+fn create_on_submit(company: Arc<Company>, callback: Callback<Flag>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
-        if let Ok(role) = e
+        if let Ok(flag) = e
             .parsed_values::<PartialFlag>()
             .map_err(log_error)
             .and_then(|form_data| {
@@ -17,19 +16,17 @@ fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnM
                     .map_err(log_error)
             })
         {
-            // If the role was successfully created, save it
             spawn(async move {
-                let role_id = role.id;
                 let mut stores = use_context::<StoreType>();
-                stores.store(role).await.unwrap_or_else(log_error);
-                callback(role_id);
+                stores.store(flag.clone()).await.unwrap_or_else(log_error);
+                callback(flag);
             });
         }
     }
 }
 
 #[component]
-pub fn CreateFlag(company: Arc<Company>, callback: Callback<Uuid>) -> Element {
+pub fn CreateFlag(company: Arc<Company>, callback: Callback<Flag>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(company, callback),
             select { id: "flag_color", name: FlagFieldName::FlagColor.name(),

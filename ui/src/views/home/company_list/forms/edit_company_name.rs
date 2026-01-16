@@ -1,37 +1,18 @@
-use crate::helpers::{log_error, report_if_error};
+use crate::helpers::edit_with_form;
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, Company, CompanyFieldName, PartialCompany};
-use uuid::Uuid;
-
-// ToDo: Names are so common, this feels like it could be made generic
-fn create_on_submit(company: Company, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
-    move |e: FormEvent| {
-        e.prevent_default();
-        if let Ok(form_data) = e.parsed_values::<PartialCompany>().map_err(log_error) {
-            let mut company = company.clone();
-            spawn(async move {
-                company.apply(form_data);
-                let id = company.id;
-                let mut stores = use_context::<StoreType>();
-                report_if_error!(stores.store(company).await);
-                callback(id);
-            });
-        }
-    }
-}
+use std::sync::Arc;
+use storage::prelude::{Company, CompanyFieldName};
 
 #[component]
-pub fn EditCompanyName(company: Company, callback: Callback<Uuid>) -> Element {
-    let name = company.name.clone();
-    let id = company.id;
+pub fn EditCompanyName(company: Arc<Company>, callback: Callback<Company>) -> Element {
     rsx! {
-        form { onsubmit: create_on_submit(company, callback),
+        form { onsubmit: edit_with_form(use_context::<StoreType>(), company.clone(), callback),
             input {
-                id: "{id}",
+                id: "{company.id}",
                 r#type: "text",
                 name: CompanyFieldName::Name.name(),
-                value: name,
+                value: "{company.name}",
             }
             input { r#type: "submit" }
         }

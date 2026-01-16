@@ -1,34 +1,22 @@
-use crate::helpers::{log_error, report_if_error};
+use crate::helpers::edit_with_form;
 use crate::StoreType;
 use dioxus::prelude::*;
-use storage::prelude::{ApplyPartial, BaseStore, Flag, FlagColor, FlagFieldName, PartialFlag};
-
-fn create_on_submit(flag: Flag, callback: Callback) -> impl FnMut(FormEvent) {
-    move |e: FormEvent| {
-        e.prevent_default();
-        if let Ok(form_data) = e.parsed_values::<PartialFlag>().map_err(log_error) {
-            let mut flag = flag.clone();
-            spawn(async move {
-                flag.apply(form_data);
-                let mut stores = use_context::<StoreType>();
-                report_if_error!(stores.store(flag).await);
-                callback(());
-            });
-        }
-    }
-}
+use std::sync::Arc;
+use storage::prelude::{Flag, FlagColor, FlagFieldName};
 
 #[component]
-pub fn EditFlag(flag: Flag, callback: Callback) -> Element {
-    let name = flag.name.clone();
-    let flag_color = flag.flag_color;
+pub fn EditFlag(flag: Arc<Flag>, callback: Callback<Flag>) -> Element {
     rsx! {
-        form { onsubmit: create_on_submit(flag, callback),
+        form { onsubmit: edit_with_form(use_context::<StoreType>(), flag.clone(), callback),
             select { name: FlagFieldName::FlagColor.name(),
-                option { selected: flag_color == FlagColor::Red, value: "red", "🚩 Red" }
-                option { selected: flag_color == FlagColor::Green, value: "green", "💚 Green" }
+                option { selected: flag.flag_color == FlagColor::Red, value: "red", "🚩 Red" }
+                option {
+                    selected: flag.flag_color == FlagColor::Green,
+                    value: "green",
+                    "💚 Green"
+                }
             }
-            input { name: FlagFieldName::Name.name(), value: name }
+            input { name: FlagFieldName::Name.name(), value: "{flag.name}" }
             input { r#type: "submit" }
         }
     }

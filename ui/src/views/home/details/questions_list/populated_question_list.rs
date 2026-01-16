@@ -18,13 +18,13 @@ pub fn QuestionList(role: Arc<Role>) -> Element {
 
     let reload_questions = use_callback(move |()| questions_resource.restart());
     let questions = questions_resource().unwrap_or_default();
-    let questions_list = questions.into_iter().map(move |question| {
+    let questions_list = questions.into_iter().map(Arc::new).map(move |question| {
         rsx! {
             QuestionListItem { question, reload_questions }
         }
     });
 
-    let callback = use_callback(move |_id| questions_resource.restart());
+    let callback = use_callback(move |_question| questions_resource.restart());
 
     rsx! {
         div { id: "flags",

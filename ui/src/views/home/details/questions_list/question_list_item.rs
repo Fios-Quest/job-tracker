@@ -1,10 +1,11 @@
 use crate::questions_list::forms::EditQuestion;
 use crate::Editable;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn QuestionListItem(question: Question, reload_questions: Callback) -> Element {
+pub fn QuestionListItem(question: Arc<Question>, reload_questions: Callback) -> Element {
     let is_editable = use_signal(|| false);
 
     let id = question.id;
@@ -14,7 +15,7 @@ pub fn QuestionListItem(question: Question, reload_questions: Callback) -> Eleme
         "{question.answer}"
     };
 
-    let callback = use_callback(move |_id| reload_questions(()));
+    let callback = use_callback(move |_question| reload_questions(()));
 
     let editable = rsx! {
         EditQuestion { question, callback }

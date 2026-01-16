@@ -2,10 +2,9 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, PartialRole, RoleFieldName};
-use uuid::Uuid;
+use storage::prelude::{BaseStore, Company, PartialRole, Role, RoleFieldName};
 
-fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
+fn create_on_submit(company: Arc<Company>, callback: Callback<Role>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         // Get the partial from the form data, then create the role from the partial
@@ -20,17 +19,16 @@ fn create_on_submit(company: Arc<Company>, callback: Callback<Uuid>) -> impl FnM
         {
             // If the role was successfully created, save it
             spawn(async move {
-                let role_id = role.id;
                 let mut stores = use_context::<StoreType>();
-                stores.store(role).await.unwrap_or_else(log_error);
-                callback(role_id);
+                stores.store(role.clone()).await.unwrap_or_else(log_error);
+                callback(role);
             });
         }
     }
 }
 
 #[component]
-pub fn CreateRole(company: Arc<Company>, callback: Callback<Uuid>) -> Element {
+pub fn CreateRole(company: Arc<Company>, callback: Callback<Role>) -> Element {
     rsx! {
         form {
             class: "flex flex-col",

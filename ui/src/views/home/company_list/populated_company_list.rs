@@ -3,6 +3,7 @@ use crate::helpers::unwrap_or_report_and_return;
 use crate::views::home::company_list::forms::create_company::CreateCompany;
 use crate::StoreType;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
@@ -15,13 +16,13 @@ pub fn CompanyList() -> Element {
     });
     let reload_companies = use_callback(move |()| companies_resource.restart());
     let companies = companies_resource().unwrap_or_default();
-    let companies_list = companies.into_iter().map(|company| {
+    let companies_list = companies.into_iter().map(Arc::new).map(|company| {
         rsx! {
             CompanyListItem { company, reload_companies }
         }
     });
 
-    let callback = use_callback(move |_company_id| {
+    let callback = use_callback(move |_company| {
         // ToDo: Shouldn't the company be selected after creating?
 
         // Reset search to empty

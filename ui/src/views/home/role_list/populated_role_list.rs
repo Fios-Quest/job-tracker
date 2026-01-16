@@ -7,7 +7,6 @@ use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;
-use uuid::Uuid;
 
 #[component]
 pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
@@ -23,17 +22,17 @@ pub fn PopulatedRoleList(company: Arc<Company>) -> Element {
     }));
     let reload_roles = use_callback(move |()| roles_resource.restart());
     let roles = roles_resource().unwrap_or_default();
-    let roles_list = roles.into_iter().map(|role| {
+    let roles_list = roles.into_iter().map(Arc::new).map(|role| {
         rsx! {
             RoleListItem { role, reload_roles }
         }
     });
 
-    let on_create_role = use_callback(move |role_id: Uuid| {
+    let on_create_role = use_callback(move |role: Role| {
         // Navigate away from the page
         navigator().push(HomeRole {
             company_id,
-            role_id,
+            role_id: role.id,
             view: DetailsView::Role,
         });
     });

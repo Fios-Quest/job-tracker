@@ -4,10 +4,11 @@ use crate::views::home::role_list::forms::edit_role_name::EditRoleName;
 use crate::Route;
 use application_context::prelude::*;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
+pub fn RoleListItem(role: Arc<Role>, reload_roles: Callback) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
     let is_editable = use_signal::<bool>(|| false);
 
@@ -36,8 +37,10 @@ pub fn RoleListItem(role: Role, reload_roles: Callback) -> Element {
         label { r#for: "{id}", "{name}" }
     };
 
+    let callback = use_callback(move |_role| reload_roles(()));
+
     let editable = rsx! {
-        EditRoleName { role, callback: reload_roles }
+        EditRoleName { role, callback }
     };
 
     rsx! {

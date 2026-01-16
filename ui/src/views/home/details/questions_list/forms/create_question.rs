@@ -2,10 +2,9 @@ use crate::helpers::log_error;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, PartialQuestion, QuestionFieldName, Role};
-use uuid::Uuid;
+use storage::prelude::{BaseStore, PartialQuestion, Question, QuestionFieldName, Role};
 
-fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(FormEvent) {
+fn create_on_submit(role: Arc<Role>, callback: Callback<Question>) -> impl FnMut(FormEvent) {
     move |e: FormEvent| {
         e.prevent_default();
         if let Ok(question) = e
@@ -18,17 +17,19 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Uuid>) -> impl FnMut(For
         {
             // If the role was successfully created, save it
             spawn(async move {
-                let id = question.id;
                 let mut stores = use_context::<StoreType>();
-                stores.store(question).await.unwrap_or_else(log_error);
-                callback(id);
+                stores
+                    .store(question.clone())
+                    .await
+                    .unwrap_or_else(log_error);
+                callback(question);
             });
         }
     }
 }
 
 #[component]
-pub fn CreateQuestion(role: Arc<Role>, callback: Callback<Uuid>) -> Element {
+pub fn CreateQuestion(role: Arc<Role>, callback: Callback<Question>) -> Element {
     rsx! {
         form { onsubmit: create_on_submit(role, callback),
             input { name: QuestionFieldName::Name.name(), value: "" }

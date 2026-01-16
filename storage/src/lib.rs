@@ -23,6 +23,9 @@ mod test_helper;
 // prevent traits being externally implemented
 trait Sealed {}
 
+// Re-export
+pub use partially::Partial;
+
 pub mod prelude {
     pub use crate::composite_store::{
         HasFutureStoreFor, JsonThreadSafeGeneralStore, StubThreadSafeGeneralStore,

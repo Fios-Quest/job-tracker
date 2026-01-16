@@ -15,7 +15,7 @@ pub fn InterviewNav(role: Arc<Role>) -> Element {
             .unwrap_or_default()
     }));
     let interviews: Vec<Interview> = interview_resource().unwrap_or_default();
-    let callback = use_callback(move |_id| interview_resource.restart());
+    let callback = use_callback(move |_interview| interview_resource.restart());
 
     let company_id = role.company_id;
     let role_id = role.id;

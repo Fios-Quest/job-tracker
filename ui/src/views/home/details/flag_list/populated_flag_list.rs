@@ -20,13 +20,13 @@ pub fn PopulatedFlagList(company: Arc<Company>) -> Element {
     }));
     let reload_flags = use_callback(move |()| flags_resource.restart());
     let flags = flags_resource().unwrap_or_default();
-    let flags_list = flags.iter().cloned().map(|flag| {
+    let flags_list = flags.into_iter().map(Arc::new).map(|flag| {
         rsx! {
             FlagListItem { flag, reload_flags }
         }
     });
 
-    let callback = use_callback(move |_flag_id| flags_resource.restart());
+    let callback = use_callback(move |_flag| flags_resource.restart());
 
     rsx! {
         div { id: "flags",
