@@ -13,7 +13,7 @@ pub fn RoleListItem(role: Arc<Role>, reload_roles: Callback) -> Element {
     let is_editable = use_signal::<bool>(|| false);
 
     let id = role.id;
-    let company_id = role.id;
+    let company_id = role.company_id;
     let name = role.name.clone();
 
     let checked = context().get_role().map(|r| r.id) == Some(role.id);
