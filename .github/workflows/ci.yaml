@@ -3,6 +3,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DIOXUS_VERSION: "0.7"
 
 name: CI
 
@@ -127,6 +128,6 @@ jobs:
       - name: Use carbo binstall
         uses: cargo-bins/cargo-binstall@main
       - name: Install Dioxus-CLI
-        run: cargo binstall dioxus-cli --force
+        run: cargo binstall dioxus-cli@${{ env.DIOXUS_VERSION }} --force
       - name: Dioxus fmt
         run: dx fmt --check
