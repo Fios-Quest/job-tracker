@@ -4,7 +4,11 @@ use partially::Partial;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[cfg(feature = "field_names")]
+use field_types::FieldName;
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Partial)]
+#[cfg_attr(feature = "field_names", derive(FieldName))]
 #[partially(derive(Deserialize, Default))]
 pub struct Value {
     #[partially(omit)]

@@ -1,10 +1,10 @@
-use super::{VALUE_DESCRIPTION_FIELD, VALUE_NAME_FIELD};
-use crate::helpers::{unwrap_or_report_and_return, CreatePartialFromFormData};
+use crate::helpers::unwrap_or_report_and_return;
+use crate::value_list::forms::create_value::CreateValue;
 use crate::value_list::ValueListItem;
 use crate::StoreType;
 use dioxus::prelude::*;
 use std::sync::Arc;
-use storage::prelude::{BaseStore, Company, PartialValue, RecallByCompany};
+use storage::prelude::{Company, RecallByCompany};
 
 #[component]
 pub fn ValueList(company: Arc<Company>) -> Element {
@@ -28,29 +28,14 @@ pub fn ValueList(company: Arc<Company>) -> Element {
         }
     });
 
-    let create_value = move |event: Event<FormData>| {
-        let company = company.clone();
-        let mut store = use_context::<StoreType>();
-        async move {
-            let partial_value = unwrap_or_report_and_return!(PartialValue::from_form_data(&event));
-            let value =
-                unwrap_or_report_and_return!(company.create_value_from_partial(partial_value));
-            unwrap_or_report_and_return!(store.store(value).await);
-            // Rerun the resource
-            values_resource.restart();
-        }
-    };
+    let callback = use_callback(move |_value| values_resource.restart());
 
     rsx! {
         div { id: "flags",
             h3 { "Values" }
             ul { {values_list} }
 
-            form { onsubmit: create_value,
-                input { name: VALUE_NAME_FIELD, value: "" }
-                textarea { name: VALUE_DESCRIPTION_FIELD, value: "" }
-                input { r#type: "submit" }
-            }
+            CreateValue { company, callback }
         }
     }
 }

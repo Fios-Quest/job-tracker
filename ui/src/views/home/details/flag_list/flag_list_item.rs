@@ -1,53 +1,30 @@
-use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
-use crate::{Editable, StoreType};
+use crate::flag_list::forms::edit_flag::EditFlag;
+use crate::Editable;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn FlagListItem(flag: Flag, reload_flags: Callback) -> Element {
-    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-    let stores = use_context::<StoreType>();
+pub fn FlagListItem(flag: Arc<Flag>, reload_flags: Callback) -> Element {
+    let is_editable = use_signal(|| false);
 
     let id = flag.id;
-
-    let input_name = "name";
-    let input_color = "flag_color";
 
     let flag_icon = match flag.flag_color {
         FlagColor::Green => "💚",
         FlagColor::Red => "🚩",
     };
 
+    let callback = use_callback(move |_flag| reload_flags(()));
+
     let display = rsx! { "{flag_icon} {flag.name}" };
     let editable: Element = rsx! {
-        select { name: input_color,
-            option { selected: flag.flag_color == FlagColor::Red, value: "red", "🚩 Red" }
-            option { selected: flag.flag_color == FlagColor::Green, value: "green", "💚 Green" }
-        }
-        input { name: input_name, value: "{flag.name}" }
+        EditFlag { flag, callback }
     };
-
-    if let Some(event) = form_receiver() {
-        iife! {
-            let mut stores = stores.clone();
-            let mut flag = flag;
-            if flag.modify_with_form_data(&event).is_ok() && !flag.name.is_empty() {
-                spawn(async move {
-                    unwrap_or_report_and_return!(stores.store(flag).await);
-                    reload_flags(());
-                    form_receiver.set(None);
-                });
-            }
-        }
-    }
 
     rsx! {
         li { id: "flag-{id}",
-            if form_receiver().is_none() {
-                Editable { display, editable, form_receiver }
-            } else {
-                "pending"
-            }
+            Editable { display, editable, is_editable }
         }
     }
 }

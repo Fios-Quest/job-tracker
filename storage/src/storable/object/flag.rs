@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
+#[cfg(feature = "field_names")]
+use field_types::FieldName;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FlagColor {
@@ -25,6 +28,7 @@ impl FromStr for FlagColor {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Partial)]
+#[cfg_attr(feature = "field_names", derive(FieldName))]
 #[partially(derive(Deserialize, Default))]
 pub struct Flag {
     #[partially(omit)]

@@ -1,46 +1,29 @@
-use super::{QUESTION_ANSWER_FIELD, QUESTION_NAME_FIELD};
-use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
-use crate::{Editable, StoreType};
+use crate::questions_list::forms::EditQuestion;
+use crate::Editable;
 use dioxus::prelude::*;
 use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
 pub fn QuestionListItem(question: Arc<Question>, reload_questions: Callback) -> Element {
+    let is_editable = use_signal(|| false);
+
     let id = question.id;
-    let mut form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
 
     let display = rsx! {
         header { "{question.name}" }
         "{question.answer}"
     };
 
-    let editable = rsx! {
-        input { name: QUESTION_NAME_FIELD, value: "{question.name}" }
-        textarea { name: QUESTION_ANSWER_FIELD, value: "{question.answer}" }
-        input { r#type: "submit" }
-    };
+    let callback = use_callback(move |_question| reload_questions(()));
 
-    if let Some(event) = form_receiver() {
-        iife! {
-           let mut question = Arc::unwrap_or_clone(question);
-           unwrap_or_report_and_return!(question.modify_with_form_data(&event));
-           spawn(async move {
-               let mut store = use_context::<StoreType>();
-               unwrap_or_report_and_return!(store.store(question).await);
-               reload_questions(());
-               form_receiver.set(None);
-           });
-        }
+    let editable = rsx! {
+        EditQuestion { question, callback }
     };
 
     rsx! {
         li { id: "question-{id}",
-            if form_receiver().is_none() {
-                Editable { display, editable, form_receiver }
-            } else {
-                "pending"
-            }
+            Editable { display, editable, is_editable }
         }
     }
 }

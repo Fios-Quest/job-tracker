@@ -1,17 +1,16 @@
-use crate::helpers::{iife, unwrap_or_report_and_return, ModifyWithFormData};
-use crate::{Editable, Route, StoreType};
+use crate::views::home::company_list::forms::edit_company_name::EditCompanyName;
+use crate::{Editable, Route};
 use application_context::prelude::*;
 use dioxus::prelude::*;
+use std::sync::Arc;
 use storage::prelude::*;
 
 #[component]
-pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element {
-    let stores = use_context::<StoreType>();
+pub fn CompanyListItem(company: Arc<Company>, reload_companies: Callback) -> Element {
     let context = use_context::<Signal<ApplicationContext>>();
-    let form_receiver: Signal<Option<Event<FormData>>> = use_signal(|| None);
-    let id = company.id;
+    let is_editable = use_signal::<bool>(|| false);
 
-    let input_name = "name";
+    let company_id = company.id;
 
     let checked = context()
         .get_company()
@@ -19,53 +18,32 @@ pub fn CompanyListItem(company: Company, reload_companies: Callback) -> Element 
         .unwrap_or(false);
     let display = rsx! {
         input {
-            id: "{id}",
+            id: "{company_id}",
             r#type: "radio",
             name: "company",
             checked,
             onchange: move |_| {
                 spawn(async move {
-                    navigator()
-                        .push(Route::HomeCompany {
-                            company_id: company.id,
-                        });
+                    navigator().push(Route::HomeCompany { company_id });
                 });
             },
         }
         label { r#for: "{company.id}", "{company.name}" }
     };
 
+    let callback = use_callback(|company: Company| {
+        navigator().push(Route::HomeCompany {
+            company_id: company.id,
+        });
+    });
+
     let editable = rsx! {
-        input {
-            id: "{company.id}",
-            r#type: "text",
-            name: input_name,
-            value: "{company.name}",
-        }
+        EditCompanyName { company, callback }
     };
 
-    if let Some(event) = form_receiver() {
-        iife! {
-            let mut stores = stores.clone();
-            let mut company = company;
-            let result = company.modify_with_form_data(&event);
-            if result.is_ok() && !company.name.is_empty() {
-                spawn(async move {
-                    let company_id = company.id;
-                    unwrap_or_report_and_return!(stores.store(company).await);
-                    navigator().push(Route::HomeCompany { company_id });
-                });
-            }
-        }
-    }
-
     rsx! {
-        li { key: id,
-            if form_receiver().is_none() {
-                Editable { display, editable, form_receiver }
-            } else {
-                "pending"
-            }
+        li { key: "{company_id}",
+            Editable { display, editable, is_editable }
         }
     }
 }

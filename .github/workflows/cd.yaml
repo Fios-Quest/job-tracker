@@ -7,6 +7,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: stable
+  DIOXUS_VERSION: "0.7"
 
 name: Release
 
@@ -24,10 +25,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update rust
         run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-      - name: Use carbo binstall
+      - name: Use cargo binstall
         uses: cargo-bins/cargo-binstall@main
       - name: Install Dioxus-CLI
-        run: cargo binstall dioxus-cli --force
+        run: cargo binstall dioxus-cli@${{ env.DIOXUS_VERSION }} --force
       - name: Dioxus bundle
         run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
       - name: Upload artifact
@@ -50,10 +51,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update rust
         run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-      - name: Use carbo binstall
+      - name: Use cargo binstall
         uses: cargo-bins/cargo-binstall@main
       - name: Install Dioxus-CLI
-        run: cargo binstall dioxus-cli --force
+        run: cargo binstall dioxus-cli@${{ env.DIOXUS_VERSION }} --force
       - name: Dioxus bundle
         run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
       - name: Upload artifact
@@ -78,10 +79,10 @@ jobs:
 #      - uses: actions/checkout@v4
 #      - name: Update rust
 #        run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-#      - name: Use carbo binstall
+#      - name: Use cargo binstall
 #        uses: cargo-bins/cargo-binstall@main
 #      - name: Install Dioxus-CLI
-#        run: cargo binstall dioxus-cli --force
+#        run: cargo binstall dioxus-cli@${{ env.DIOXUS_VERSION }} --force
 #      - name: Dioxus bundle
 #        run: dx bundle --package job-tracker --platform "${{ env.PLATFORM }}" --package-types "${{ matrix.package-type }}" --out-dir "build/${{ matrix.package-type }}"
 #      - name: Upload artifact

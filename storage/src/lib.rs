@@ -23,6 +23,9 @@ mod test_helper;
 // prevent traits being externally implemented
 trait Sealed {}
 
+// Re-export
+pub use partially::Partial;
+
 pub mod prelude {
     pub use crate::composite_store::{
         HasFutureStoreFor, JsonThreadSafeGeneralStore, StubThreadSafeGeneralStore,
@@ -33,9 +36,11 @@ pub mod prelude {
         json_log_fetcher::JsonLogFetcher, stub_log_fetcher::StubLogFetcher, LogFetcher,
     };
     pub use crate::storable::{
-        ApplyPartial, CheckPartialComplete, Company, Flag, FlagColor, HasCompany, HasDeleted,
-        HasId, HasName, HasRole, Interview, PartialCompany, PartialFlag, PartialInterview,
-        PartialQuestion, PartialRole, PartialValue, Question, Role, Value,
+        ApplyPartial, CheckPartialComplete, Company, CompanyFieldName, Flag, FlagColor,
+        FlagFieldName, HasCompany, HasDeleted, HasId, HasName, HasRole, Interview,
+        InterviewFieldName, PartialCompany, PartialFlag, PartialInterview, PartialQuestion,
+        PartialRole, PartialValue, Question, QuestionFieldName, Role, RoleFieldName, Value,
+        ValueFieldName,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,
