@@ -15,7 +15,12 @@ pub fn InterviewNav(role: Arc<Role>) -> Element {
             .unwrap_or_default()
     }));
     let interviews: Vec<Interview> = interview_resource().unwrap_or_default();
-    let callback = use_callback(move |_interview| interview_resource.restart());
+
+    let mut is_editable = use_signal(|| false);
+    let callback = use_callback(move |_interview| {
+        is_editable.set(false);
+        interview_resource.restart();
+    });
 
     let company_id = role.company_id;
     let role_id = role.id;
@@ -43,7 +48,7 @@ pub fn InterviewNav(role: Arc<Role>) -> Element {
                 }
 
                 li {
-                    CreateInterview { role, callback }
+                    CreateInterview { role, callback, is_editable }
                 }
             }
         }

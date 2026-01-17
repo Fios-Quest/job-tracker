@@ -28,7 +28,7 @@ fn InterviewDetailsDisplay(interview: Arc<Interview>) -> Element {
 
 #[component]
 pub fn InterviewDetails(role: Arc<Role>) -> Element {
-    let is_editable = use_signal(|| false);
+    let mut is_editable = use_signal(|| false);
     let context = use_context::<Signal<ApplicationContext>>();
     let interview = context().get_interview();
     let store = use_context::<StoreType>();
@@ -62,7 +62,10 @@ pub fn InterviewDetails(role: Arc<Role>) -> Element {
         };
     };
 
-    let callback = use_callback(move |_interview| interview_resource.restart());
+    let callback = use_callback(move |_interview| {
+        interview_resource.restart();
+        is_editable.set(false);
+    });
 
     let display = rsx! {
         InterviewDetailsDisplay { interview: interview.clone() }

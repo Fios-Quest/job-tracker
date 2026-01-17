@@ -29,8 +29,11 @@ fn create_on_submit(role: Arc<Role>, callback: Callback<Interview>) -> impl FnMu
 }
 
 #[component]
-pub fn CreateInterview(role: Arc<Role>, callback: Callback<Interview>) -> Element {
-    let mut is_editable = use_signal(|| false);
+pub fn CreateInterview(
+    role: Arc<Role>,
+    callback: Callback<Interview>,
+    is_editable: Signal<bool>,
+) -> Element {
     if is_editable() {
         rsx! {
             form { onsubmit: create_on_submit(role, callback),

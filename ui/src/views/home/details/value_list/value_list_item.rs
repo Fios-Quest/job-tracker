@@ -6,8 +6,11 @@ use storage::prelude::*;
 
 #[component]
 pub fn ValueListItem(value: Arc<Value>, reload_values: Callback) -> Element {
-    let is_editable = use_signal(|| false);
-    let callback = use_callback(move |_value| reload_values(()));
+    let mut is_editable = use_signal(|| false);
+    let callback = use_callback(move |_value| {
+        reload_values(());
+        is_editable.set(false);
+    });
 
     let display = rsx! {
         header { "{value.name}" }

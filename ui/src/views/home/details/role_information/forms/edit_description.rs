@@ -9,6 +9,7 @@ pub fn EditRoleDescription(role: Arc<Role>, callback: Callback<Role>) -> Element
     rsx! {
         form { onsubmit: edit_with_form(use_context::<StoreType>(), role.clone(), callback),
             textarea { name: RoleFieldName::Description.name(), "{role.description}" }
+            input { r#type: "submit" }
         }
     }
 }

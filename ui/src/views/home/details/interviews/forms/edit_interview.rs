@@ -42,6 +42,7 @@ pub fn EditInterview(interview: Arc<Interview>, callback: Callback<Interview>) -
                     value: "{interview.notes}",
                 }
             }
+            input { r#type: "submit" }
         }
     }
 }

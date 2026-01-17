@@ -11,7 +11,7 @@ use storage::prelude::Role;
 
 #[component]
 pub fn RoleDescription(role: Arc<Role>) -> Element {
-    let is_editable = use_signal(|| false);
+    let mut is_editable = use_signal(|| false);
 
     let callback = use_callback(move |role: Role| {
         let role_id = role.id;
@@ -24,6 +24,7 @@ pub fn RoleDescription(role: Arc<Role>) -> Element {
             role_id,
             view: DetailsView::Role,
         });
+        is_editable.set(false);
     });
 
     let editable = rsx! {
