@@ -36,15 +36,19 @@ pub mod prelude {
         json_log_fetcher::JsonLogFetcher, stub_log_fetcher::StubLogFetcher, LogFetcher,
     };
     pub use crate::storable::{
-        ApplyPartial, CheckPartialComplete, Company, CompanyFieldName, Flag, FlagColor,
-        FlagFieldName, HasCompany, HasDeleted, HasId, HasName, HasRole, Interview,
-        InterviewFieldName, PartialCompany, PartialFlag, PartialInterview, PartialQuestion,
-        PartialRole, PartialValue, Question, QuestionFieldName, Role, RoleFieldName, Value,
-        ValueFieldName,
+        ApplyPartial, CheckPartialComplete, Company, Flag, FlagColor, HasCompany, HasDeleted,
+        HasId, HasName, HasRole, Interview, PartialCompany, PartialFlag, PartialInterview,
+        PartialQuestion, PartialRole, PartialValue, Question, Role, Value,
     };
     pub use crate::storage::{
         BaseStore, CompanyStore, FlagStore, JsonStore, RecallByCompany, RecallById, RecallByName,
         RecallByRole, RoleStore, ScopedJsonStoreFor,
     };
     pub use crate::time::Timestamp;
+
+    #[cfg(feature = "field_names")]
+    pub use crate::storable::{
+        CompanyFieldName, FlagFieldName, InterviewFieldName, QuestionFieldName, RoleFieldName,
+        ValueFieldName,
+    };
 }
