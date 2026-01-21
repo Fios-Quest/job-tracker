@@ -5,3 +5,9 @@ edition = "2024"
 
 [dependencies]
 uuid = { version = "1.19.0", features = ["v4"] }
+storage = { workspace = true, optional = true }
+
+[features]
+storage-events = [
+    "dep:storage"
+]

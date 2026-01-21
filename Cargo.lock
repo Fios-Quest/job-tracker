@@ -1691,6 +1691,7 @@ dependencies = [
 name = "event-broker"
 version = "0.1.0"
 dependencies = [
+ "storage",
  "uuid",
 ]
 

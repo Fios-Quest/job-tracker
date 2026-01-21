@@ -4,6 +4,8 @@ use std::error::Error;
 use std::fmt::{self, Debug};
 use uuid::Uuid;
 
+pub mod events;
+
 /// This trait is used to represent a function that can handle an event
 pub trait Handler<E>: 'static {
     fn handle(&self, event: E);
@@ -120,11 +122,16 @@ impl Broker {
     /// ```
     /// # use event_broker::*;
     /// // This will handle messages of String
-    /// let handler = |message: String| println!("{message}");
+    /// let handler1 = |message: String| println!("Handler 1 received: {message}");
+    /// let handler2 = |message: String| println!("Handler 2 received: {message}");
     ///
     /// // Create an event broker and register the handler
     /// let mut broker = Broker::new();
-    /// broker.register(Box::new(handler));
+    /// broker.register(Box::new(handler1));
+    /// broker.register(Box::new(handler2));
+    ///
+    /// // You can now emit an event and if the event is of the type of a registered handler, all
+    /// // registered handlers of that type will process the event
     /// broker.emit("Hello, Broker!".to_string())
     ///     .expect("You can usually ignore this error if your event is fire and forget");
     /// ```
