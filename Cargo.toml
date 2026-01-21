@@ -7,6 +7,7 @@ members = [
     "mobile",
     "storage",
     "application_context",
+    "event-broker",
 ]
 
 [workspace.dependencies]
@@ -21,6 +22,7 @@ ui = { path = "ui" }
 server = { path = "server" }
 storage = { path = "storage" }
 application_context = { path = "application_context" }
+messaging = { path = "event-broker" }
 
 [profile]
 
